@@ -560,6 +560,7 @@ class AsyncOperation(Operation):
 class PathView:
     def __init__(self) -> None:
         self.operations: List[Operation] = []
+        self._method_map: Dict[str, Operation] = {}
         self.is_async = False  # if at least one operation is async - will become True
         self.url_name: Optional[str] = None
 
@@ -618,6 +619,8 @@ class PathView:
         )
 
         self.operations.append(operation)
+        for method in methods:
+            self._method_map[method] = operation
         view_func._ninja_operation = operation  # type: ignore
 
         return operation
@@ -633,6 +636,11 @@ class PathView:
         cloned.is_async = self.is_async
         cloned.url_name = self.url_name
         cloned.operations = [op.clone() for op in self.operations]
+        cloned._method_map = {
+            method: op
+            for op in cloned.operations
+            for method in op.methods
+        }
         return cloned
 
     def get_view(self) -> Callable:
@@ -680,10 +688,7 @@ class PathView:
         return await sync_to_async(operation.run)(request, *a, **kw)
 
     def _find_operation(self, request: HttpRequest) -> Optional[Operation]:
-        for op in self.operations:
-            if request.method in op.methods:
-                return op
-        return None
+        return self._method_map.get(request.method)
 
     def _not_allowed(self) -> HttpResponse:
         allowed_methods = set()

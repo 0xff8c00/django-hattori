@@ -295,6 +295,55 @@ class TestOperationClone:
             assert clone_op.path == orig_op.path
             assert clone_op.methods == orig_op.methods
 
+    def test_find_operation_uses_method_map(self):
+        """_find_operation should return the correct operation by HTTP method."""
+        from django.test import RequestFactory
+
+        pv = PathView()
+        factory = RequestFactory()
+
+        def get_view(request):
+            return {"method": "get"}
+
+        def post_view(request):
+            return {"method": "post"}
+
+        pv.add_operation("/test", ["GET"], get_view)
+        pv.add_operation("/test", ["POST"], post_view)
+
+        get_op = pv._find_operation(factory.get("/test"))
+        assert get_op is not None
+        assert "GET" in get_op.methods
+
+        post_op = pv._find_operation(factory.post("/test"))
+        assert post_op is not None
+        assert "POST" in post_op.methods
+
+        put_op = pv._find_operation(factory.put("/test"))
+        assert put_op is None
+
+    def test_cloned_pathview_find_operation(self):
+        """Cloned PathView should have a working _method_map."""
+        from django.test import RequestFactory
+
+        pv = PathView()
+        factory = RequestFactory()
+
+        def get_view(request):
+            return {"method": "get"}
+
+        pv.add_operation("/test", ["GET", "HEAD"], get_view)
+
+        cloned = pv.clone()
+
+        # Cloned PathView should find operations by method
+        get_op = cloned._find_operation(factory.get("/test"))
+        assert get_op is not None
+        assert "GET" in get_op.methods
+
+        # Cloned operations should be independent from originals
+        assert get_op is not pv.operations[0]
+
 
 class TestCloneCompleteness:
     """Test that clone() is updated when new attributes are added to Operation."""
