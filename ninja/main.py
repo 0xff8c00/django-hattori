@@ -146,8 +146,8 @@ class NinjaAPI:
         """
         return self.default_router.get(
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,
@@ -189,8 +189,8 @@ class NinjaAPI:
         """
         return self.default_router.post(
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,
@@ -232,8 +232,8 @@ class NinjaAPI:
         """
         return self.default_router.delete(
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,
@@ -275,8 +275,8 @@ class NinjaAPI:
         """
         return self.default_router.patch(
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,
@@ -318,8 +318,8 @@ class NinjaAPI:
         """
         return self.default_router.put(
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,
@@ -359,8 +359,8 @@ class NinjaAPI:
         return self.default_router.api_operation(
             methods,
             path,
-            auth=auth is NOT_SET and self.auth or auth,
-            throttle=throttle is NOT_SET and self.throttle or throttle,
+            auth=self.auth if auth is NOT_SET else auth,
+            throttle=self.throttle if throttle is NOT_SET else throttle,
             response=response,
             operation_id=operation_id,
             summary=summary,

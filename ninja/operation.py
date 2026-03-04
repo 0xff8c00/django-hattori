@@ -283,7 +283,7 @@ class Operation:
         self, auth: Optional[Union[Sequence[Callable], Callable, object]]
     ) -> None:
         if auth is not None and auth is not NOT_SET:
-            self.auth_callbacks = isinstance(auth, Sequence) and auth or [auth]
+            self.auth_callbacks = auth if isinstance(auth, Sequence) else [auth]
 
     def _run_checks(self, request: HttpRequest) -> Optional[HttpResponse]:
         "Runs security/throttle checks for each operation"

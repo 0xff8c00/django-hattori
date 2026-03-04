@@ -511,12 +511,12 @@ class Router:
         else:
             path_view = self.path_operations[path]
 
-        by_alias = by_alias is None and self.by_alias or by_alias
-        exclude_unset = exclude_unset is None and self.exclude_unset or exclude_unset
+        by_alias = self.by_alias if by_alias is None else by_alias
+        exclude_unset = self.exclude_unset if exclude_unset is None else exclude_unset
         exclude_defaults = (
-            exclude_defaults is None and self.exclude_defaults or exclude_defaults
+            self.exclude_defaults if exclude_defaults is None else exclude_defaults
         )
-        exclude_none = exclude_none is None and self.exclude_none or exclude_none
+        exclude_none = self.exclude_none if exclude_none is None else exclude_none
 
         path_view.add_operation(
             path=path,
