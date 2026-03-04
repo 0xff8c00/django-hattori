@@ -135,15 +135,15 @@ class BoundRouter:
 
                 # Apply throttle inheritance
                 if operation.throttle_param == NOT_SET:
-                    if self.api.throttle != NOT_SET:
-                        throttle = self.api.throttle
+                    if self.throttle != NOT_SET:
+                        throttle = self.throttle
                         operation.throttle_objects = (
                             isinstance(throttle, BaseThrottle)
                             and [throttle]
                             or throttle  # type: ignore
                         )
-                    if self.throttle != NOT_SET:
-                        throttle = self.throttle
+                    elif self.api.throttle != NOT_SET:
+                        throttle = self.api.throttle
                         operation.throttle_objects = (
                             isinstance(throttle, BaseThrottle)
                             and [throttle]
