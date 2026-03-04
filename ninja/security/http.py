@@ -34,7 +34,9 @@ class HttpBearer(HttpAuthBase, ABC):
             if settings.DEBUG:
                 logger.error(f"Unexpected auth - '{auth_value}'")
             return None
-        token = " ".join(parts[1:])
+        token = " ".join(parts[1:]).strip()
+        if not token:
+            return None
         return self.authenticate(request, token)
 
     @abstractmethod

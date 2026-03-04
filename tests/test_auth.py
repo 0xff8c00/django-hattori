@@ -267,6 +267,25 @@ def test_auth(path, kwargs, expected_code, expected_body, settings):
         assert response.json() == expected_body
 
 
+def test_bearer_empty_token():
+    """Bearer with trailing space only should return 401 without calling authenticate."""
+    mock = Mock()
+
+    class SpyBearerAuth(HttpBearer):
+        def authenticate(self, request, token):
+            mock(token)
+            return token
+
+    spy_api = NinjaAPI()
+    spy_api.get("/spy", auth=SpyBearerAuth())(demo_operation)
+    spy_client = TestClient(spy_api)
+
+    # "Bearer " with no actual token should be rejected
+    response = spy_client.get("/spy", headers={"Authorization": "Bearer "})
+    assert response.status_code == 401
+    mock.assert_not_called()
+
+
 def test_schema():
     schema = api.get_openapi_schema()
     assert schema["components"]["securitySchemes"] == {
