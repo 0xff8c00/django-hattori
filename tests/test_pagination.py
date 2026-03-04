@@ -4,6 +4,7 @@ from typing import Any, List
 import pytest
 from django.test import override_settings
 from pydantic.errors import PydanticSchemaGenerationError
+from someapp.models import Category
 
 from ninja import NinjaAPI, Schema
 from ninja.constants import NOT_SET
@@ -719,3 +720,23 @@ def test_find_collection_response_raises_when_no_collection():
     # Should raise ConfigError since ItemSchema is not a collection
     with pytest.raises(ConfigError, match="no collection response"):
         _find_collection_response(operation)
+
+
+@pytest.mark.django_db
+def test_items_count_with_queryset_and_list():
+    """Test that _items_count returns correct count for both QuerySets and plain lists."""
+    paginator = LimitOffsetPagination()
+
+    # Create some DB objects
+    Category.objects.all().delete()
+    for i in range(5):
+        Category.objects.create(title=f"cat-{i}")
+
+    qs = Category.objects.all()
+
+    # QuerySet path: should use .count() and return correct value
+    assert paginator._items_count(qs) == 5
+
+    # List path: should use len() and return correct value
+    assert paginator._items_count([1, 2, 3]) == 3
+    assert paginator._items_count([]) == 0

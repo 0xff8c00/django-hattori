@@ -66,11 +66,9 @@ class PaginationBase(ABC):
         Since lists are mainly compatible with QuerySets and can be passed to paginator.
         We will first to try to use .count - and if not there will use a len
         """
-        try:
-            # forcing to find queryset.count instead of list.count:
-            return queryset.all().count()
-        except AttributeError:
-            return len(queryset)
+        if isinstance(queryset, QuerySet):
+            return queryset.count()
+        return len(queryset)
 
 
 class AsyncPaginationBase(PaginationBase):
@@ -85,10 +83,9 @@ class AsyncPaginationBase(PaginationBase):
         pass  # pragma: no cover
 
     async def _aitems_count(self, queryset: QuerySet) -> int:
-        try:
-            return await queryset.all().acount()
-        except AttributeError:
-            return len(queryset)
+        if isinstance(queryset, QuerySet):
+            return await queryset.acount()
+        return len(queryset)
 
 
 class LimitOffsetPagination(AsyncPaginationBase):
