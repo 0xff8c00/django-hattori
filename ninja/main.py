@@ -550,7 +550,7 @@ class NinjaAPI:
     ) -> HttpResponse:
         if temporal_response:
             status = temporal_response.status_code
-        assert status
+        assert status is not None
 
         content = self.renderer.render(request, data, response_status=status)
 
@@ -628,7 +628,7 @@ class NinjaAPI:
                     model.__ninja_param_source__,
                 ) + model.__ninja_flatten_map_reverse__.get(i["loc"], i["loc"])
                 # removing pydantic hints
-                del i["input"]  # type: ignore
+                i.pop("input", None)  # type: ignore
                 if (
                     "ctx" in i
                     and "error" in i["ctx"]
