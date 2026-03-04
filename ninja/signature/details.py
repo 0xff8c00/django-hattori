@@ -317,7 +317,7 @@ def is_pydantic_model(cls: Any) -> bool:
 
         # Handle Union types
         if origin in UNION_TYPES:
-            return any(issubclass(arg, pydantic.BaseModel) for arg in get_args(cls))
+            return any(is_pydantic_model(arg) for arg in get_args(cls))
         return issubclass(cls, pydantic.BaseModel)
     except TypeError:  # pragma: no cover
         return False
