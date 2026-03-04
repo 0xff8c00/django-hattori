@@ -205,13 +205,11 @@ class FilterSchema(Schema):
                 else:
                     ignore_none = DEFAULT_IGNORE_NONE
 
-            # Resolve Q expression for a field even if we skip it due to None value
-            # So that improperly configured fields are easier to detect
+            if filter_value is None and ignore_none:
+                continue
             field_q = self._resolve_field_expression(
                 field_name, filter_value, field_info
             )
-            if filter_value is None and ignore_none:
-                continue
             q = q._combine(  # type: ignore[attr-defined]
                 field_q,
                 self.model_config.get(

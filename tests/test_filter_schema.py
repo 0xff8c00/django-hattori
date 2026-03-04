@@ -47,7 +47,7 @@ def test_improperly_configured_deprecated():
     class DummyFilterSchema(FilterSchema):
         popular: Optional[str] = Field(None, q=Q(view_count__gt=1000))
 
-    filter_instance = DummyFilterSchema()
+    filter_instance = DummyFilterSchema(popular="yes")
     with pytest.raises(ImproperlyConfigured):
         filter_instance.get_filter_expression()
 
@@ -58,7 +58,7 @@ def test_improperly_configured_annotated():
     class DummyFilterSchema(FilterSchema):
         popular: Annotated[Optional[str], FilterLookup(Q(view_count__gt=1000))] = None
 
-    filter_instance = DummyFilterSchema()
+    filter_instance = DummyFilterSchema(popular="yes")
     with pytest.raises(ImproperlyConfigured):
         filter_instance.get_filter_expression()
 
@@ -364,6 +364,25 @@ def test_field_level_custom_expression():
     assert q == Q()
 
 
+def test_custom_filter_not_called_when_none_ignored():
+    """Custom filter_* method should not be called when value is None and ignore_none is True."""
+    from unittest.mock import Mock
+
+    mock = Mock(return_value=Q())
+
+    class DummyFilterSchema(FilterSchema):
+        name: Optional[str] = None
+
+        def filter_name(self, value):
+            return mock(value)
+
+    # Default ignore_none=True, value is None — filter_name should not be called
+    filter_instance = DummyFilterSchema()
+    q = filter_instance.get_filter_expression()
+    assert q == Q()
+    mock.assert_not_called()
+
+
 def test_class_level_custom_expression():
     """Test custom_expression method overrides all field configuration."""
 
@@ -410,7 +429,7 @@ def test_pydantic_field_with_extra_warns():
     class DummyFilterSchema(FilterSchema):
         name: Optional[str] = Field(None, q="name__icontains")
 
-    filter_instance = DummyFilterSchema()
+    filter_instance = DummyFilterSchema(name="test")
 
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
