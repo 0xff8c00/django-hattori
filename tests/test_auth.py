@@ -286,6 +286,28 @@ def test_bearer_empty_token():
     mock.assert_not_called()
 
 
+def test_async_auth_no_unawaited_coroutine_on_sync_endpoint():
+    """Async auth on a sync endpoint should not leak unawaited coroutines."""
+    import warnings
+
+    class SpyAsyncBearerAuth(HttpBearer):
+        async def authenticate(self, request, token):
+            return token
+
+    spy_api = NinjaAPI()
+    spy_api.get("/spy", auth=SpyAsyncBearerAuth())(demo_operation)
+    spy_client = TestClient(spy_api)
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        response = spy_client.get(
+            "/spy", headers={"Authorization": "Bearer testtoken"}
+        )
+        assert response.status_code == 200
+        runtime_warnings = [x for x in w if issubclass(x.category, RuntimeWarning)]
+        assert not runtime_warnings, f"Unawaited coroutine warnings: {runtime_warnings}"
+
+
 def test_schema():
     schema = api.get_openapi_schema()
     assert schema["components"]["securitySchemes"] == {

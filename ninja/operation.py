@@ -303,12 +303,9 @@ class Operation:
     def _run_authentication(self, request: HttpRequest) -> Optional[HttpResponse]:
         for callback in self.auth_callbacks:
             try:
-                if is_async_callable(callback) or getattr(callback, "is_async", False):
-                    result = callback(request)
-                    if inspect.iscoroutine(result):
-                        result = async_to_sync(callback)(request)
-                else:
-                    result = callback(request)
+                result = callback(request)
+                if inspect.iscoroutine(result):
+                    result = async_to_sync(lambda: result)()
             except Exception as exc:
                 return self.api.on_exception(request, exc)
 
