@@ -1,3 +1,4 @@
+from copy import copy
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -48,11 +49,13 @@ def get_schema_annotations(schema_cls: Type[Any]) -> Dict[str, Any]:
 def create_patch_schema(schema_cls: Type[Any]) -> Type[ModelToDict]:
     schema_annotations = get_schema_annotations(schema_cls)
     values, annotations = {}, {}
-    # assert False, f"{schema_cls} - {schema_cls.model_fields}"
     for f in schema_cls.model_fields.keys():
         t = schema_annotations[f]
         if not is_optional_type(t):
-            values[f] = getattr(schema_cls, f, None)
+            field_info = copy(schema_cls.model_fields[f])
+            field_info.default = None
+            field_info.default_factory = None
+            values[f] = field_info
             annotations[f] = Optional[t]
     values["__annotations__"] = annotations
     OptionalSchema = type(f"{schema_cls.__name__}Patch", (schema_cls,), values)

@@ -2,13 +2,31 @@ from typing import List, Optional
 
 import pytest
 
-from ninja import NinjaAPI, Schema
+from ninja import Field, NinjaAPI, Schema
 from ninja.patch_dict import PatchDict
 from ninja.testing import TestClient
 
 api = NinjaAPI()
 
 client = TestClient(api)
+
+
+# -- Schema with Field constraints for testing preservation --
+
+
+class ConstrainedSchema(Schema):
+    name: str = Field(max_length=5)
+    price: int = Field(ge=0)
+    tag: Optional[str] = None
+
+
+constrained_api = NinjaAPI()
+constrained_client = TestClient(constrained_api)
+
+
+@constrained_api.patch("/patch-constrained")
+def patch_constrained(request, payload: PatchDict[ConstrainedSchema]):
+    return {"payload": payload}
 
 
 class SomeSchema(Schema):
@@ -111,3 +129,42 @@ def test_inherited_schema():
             },
         },
     }
+
+
+def test_patch_preserves_max_length():
+    """PatchDict should enforce max_length from Field constraints."""
+    response = constrained_client.patch(
+        "/patch-constrained", json={"name": "ok"}
+    )
+    assert response.status_code == 200
+
+    response = constrained_client.patch(
+        "/patch-constrained", json={"name": "way too long"}
+    )
+    assert response.status_code == 422
+
+
+def test_patch_preserves_ge():
+    """PatchDict should enforce ge=0 from Field constraints."""
+    response = constrained_client.patch(
+        "/patch-constrained", json={"price": 10}
+    )
+    assert response.status_code == 200
+
+    response = constrained_client.patch(
+        "/patch-constrained", json={"price": -1}
+    )
+    assert response.status_code == 422
+
+
+def test_patch_constrained_partial_update():
+    """PatchDict with constraints should still allow partial updates."""
+    response = constrained_client.patch(
+        "/patch-constrained", json={"name": "hi"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"payload": {"name": "hi"}}
+
+    response = constrained_client.patch("/patch-constrained", json={})
+    assert response.status_code == 200
+    assert response.json() == {"payload": {}}
