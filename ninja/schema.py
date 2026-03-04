@@ -43,7 +43,6 @@ from ninja.signature.utils import get_args_names, has_kwargs
 from ninja.types import DictStrAny
 
 pydantic_version = list(map(int, pydantic.VERSION.split(".")[:2]))
-assert pydantic_version >= [2, 0], "Pydantic 2.0+ required"
 
 __all__ = ["BaseModel", "Field", "DjangoGetter", "Schema"]
 
@@ -174,7 +173,6 @@ class ResolverMetaclass(ModelMetaclass):
                 continue
             if (
                 not callable(resolve_func)
-                # A staticmethod isn't directly callable in Python <=3.9.
                 and not isinstance(resolve_func, staticmethod)
             ):
                 continue  # pragma: no cover

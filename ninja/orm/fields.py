@@ -177,7 +177,7 @@ def get_schema_field(
         default = PydanticUndefined
 
     if nullable:
-        python_type = Union[python_type, None]  # aka Optional in 3.7+
+        python_type = Union[python_type, None]
 
     description = field.help_text or None
     title = title_if_lower(field.verbose_name)

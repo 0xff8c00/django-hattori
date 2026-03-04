@@ -7,7 +7,7 @@
 
 ![Django Ninja](img/hero.png)
 
-Django Ninja is a web framework for building APIs with Django and Python 3.6+ type hints.
+Django Ninja is a web framework for building APIs with Django and Python type hints.
 
 Key features:
 
@@ -80,7 +80,7 @@ You do that with standard modern Python types.
 
 You don't have to learn a new syntax, the methods or classes of a specific library, etc.
 
-Just standard **Python 3.6+**.
+Just standard **Python 3.11+**.
 
 For example, for an `int`:
 

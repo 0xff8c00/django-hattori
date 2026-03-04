@@ -1,7 +1,6 @@
 import inspect
 import warnings
 from collections import defaultdict, namedtuple
-from sys import version_info
 from typing import Any, Callable, Dict, Generator, List, Optional, Tuple
 
 import pydantic
@@ -229,19 +228,7 @@ class ViewSignature:
                 if len(args) == 2:
                     annotation, default = args
                 else:
-                    # TODO: Remove version check once support for <=3.8 is dropped.
-                    # Annotated[] is only available at runtime in 3.9+ per
-                    # https://docs.python.org/3/library/typing.html#typing.Annotated
-                    if version_info >= (3, 9):
-                        # NOTE: Annotated[args[:-1]] seems to have the same runtime
-                        # behavior as Annotated[*args[:-1]], but the latter is
-                        # invalid in Python < 3.11 because star expressions
-                        # were not allowed in index expressions.
-                        annotation, default = Annotated[args[:-1]], args[-1]
-                    else:  # pragma: no cover -- requires specific Python versions
-                        raise NotImplementedError(
-                            "This definition requires Python version 3.9+"
-                        )
+                    annotation, default = Annotated[args[:-1]], args[-1]
                 if prev_default != self.signature.empty:
                     default.default = prev_default
 

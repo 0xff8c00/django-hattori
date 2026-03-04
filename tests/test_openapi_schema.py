@@ -1,5 +1,3 @@
-import sys
-from sys import version_info
 from typing import Any, List, Union
 from unittest.mock import Mock
 from uuid import uuid4
@@ -99,32 +97,15 @@ def method_path(
     return dict(i=i, f=f)
 
 
-# This definition is only possible in Python 3.9+
-# TODO: Drop this condition once support for <= 3.8 is dropped
-if version_info >= (3, 9):
-
-    @api.get("/test-pathex/{path_ex}", response=AnnotatedStr)
-    def method_pathex(
-        request,
-        path_ex: PathEx[
-            AnnotatedStr,
-            P(description="path_ex description"),
-        ],
-    ):
-        return path_ex
-
-else:
-    with pytest.raises(NotImplementedError, match="3.9+"):
-
-        @api.get("/test-pathex/{path_ex}", response=AnnotatedStr)
-        def method_pathex(
-            request,
-            path_ex: PathEx[
-                AnnotatedStr,
-                P(description="path_ex description"),
-            ],
-        ):
-            return path_ex
+@api.get("/test-pathex/{path_ex}", response=AnnotatedStr)
+def method_pathex(
+    request,
+    path_ex: PathEx[
+        AnnotatedStr,
+        P(description="path_ex description"),
+    ],
+):
+    return path_ex
 
 
 @api.post("/test-form", response=Response)
@@ -166,12 +147,9 @@ def method_union_payload_and_simple(request, data: Union[int, TypeB]):
     return data.dict()
 
 
-if sys.version_info >= (3, 10):
-    # This requires Python 3.10 or higher (PEP 604), so we're using eval to
-    # conditionally make it available
-    @api.post("/test-new-union-type", response=Response)
-    def method_new_union_payload(request, data: "TypeA | TypeB"):
-        return dict(i=data.i, f=data.f)
+@api.post("/test-new-union-type", response=Response)
+def method_new_union_payload(request, data: "TypeA | TypeB"):
+    return dict(i=data.i, f=data.f)
 
 
 @api.post(
@@ -492,10 +470,6 @@ def test_schema_path(schema):
     }
 
 
-@pytest.mark.skipif(
-    version_info < (3, 9),
-    reason="requires py3.9+ for Annotated[] at the route definition site",
-)
 def test_schema_pathex(schema):
     method_list = schema["paths"]["/api/test-pathex/{path_ex}"]["get"]
 
@@ -853,10 +827,6 @@ def test_union_payload_simple(schema):
     }
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 10),
-    reason="requires Python 3.10 or higher (PEP 604)",
-)
 def test_new_union_payload_type(schema):
     method = schema["paths"]["/api/test-new-union-type"]["post"]
 

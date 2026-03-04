@@ -1,5 +1,4 @@
 import importlib
-from sys import version_info
 from typing import Any, List
 
 import pytest
@@ -645,7 +644,6 @@ def test_config_error_NOT_SET():
             pass
 
 
-@pytest.mark.skipif(version_info < (3, 11), reason="Not needed at this Python version")
 def test_pagination_works_with_unnamed_classes():
     """
     This test lets you check that the typing.Any case handled in `ninja.pagination.make_response_paginated`

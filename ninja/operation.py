@@ -27,7 +27,6 @@ from django.http.response import HttpResponseBase
 from pydantic import BaseModel
 
 from ninja.compatibility.files import FIX_MIDDLEWARE_PATH, need_to_fix_request_files
-from ninja.compatibility.streaming import create_streaming_response
 from ninja.constants import NOT_SET, NOT_SET_TYPE
 from ninja.errors import (
     AuthenticationError,
@@ -37,7 +36,7 @@ from ninja.errors import (
 )
 from ninja.params.models import TModels
 from ninja.responses import Status
-from ninja.schema import Schema, pydantic_version
+from ninja.schema import Schema
 from ninja.signature import ViewSignature, is_async
 from ninja.streaming import StreamFormat, _serialize_item, _StreamAlias
 from ninja.throttling import BaseThrottle
@@ -232,19 +231,12 @@ class Operation:
             resp_object, context={"request": request, "response_status": 200}
         )
 
-        model_dump_kwargs: Dict[str, Any] = {}
-        if pydantic_version >= [2, 7]:  # pragma: no branch
-            # pydantic added support for serialization context at 2.7
-            model_dump_kwargs.update(
-                context={"request": request, "response_status": 200}
-            )
-
         result = validated.model_dump(
+            context={"request": request, "response_status": 200},
             by_alias=self.by_alias,
             exclude_unset=self.exclude_unset,
             exclude_defaults=self.exclude_defaults,
             exclude_none=self.exclude_none,
-            **model_dump_kwargs,
         )["response"]
         return _serialize_item(result)
 
@@ -342,10 +334,7 @@ class Operation:
         return None
 
     def _model_dump_kwargs(self, request: HttpRequest, status: int) -> Dict[str, Any]:
-        kwargs: Dict[str, Any] = {}
-        if pydantic_version >= [2, 7]:
-            kwargs["context"] = {"request": request, "response_status": status}
-        return kwargs
+        return {"context": {"request": request, "response_status": status}}
 
     def _result_to_response(
         self, request: HttpRequest, result: Any, temporal_response: HttpResponse
@@ -505,18 +494,25 @@ class AsyncOperation(Operation):
         assert self.stream_format is not None
         fmt = self.stream_format
 
-        async def content_gen() -> Any:
+        async def content_iter() -> Any:
             async for item in generator:
                 data = self._validate_stream_item(item, request)
                 yield fmt.format_chunk(data)
+            # Copy headers/cookies after generator completes
+            for key, value in temporal_response.items():
+                if key.lower() != "content-type":
+                    response[key] = value
+            for cookie_name, cookie in temporal_response.cookies.items():
+                response.cookies[cookie_name] = cookie
 
-        return await create_streaming_response(
-            content_gen(),
+        response = StreamingHttpResponse(
+            content_iter(),
             content_type=fmt.media_type,
             status=temporal_response.status_code,
-            temporal_response=temporal_response,
-            extra_headers=fmt.response_headers(),
         )
+        for key, value in fmt.response_headers().items():
+            response[key] = value
+        return response
 
     async def _run_checks(self, request: HttpRequest) -> Optional[HttpResponse]:  # type: ignore
         "Runs security/throttle checks for each operation"

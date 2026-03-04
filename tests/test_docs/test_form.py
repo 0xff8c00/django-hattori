@@ -1,7 +1,4 @@
-import sys
 from unittest.mock import patch
-
-import pytest
 
 from ninja import NinjaAPI
 from ninja.testing import TestClient
@@ -39,7 +36,6 @@ def test_examples():
         }
 
 
-@pytest.mark.skipif(sys.version_info[:2] < (3, 9), reason="requires py3.9+")
 def test_examples_extra():
     api = NinjaAPI()
 

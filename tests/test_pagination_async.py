@@ -1,7 +1,6 @@
 import asyncio
 from typing import Any, List
 
-import django
 import pytest
 from django.db.models import QuerySet
 from someapp.models import Category
@@ -148,7 +147,6 @@ async def test_async_page_number():
     assert response.json() == {"items": [{"page": 11, "page_size": None}], "count": 101}
 
 
-@pytest.mark.skipif(django.VERSION[:2] < (5, 0), reason="Requires Django 5.0+")
 @pytest.mark.django_db
 @pytest.mark.asyncio
 async def test_test_async_pagination():

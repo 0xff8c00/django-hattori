@@ -10,7 +10,6 @@ from typing_extensions import Literal
 from .constants import NOT_SET
 from .schema import Schema
 
-# XOR is available only in Django 4.1+: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#xor
 ExpressionConnector = Literal["AND", "OR", "XOR"]
 
 DEFAULT_IGNORE_NONE: bool = True

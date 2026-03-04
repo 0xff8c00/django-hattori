@@ -2,7 +2,6 @@ from datetime import date, timedelta
 from http import HTTPStatus
 from typing import List
 
-import django
 import pytest
 from django.test import override_settings
 from someapp.api import EventSchema  # pyright: ignore[reportMissingImports]
@@ -537,9 +536,6 @@ def test_cursor_pagination_last_item_deleted():
 # Async versions of all tests
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_first_page():
     """Test first page of cursor pagination with async."""
@@ -554,9 +550,6 @@ async def test_async_cursor_pagination_first_page():
     assert response_data["previous"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_with_cursor():
     """Test navigation using cursor with async."""
@@ -582,9 +575,6 @@ async def test_async_cursor_pagination_with_cursor():
         assert response_data["previous"] is not None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_reverse_ordering():
     """Test cursor pagination with reverse ordering with async."""
@@ -599,9 +589,6 @@ async def test_async_cursor_pagination_reverse_ordering():
     assert response_data["previous"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_end_date_offset():
     """Test cursor pagination handles duplicate end_date values with async"""
@@ -637,9 +624,6 @@ async def test_async_cursor_pagination_end_date_offset():
     assert start_dates == sorted(start_dates), "Results should be sorted by end_date"
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_end_date_offset_backwards():
     """Test cursor pagination handles duplicate end_date values iterating backwards with async"""
@@ -683,9 +667,6 @@ async def test_async_cursor_pagination_end_date_offset_backwards():
     ), "Results should be sorted by start_date when iterating backwards"
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_default_page_size():
     """Test cursor pagination with default page size with async."""
@@ -702,9 +683,6 @@ async def test_async_cursor_pagination_default_page_size():
     assert response_data["previous"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_custom_page_size_override():
     """Test overriding page size in request with async."""
@@ -720,9 +698,6 @@ async def test_async_cursor_pagination_custom_page_size_override():
     assert response_data["previous"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_with_custom_params():
     """Test cursor pagination with additional query parameters with async."""
@@ -737,9 +712,6 @@ async def test_async_cursor_pagination_with_custom_params():
     assert all("Special" in item["title"] for item in response_data["results"])
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_invalid_cursor():
     """Test handling of invalid cursor values with async."""
@@ -749,9 +721,6 @@ async def test_async_cursor_pagination_invalid_cursor():
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_empty_cursor():
     """Test handling of empty cursor with async."""
@@ -764,9 +733,6 @@ async def test_async_cursor_pagination_empty_cursor():
     assert response_data["results"][0]["title"] == "Event 1"
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_no_page_size():
     """Test cursor pagination without specifying page_size with async."""
@@ -781,9 +747,6 @@ async def test_async_cursor_pagination_no_page_size():
     assert "results" in response_data
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_large_page_size():
     """Test edge cases for cursor pagination with async."""
@@ -796,9 +759,6 @@ async def test_async_cursor_pagination_large_page_size():
     assert response_data["next"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_page_size_of_one():
     # Page size of 1 with async
@@ -833,9 +793,6 @@ async def test_async_cursor_pagination_page_size_of_one():
     assert titles == expected_titles
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_empty_queryset():
     """Test cursor pagination with empty queryset with async."""
@@ -851,9 +808,6 @@ async def test_async_cursor_pagination_empty_queryset():
     assert response_data["previous"] is None
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 1), reason="Async QuerySet iteration requires Django 4.1+"
-)
 @pytest.mark.asyncio
 @override_settings(NINJA_PAGINATION_PER_PAGE=20)
 async def test_async_cursor_pagination_settings_override():
@@ -865,9 +819,6 @@ async def test_async_cursor_pagination_settings_override():
     assert len(response_data["results"]) == 13
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 2), reason="Model.adelete() requires Django 4.2+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_deleted_position():
     """Test cursor pagination when the cursor position is deleted between requests with async."""
@@ -905,9 +856,6 @@ async def test_async_cursor_pagination_deleted_position():
     assert titles[0] == "Event 5"
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 2), reason="Model.adelete() requires Django 4.2+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_deleted_position_previous():
     """Test cursor pagination when the cursor position is deleted between requests using previous cursor with async."""
@@ -950,9 +898,6 @@ async def test_async_cursor_pagination_deleted_position_previous():
     assert "Special Event 13" not in titles
 
 
-@pytest.mark.skipif(
-    django.VERSION < (4, 2), reason="Model.adelete() requires Django 4.2+"
-)
 @pytest.mark.asyncio
 async def test_async_cursor_pagination_last_item_deleted():
     """Test cursor pagination when the cursor is pointed at the last item, but it is deleted with async."""
