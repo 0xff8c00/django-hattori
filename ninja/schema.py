@@ -97,6 +97,8 @@ class DjangoGetter:
             return list(result)
 
         if callable(result):
+            if getattr(result, "alters_data", False):
+                raise AttributeError
             return result()
 
         elif isinstance(result, FieldFile):

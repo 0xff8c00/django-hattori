@@ -197,6 +197,55 @@ def test_django_getter():
     assert repr(dg) == "<DjangoGetter: {'i': 1}>"
 
 
+def test_callable_attribute_not_invoked_during_serialization():
+    """Regression test for #1686: DjangoGetter should not invoke callable
+    attributes (like model.delete) just because the field name matches."""
+    call_count = 0
+
+    class ObjWithCallable:
+        name = "test"
+
+        def delete(self):
+            nonlocal call_count
+            call_count += 1
+            return "deleted"
+
+        delete.alters_data = True
+
+    class ObjSchema(Schema):
+        name: str
+
+    obj = ObjWithCallable()
+    schema = ObjSchema.from_orm(obj)
+    assert call_count == 0, "callable attribute was invoked during serialization"
+    assert schema.name == "test"
+
+
+def test_alters_data_method_not_called_when_field_matches():
+    """Regression test for #1686: a schema field matching a model method with
+    alters_data=True should not invoke that method."""
+    call_count = 0
+
+    class ObjWithDelete:
+        name = "test"
+
+        def delete(self):
+            nonlocal call_count
+            call_count += 1
+            return "deleted"
+
+        delete.alters_data = True
+
+    class ObjSchema(Schema):
+        name: str
+        delete: str = None
+
+    obj = ObjWithDelete()
+    schema = ObjSchema.from_orm(obj)
+    assert call_count == 0, "alters_data method was invoked during serialization"
+    assert schema.name == "test"
+
+
 def test_schema_validates_assignment_and_reassigns_the_value():
     class ValidateAssignmentSchema(Schema):
         str_var: str
