@@ -31,21 +31,21 @@ class CamelModelSchema(Schema):
 
 Keep in mind that when you want modify output for field names (like camel case) - you need to set as well  `populate_by_name` and `by_alias`
 
-```python hl_lines="6 14"
+```python hl_lines="6 13"
 from pydantic import ConfigDict
+from ninja import Schema
 
-class UserSchema(ModelSchema):
+class UserSchema(Schema):
     model_config = ConfigDict(
-        alias_generator = to_camel
-        populate_by_name = True,  # !!!!!! <--------
+        alias_generator=to_camel,
+        populate_by_name=True,  # !!!!!! <--------
     )
-    class Meta:
-        model = User
-        fields = ["id", "email", "is_staff"]
+    id: int
+    email: str
+    is_staff: bool
 
 
-
-@api.get("/users", response=list[UserSchema], by_alias=True) # !!!!!! <-------- by_alias
+@api.get("/users", response=list[UserSchema], by_alias=True)  # !!!!!! <-------- by_alias
 def get_users(request):
     return User.objects.all()
 

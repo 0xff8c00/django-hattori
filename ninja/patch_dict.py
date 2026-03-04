@@ -13,7 +13,6 @@ from pydantic import BaseModel
 from pydantic_core import core_schema
 
 from ninja import Body
-from ninja.orm import ModelSchema
 from ninja.schema import Schema
 from ninja.utils import is_optional_type
 
@@ -36,7 +35,7 @@ class ModelToDict(dict):
 
 def get_schema_annotations(schema_cls: Type[Any]) -> Dict[str, Any]:
     annotations: Dict[str, Any] = {}
-    excluded_bases = {Schema, ModelSchema, BaseModel}
+    excluded_bases = {Schema, BaseModel}
     bases = schema_cls.mro()[:-1]
     final_bases = reversed([b for b in bases if b not in excluded_bases])
 

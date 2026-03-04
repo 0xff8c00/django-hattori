@@ -49,21 +49,6 @@ class Payload(Schema):
 
 During response a "response_code" is also passed to context
 
-## Schema.Meta
-
-Pydantic now deprecates BaseModel.Config class.  But to keep things consistent with all other django parts we introduce "Meta" class for ModelSchema - which works in a similar way as django's ModelForms:
-
-```Python hl_lines="2 4"
-class TxItem(ModelSchema):
-    class Meta:
-        model = Transaction
-        fields = ["id", "account", "amount", "timestamp"]
-
-```
-
-(The "Config" class is still supported, but deprecated)
-
-
 ## Shorter / cleaner parameters syntax
 
 ```python

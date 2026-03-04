@@ -14,7 +14,6 @@ from ninja import (
     Field,
     File,
     Form,
-    ModelSchema,
     NinjaAPI,
     P,
     PathEx,
@@ -1069,25 +1068,15 @@ def test_by_alias_uses_serialization_alias_model():
     """Test the serialization_alias on the Field is used when by_alias=True is set on the route"""
     api = NinjaAPI()
 
-    class Person(models.Model):
-        uuid = models.CharField(
-            max_length=36, unique=True, default=lambda: str(uuid4()), editable=False
-        )
-        created = models.DateTimeField(auto_now_add=True)
+    from datetime import datetime
 
-        class Meta:
-            app_label = "tests"
-
-    class PersonModelOut(ModelSchema):
+    class PersonModelOut(Schema):
         uuid: str = Field(..., serialization_alias="id")
-
-        class Meta:
-            model = Person
-            fields = ["created"]
+        created: datetime
 
     @api.get("/person", response={200: PersonModelOut}, by_alias=True)
     def get_user(request):
-        return Person(fullname="John Snow")
+        return {"uuid": "abc", "created": "2024-01-01T00:00:00"}
 
     schema = api.get_openapi_schema()
     user_alias_schema = schema["components"]["schemas"]["PersonModelOut"]

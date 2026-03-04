@@ -9,7 +9,6 @@ from ninja.files import UploadedFile
 from ninja.filter_schema import FilterConfigDict, FilterLookup, FilterSchema
 from ninja.main import NinjaAPI
 from ninja.openapi.docs import Redoc, Swagger
-from ninja.orm import ModelSchema
 from ninja.params import (
     Body,
     BodyEx,
@@ -54,7 +53,6 @@ __all__ = [
     "Router",
     "P",
     "Schema",
-    "ModelSchema",
     "FilterSchema",
     "FilterLookup",
     "FilterConfigDict",
