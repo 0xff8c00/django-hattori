@@ -218,9 +218,9 @@ class Param(FieldInfo):  # type: ignore[misc]
         # self.param_type: Any = None
         self.model_field: Optional[FieldInfo] = None
         json_schema_extra = {}
-        if example:
+        if example is not None:
             json_schema_extra["example"] = example
-        if examples:
+        if examples is not None:
             json_schema_extra["examples"] = examples
         if deprecated:
             json_schema_extra["deprecated"] = deprecated
