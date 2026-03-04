@@ -264,7 +264,7 @@ class ViewSignature:
         is_collection = is_collection_type(annotation)
 
         if annotation == UploadedFile or (
-            is_collection and annotation.__args__[0] == UploadedFile
+            is_collection and getattr(annotation, "__args__", (None,))[0] == UploadedFile
         ):
             # People often forgot to mark UploadedFile as a File, so we better assign it automatically
             if default == self.signature.empty or default is None:
