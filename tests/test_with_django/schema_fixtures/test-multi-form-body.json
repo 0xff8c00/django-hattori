@@ -13,6 +13,16 @@
             }
           }
         }
+      },
+      "422": {
+        "description": "Unprocessable Content",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
+            }
+          }
+        }
       }
     },
     "requestBody": {
@@ -27,19 +37,19 @@
                 "type": "integer"
               },
               "foo4": {
-                "title": "Foo4 Title",
-                "description": "Foo4 Desc",
                 "default": 44,
+                "description": "Foo4 Desc",
+                "title": "Foo4 Title",
                 "type": "integer"
               },
               "bar4": {
-                "title": "Bar4",
                 "default": "44bar",
+                "title": "Bar4",
                 "type": "string"
               },
               "s": {
-                "title": "S",
                 "default": "a-str",
+                "title": "S",
                 "type": "string"
               },
               "nested-data": {

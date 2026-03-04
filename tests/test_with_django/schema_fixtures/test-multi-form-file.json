@@ -13,38 +13,46 @@
             }
           }
         }
+      },
+      "422": {
+        "description": "Unprocessable Content",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
+            }
+          }
+        }
       }
     },
     "requestBody": {
       "content": {
         "multipart/form-data": {
           "schema": {
-            "title": "MultiPartBodyParams",
-            "type": "object",
             "properties": {
               "file": {
+                "format": "binary",
                 "title": "File",
-                "type": "string",
-                "format": "binary"
+                "type": "string"
               },
               "i": {
                 "title": "I",
                 "type": "integer"
               },
               "s": {
-                "title": "S",
                 "default": "a-str",
+                "title": "S",
                 "type": "string"
               },
               "foo4": {
-                "title": "Foo4 Title",
-                "description": "Foo4 Desc",
                 "default": 44,
+                "description": "Foo4 Desc",
+                "title": "Foo4 Title",
                 "type": "integer"
               },
               "bar4": {
-                "title": "Bar4",
                 "default": "44bar",
+                "title": "Bar4",
                 "type": "string"
               },
               "foo": {
@@ -52,14 +60,14 @@
                 "type": "integer"
               },
               "bar": {
-                "title": "Bar",
                 "default": "11bar",
+                "title": "Bar",
                 "type": "string"
               },
               "foo2": {
-                "title": "Foo2 Title",
-                "description": "Foo2 Desc",
                 "default": 22,
+                "description": "Foo2 Desc",
+                "title": "Foo2 Title",
                 "type": "integer"
               },
               "bar2": {
@@ -67,13 +75,13 @@
                 "type": "string"
               },
               "foo3": {
-                "title": "Foo3 Title",
                 "description": "Foo3 Desc",
+                "title": "Foo3 Title",
                 "type": "integer"
               },
               "bar3": {
-                "title": "Bar3",
                 "default": "33bar",
+                "title": "Bar3",
                 "type": "string"
               }
             },
@@ -83,7 +91,9 @@
               "foo",
               "bar2",
               "foo3"
-            ]
+            ],
+            "title": "MultiPartBodyParams",
+            "type": "object"
           }
         }
       },

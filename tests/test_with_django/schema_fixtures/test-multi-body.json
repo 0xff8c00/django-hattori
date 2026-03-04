@@ -13,28 +13,36 @@
             }
           }
         }
+      },
+      "422": {
+        "description": "Unprocessable Content",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrorResponse"
+            }
+          }
+        }
       }
     },
     "requestBody": {
       "content": {
         "application/json": {
           "schema": {
-            "title": "BodyParams",
-            "type": "object",
             "properties": {
               "i": {
                 "title": "I",
                 "type": "integer"
               },
               "s": {
-                "title": "S",
                 "default": "a-str",
+                "title": "S",
                 "type": "string"
               },
               "data": {
-                "title": "Data4 Title",
+                "$ref": "#/components/schemas/TestData4",
                 "description": "Data4 Desc",
-                "$ref": "#/components/schemas/TestData4"
+                "title": "Data4 Title"
               },
               "nested-data": {
                 "$ref": "#/components/schemas/TestData"
@@ -44,7 +52,9 @@
               "i",
               "data",
               "nested-data"
-            ]
+            ],
+            "title": "BodyParams",
+            "type": "object"
           }
         }
       },

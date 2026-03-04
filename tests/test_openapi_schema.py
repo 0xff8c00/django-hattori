@@ -27,6 +27,17 @@ from ninja.renderers import JSONRenderer
 
 api = NinjaAPI()
 
+VALIDATION_ERROR_422 = {
+    "description": "Unprocessable Content",
+    "content": {
+        "application/json": {
+            "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse",
+            }
+        }
+    },
+}
+
 
 class Payload(Schema):
     i: int
@@ -233,7 +244,8 @@ def test_schema(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
     assert schema.schemas == {
         "Response": {
@@ -270,6 +282,36 @@ def test_schema(schema):
             "title": "TypeB",
             "type": "object",
         },
+        "ValidationErrorDetail": {
+            "properties": {
+                "loc": {
+                    "items": {
+                        "anyOf": [{"type": "string"}, {"type": "integer"}]
+                    },
+                    "title": "Loc",
+                    "type": "array",
+                },
+                "msg": {"title": "Msg", "type": "string"},
+                "type": {"title": "Type", "type": "string"},
+            },
+            "required": ["loc", "msg", "type"],
+            "title": "ValidationErrorDetail",
+            "type": "object",
+        },
+        "ValidationErrorResponse": {
+            "properties": {
+                "detail": {
+                    "items": {
+                        "$ref": "#/components/schemas/ValidationErrorDetail"
+                    },
+                    "title": "Detail",
+                    "type": "array",
+                }
+            },
+            "required": ["detail"],
+            "title": "ValidationErrorResponse",
+            "type": "object",
+        },
     }
 
 
@@ -290,7 +332,8 @@ def test_schema_alias(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
     # ::TODO:: this is currently broken if not all responses for same schema use the same by_alias
     """
@@ -344,7 +387,8 @@ def test_schema_list(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
     assert schema["components"]["schemas"] == {
@@ -382,6 +426,36 @@ def test_schema_list(schema):
             "title": "Response",
             "type": "object",
         },
+        "ValidationErrorDetail": {
+            "properties": {
+                "loc": {
+                    "items": {
+                        "anyOf": [{"type": "string"}, {"type": "integer"}]
+                    },
+                    "title": "Loc",
+                    "type": "array",
+                },
+                "msg": {"title": "Msg", "type": "string"},
+                "type": {"title": "Type", "type": "string"},
+            },
+            "required": ["loc", "msg", "type"],
+            "title": "ValidationErrorDetail",
+            "type": "object",
+        },
+        "ValidationErrorResponse": {
+            "properties": {
+                "detail": {
+                    "items": {
+                        "$ref": "#/components/schemas/ValidationErrorDetail"
+                    },
+                    "title": "Detail",
+                    "type": "array",
+                }
+            },
+            "required": ["detail"],
+            "title": "ValidationErrorResponse",
+            "type": "object",
+        },
     }
 
 
@@ -412,7 +486,8 @@ def test_schema_body(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -433,7 +508,8 @@ def test_schema_body_schema(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -465,7 +541,8 @@ def test_schema_path(schema):
                 },
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -504,7 +581,8 @@ def test_schema_pathex(schema):
                 },
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -535,7 +613,8 @@ def test_schema_form(schema):
                     "schema": {"$ref": "#/components/schemas/Response"}
                 }
             },
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -563,7 +642,8 @@ def test_schema_single(schema):
                     "schema": {"$ref": "#/components/schemas/Response"}
                 }
             },
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -593,7 +673,8 @@ def test_schema_form_body(schema):
                     "schema": {"$ref": "#/components/schemas/Response"}
                 }
             },
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -629,7 +710,8 @@ def test_schema_form_file(schema):
                     "schema": {"$ref": "#/components/schemas/Response"}
                 }
             },
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -664,7 +746,8 @@ def test_schema_body_file(schema):
                     "schema": {"$ref": "#/components/schemas/Response"}
                 }
             },
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -724,7 +807,8 @@ def test_schema_title_description(schema):
                 }
             },
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -783,7 +867,8 @@ def test_schema_deprecated_example_examples(schema):
     assert method_list["responses"] == {
         200: {
             "description": "OK",
-        }
+        },
+        422: VALIDATION_ERROR_422,
     }
 
 
@@ -1088,4 +1173,54 @@ def test_by_alias_uses_serialization_alias_model():
             "created": {"type": "string", "format": "date-time", "title": "Created"},
         },
         "required": ["id", "created"],
+    }
+
+
+def test_422_auto_documented():
+    api = NinjaAPI()
+
+    @api.get("/items", response={200: TypeA})
+    def get_items(request, q: str = Query(...)):
+        return {"a": q}
+
+    schema = api.get_openapi_schema()
+    method = schema["paths"]["/api/items"]["get"]
+    assert 422 in method["responses"]
+    resp_422 = method["responses"][422]
+    assert resp_422["description"] == "Unprocessable Content"
+    assert resp_422["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ValidationErrorResponse"
+    }
+    assert "ValidationErrorResponse" in schema["components"]["schemas"]
+    assert "ValidationErrorDetail" in schema["components"]["schemas"]
+
+
+def test_422_not_on_parameterless():
+    api = NinjaAPI()
+
+    @api.get("/ping", response={200: TypeA})
+    def ping(request):
+        return {"a": "pong"}
+
+    schema = api.get_openapi_schema()
+    method = schema["paths"]["/api/ping"]["get"]
+    assert 422 not in method["responses"]
+
+
+def test_422_not_overwritten():
+    api = NinjaAPI()
+
+    class CustomError(Schema):
+        error: str
+
+    @api.get("/items", response={200: TypeA, 422: CustomError})
+    def get_items(request, q: str = Query(...)):
+        return {"a": q}
+
+    schema = api.get_openapi_schema()
+    method = schema["paths"]["/api/items"]["get"]
+    assert 422 in method["responses"]
+    resp_422 = method["responses"][422]
+    assert resp_422["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/CustomError"
     }

@@ -7,6 +7,7 @@ from django.utils.termcolors import make_style
 from pydantic.json_schema import JsonSchemaMode
 
 from ninja.constants import NOT_SET
+from ninja.errors import ValidationErrorResponse
 from ninja.operation import Operation
 from ninja.params.models import TModel, TModels
 from ninja.schema import NinjaGenerateJsonSchema
@@ -312,6 +313,21 @@ class OpenAPISchema(dict):
                         self.api.renderer.media_type: {"schema": schema}
                     }
             result.update(details)
+
+        if operation.models and 422 not in result:
+            schema_422 = self._create_schema_from_model(
+                ValidationErrorResponse, remove_level=False
+            )[0]
+            title = schema_422.get("title", "ValidationErrorResponse")
+            self.schemas[title] = schema_422
+            result[422] = {
+                "description": responses.get(422, "Unknown Status Code"),
+                "content": {
+                    self.api.renderer.media_type: {
+                        "schema": {"$ref": REF_TEMPLATE.format(model=title)}
+                    }
+                },
+            }
 
         return result
 

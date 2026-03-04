@@ -136,6 +136,26 @@ api = CustomNinjaAPI()
 
 Now each `ValidationError` raised during request validation will contain data from your `validation_error_from_error_contexts`.
 
+## 422 responses in the OpenAPI schema
+
+Django Ninja automatically adds a `422 Unprocessable Content` response to the OpenAPI schema for any operation that has validatable parameters (query, path, body, form, etc.). This documents the validation error response shape that clients can expect when input fails pydantic validation.
+
+Operations with no parameters will not have a 422 response in the schema.
+
+If you need to customize the 422 response schema (for example, because you changed the error format with a custom exception handler), you can override it by explicitly declaring a 422 response:
+
+```python
+class CustomError(Schema):
+    message: str
+    errors: list
+
+@api.post("/items", response={200: Item, 422: CustomError})
+def create_item(request, data: ItemIn):
+    ...
+```
+
+When you explicitly include `422` in your `response` dict, Django Ninja will use your schema instead of the default one.
+
 
 ## Throwing HTTP responses with exceptions
 

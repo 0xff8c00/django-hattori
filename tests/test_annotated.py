@@ -8,6 +8,17 @@ from ninja.testing import TestClient
 
 api = NinjaAPI()
 
+VALIDATION_ERROR_422 = {
+    "description": "Unprocessable Content",
+    "content": {
+        "application/json": {
+            "schema": {
+                "$ref": "#/components/schemas/ValidationErrorResponse",
+            }
+        }
+    },
+}
+
 
 class FormData(Schema):
     x: int
@@ -125,7 +136,7 @@ def test_openapi_schema():
                         "description": "Cookie params",
                     },
                 ],
-                "responses": {200: {"description": "OK"}},
+                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
                 "requestBody": {
                     "content": {
                         "application/x-www-form-urlencoded": {
@@ -162,7 +173,7 @@ def test_openapi_schema():
                         "description": "User ID",
                     }
                 ],
-                "responses": {200: {"description": "OK"}},
+                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
             }
         },
         "/api/headers": {
@@ -181,7 +192,7 @@ def test_openapi_schema():
                         "required": False,
                     }
                 ],
-                "responses": {200: {"description": "OK"}},
+                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
             }
         },
         "/api/body": {
@@ -189,7 +200,7 @@ def test_openapi_schema():
                 "operationId": "test_annotated_body_op",
                 "summary": "Body Op",
                 "parameters": [],
-                "responses": {200: {"description": "OK"}},
+                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
                 "requestBody": {
                     "content": {
                         "application/json": {

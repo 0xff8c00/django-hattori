@@ -1,7 +1,7 @@
 import logging
 import traceback
 from functools import partial
-from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, Union
 
 import pydantic
 from django.conf import settings
@@ -18,6 +18,8 @@ __all__ = [
     "AuthenticationError",
     "AuthorizationError",
     "ValidationError",
+    "ValidationErrorDetail",
+    "ValidationErrorResponse",
     "HttpError",
     "set_default_exc_handlers",
 ]
@@ -82,6 +84,16 @@ class Throttled(HttpError):
     def __init__(self, wait: Optional[int]) -> None:
         self.wait = wait
         super().__init__(status_code=429, message="Too many requests.")
+
+
+class ValidationErrorDetail(pydantic.BaseModel):
+    loc: List[Union[str, int]]
+    msg: str
+    type: str
+
+
+class ValidationErrorResponse(pydantic.BaseModel):
+    detail: List[ValidationErrorDetail]
 
 
 def set_default_exc_handlers(api: "NinjaAPI") -> None:
