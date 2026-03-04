@@ -482,6 +482,10 @@ class AsyncOperation(Operation):
             result = await self.view_func(request, **values)
             return self._result_to_response(request, result, temporal_response)
         except Exception as e:
+            if isinstance(e, TypeError) and "required positional argument" in str(e):
+                msg = "Did you fail to use functools.wraps() in a decorator?"
+                msg = f"{e.args[0]}: {msg}" if e.args else msg
+                e.args = (msg,) + e.args[1:]
             return self.api.on_exception(request, e)
 
     async def _async_stream_response(
