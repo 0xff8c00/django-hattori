@@ -311,6 +311,36 @@ def test_base_classes():
         sample_scope2.get_rate()
 
 
+def test_throttle_rates_updated_by_settings_override():
+    """
+    get_rate() reads from settings lazily, so Django settings overrides
+    are respected at runtime.
+    """
+    from django.test import override_settings
+
+    custom_rates = {"anon": "1/min", "auth": "2/min", "user": "3/min"}
+    with override_settings(NINJA_DEFAULT_THROTTLE_RATES=custom_rates):
+        from ninja.conf import Settings
+        from django.conf import settings as django_settings
+
+        # Reload settings to pick up the override
+        import ninja.conf
+
+        ninja.conf.settings = Settings.model_validate(django_settings)
+
+        th = AnonRateThrottle()
+        assert th.rate == "1/min"
+
+        th = AuthRateThrottle()
+        assert th.rate == "2/min"
+
+        th = UserRateThrottle()
+        assert th.rate == "3/min"
+
+    # Restore settings
+    ninja.conf.settings = Settings.model_validate(django_settings)
+
+
 def set_throttle_timer(throttle: BaseThrottle, value: int):
     """
     Explicitly set the timer, overriding time.time()

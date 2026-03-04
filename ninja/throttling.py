@@ -1,6 +1,6 @@
 import hashlib
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from django.core.cache import cache as default_cache
 from django.core.exceptions import ImproperlyConfigured
@@ -60,13 +60,10 @@ class SimpleRateThrottle(BaseThrottle):
     Previous request information used for throttling is stored in the cache.
     """
 
-    from ninja.conf import settings
-
     cache = default_cache
     timer = time.time
     cache_format = "throttle_%(scope)s_%(ident)s"
     scope: Optional[str] = None
-    THROTTLE_RATES: Dict[str, Optional[str]] = settings.DEFAULT_THROTTLE_RATES
     _PERIODS = {
         "s": 1,
         "m": 60,
@@ -103,8 +100,10 @@ class SimpleRateThrottle(BaseThrottle):
             msg = f"You must set either `.scope` or `.rate` for '{self.__class__.__name__}' throttle"
             raise ImproperlyConfigured(msg)
 
+        from ninja.conf import settings
+
         try:
-            return self.THROTTLE_RATES[self.scope]  # type: ignore
+            return settings.DEFAULT_THROTTLE_RATES[self.scope]  # type: ignore
         except KeyError:
             msg = f"No default throttle rate set for '{self.scope}' scope"
             raise ImproperlyConfigured(msg) from None
@@ -140,8 +139,8 @@ class SimpleRateThrottle(BaseThrottle):
         On success calls `throttle_success`.
         On failure calls `throttle_failure`.
         """
-        # if self.rate is None:
-        #     return True
+        if self.rate is None:
+            return True
 
         self.key = self.get_cache_key(request)
         if self.key is None:
