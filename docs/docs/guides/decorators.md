@@ -196,12 +196,12 @@ router.add_decorator(cache_response(600), mode="view")
 
 ## Decorator Execution Order
 
-When multiple decorators are applied, they execute in this order:
+Within the same mode, decorators cascade from outermost to innermost:
 
-1. API-level decorators (outermost)
+1. API-level decorators
 2. Parent router decorators
 3. Child router decorators
-4. Individual endpoint decorators (innermost)
+4. Endpoint decorators (`@decorate_view`)
 
 ```python
 api = NinjaAPI()
@@ -213,20 +213,18 @@ parent_router.add_decorator(parent_decorator)
 child_router.add_decorator(child_decorator)
 
 @child_router.get("/test")
-@decorate_view(endpoint_decorator)
 def endpoint(request):
     return {"result": "ok"}
-
-parent_router.add_router("/child", child_router)
-api.add_router("/parent", parent_router)
 
 # Execution order:
 # 1. api_decorator
 # 2. parent_decorator
 # 3. child_decorator
-# 4. endpoint_decorator
-# 5. endpoint function
+# 4. endpoint function
 ```
+
+!!! note "VIEW and OPERATION mode decorators run at different stages"
+    VIEW mode decorators (including `@decorate_view`) run **before** Ninja validates inputs. OPERATION mode decorators (the default) run **after** validation. When mixing both modes, all VIEW decorators will execute before any OPERATION decorators, regardless of their position in the cascade. To compare execution order, only compare decorators within the same mode.
 
 ## Async Support
 
