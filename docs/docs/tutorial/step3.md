@@ -7,7 +7,7 @@
 We'll create a third operation that will return information about the current Django user.
 
 ```python
-from ninja import Schema
+from hattori import Schema
 
 class UserSchema(Schema):
     username: str

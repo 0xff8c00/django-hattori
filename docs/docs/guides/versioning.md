@@ -10,7 +10,7 @@ All you have to do is create two or more NinjaAPI instances with different `vers
 **api_v1.py**:
 
 ```python hl_lines="4"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 
 api = NinjaAPI(version='1.0.0')
@@ -25,7 +25,7 @@ def hello(request):
 api_**v2**.py:
 
 ```python hl_lines="4"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 
 api = NinjaAPI(version='2.0.0')

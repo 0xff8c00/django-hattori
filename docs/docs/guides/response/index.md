@@ -7,7 +7,7 @@ Imagine you need to create an API operation that creates a user. The **input** p
 Let's create the input schema:
 
 ```python hl_lines="3 5"
-from ninja import Schema
+from hattori import Schema
 
 class UserIn(Schema):
     username: str
@@ -25,7 +25,7 @@ def create_user(request, data: UserIn):
 Now let's define the output schema, and pass it as a `response` argument to the `@api.post` decorator:
 
 ```python hl_lines="8 9 10 13 18"
-from ninja import Schema
+from hattori import Schema
 
 class UserIn(Schema):
     username: str
@@ -72,7 +72,7 @@ Now let's output all tasks, and for each task, output some fields about the user
 
 ```python hl_lines="13 16"
 from typing import List
-from ninja import Schema
+from hattori import Schema
 
 class UserSchema(Schema):
     id: int
@@ -125,7 +125,7 @@ Using the models from above, let's make a schema that just includes the task
 owner's first name inline, and also uses `completed` rather than `is_completed`:
 
 ```python hl_lines="1 7-9"
-from ninja import Field, Schema
+from hattori import Field, Schema
 
 
 class TaskSchema(Schema):
@@ -277,7 +277,7 @@ Also, when you return the result - you have to also pass a status code to tell *
 An example:
 
 ```python hl_lines="1 9 12 14 16"
-from ninja import Status
+from hattori import Status
 
 class Token(Schema):
     token: str
@@ -312,8 +312,8 @@ To avoid this duplication you can use multiple response codes for a schema:
 
 ```python hl_lines="2 3 6 9 11"
 ...
-from ninja import Status
-from ninja.responses import codes_4xx
+from hattori import Status
+from hattori.responses import codes_4xx
 
 
 @api.post('/login', response={200: Token, codes_4xx: Message})
@@ -328,11 +328,11 @@ def login(request, payload: Auth):
 **Django Ninja** comes with the following HTTP codes:
 
 ```python
-from ninja.responses import codes_1xx
-from ninja.responses import codes_2xx
-from ninja.responses import codes_3xx
-from ninja.responses import codes_4xx
-from ninja.responses import codes_5xx
+from hattori.responses import codes_1xx
+from hattori.responses import codes_2xx
+from hattori.responses import codes_3xx
+from hattori.responses import codes_4xx
+from hattori.responses import codes_5xx
 ```
 
 You can also create your own range using a `frozenset`:

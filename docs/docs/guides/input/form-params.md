@@ -6,7 +6,7 @@
 ## Form Data as params 
 
 ```python hl_lines="1 4"
-from ninja import NinjaAPI, Form
+from hattori import NinjaAPI, Form
 
 @api.post("/login")
 def login(request, username: Form[str], password: Form[str]):
@@ -15,9 +15,9 @@ def login(request, username: Form[str], password: Form[str]):
 
 Note the following:
 
-1) You need to import the `Form` class from `ninja`
+1) You need to import the `Form` class from `hattori`
 ```python
-from ninja import Form
+from hattori import Form
 ```
 
 2) Use `Form` as default value for your parameter:

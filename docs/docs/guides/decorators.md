@@ -27,8 +27,8 @@ The `@decorate_view` decorator allows you to apply Django view decorators to ind
 
 ```python
 from django.views.decorators.cache import cache_page
-from ninja import NinjaAPI
-from ninja.decorators import decorate_view
+from hattori import NinjaAPI
+from hattori.decorators import decorate_view
 
 api = NinjaAPI()
 
@@ -59,7 +59,7 @@ The `add_decorator` method allows you to apply decorators to multiple endpoints 
 Apply decorators to all endpoints in a router:
 
 ```python
-from ninja import Router
+from hattori import Router
 
 router = Router()
 
@@ -88,7 +88,7 @@ def get_user(request, user_id: int):
 Apply decorators to all endpoints in your entire API:
 
 ```python
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 

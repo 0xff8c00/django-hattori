@@ -45,7 +45,7 @@ To add API's to each of the Django applications, create an `api.py` module in ea
 Now let's add a few operations to `events/api.py`. The trick is that instead of using the `NinjaAPI` class, you use the **Router** class:
 
 ```python  hl_lines="1 4 6 13"
-from ninja import Router
+from hattori import Router
 from .models import Event
 
 router = Router()
@@ -66,7 +66,7 @@ def event_details(request, event_id: int):
 Then do the same for the `news` app with `news/api.py`:
 
 ```python  hl_lines="1 4"
-from ninja import Router
+from hattori import Router
 from .models import News
 
 router = Router()
@@ -101,7 +101,7 @@ In your top level project folder (next to `urls.py`), create another `api.py` fi
 It should look like this:
 
 ```python
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 
@@ -110,7 +110,7 @@ api = NinjaAPI()
 Now we import all the routers from the various apps, and include them into the main API instance:
 
 ```python hl_lines="2 6 7 8"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 from events.api import router as events_router
 
 api = NinjaAPI()
@@ -166,7 +166,7 @@ Basically, what that means is that you have `add_router` both on the `api` insta
 ```python hl_lines="7 8 9 32 33 34"
 from django.contrib import admin
 from django.urls import path
-from ninja import NinjaAPI, Router
+from hattori import NinjaAPI, Router
 
 api = NinjaAPI()
 
@@ -225,7 +225,7 @@ You can also use url parameters in nested routers by adding `= Path(...)` to the
 ```python hl_lines="13 16"
 from django.contrib import admin
 from django.urls import path
-from ninja import NinjaAPI, Path, Router
+from hattori import NinjaAPI, Path, Router
 
 api = NinjaAPI()
 router = Router()

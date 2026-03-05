@@ -9,15 +9,15 @@ You will see the automatic, interactive API documentation (provided by the [Open
 
 ## CDN vs staticfiles
 
-You are not required to put django ninja to `INSTALLED_APPS`. In that case the interactive UI is hosted by CDN.
+You are not required to put django hattori to `INSTALLED_APPS`. In that case the interactive UI is hosted by CDN.
 
-To host docs (Js/css) from your own server - just put "ninja" to INSTALLED_APPS - in that case standard django staticfiles mechanics will host it.
+To host docs (Js/css) from your own server - just put "hattori" to INSTALLED_APPS - in that case standard django staticfiles mechanics will host it.
 
 ## Switch to Redoc
 
 
 ```python
-from ninja import Redoc
+from hattori import Redoc
 
 api = NinjaAPI(docs=Redoc())
 
@@ -30,7 +30,7 @@ Then you will see the alternative automatic documentation (provided by [Redoc](h
 To set some custom settings for Swagger or Redocs you can use `settings` param on the docs class
 
 ```python
-from ninja import Redoc, Swagger
+from hattori import Redoc, Swagger
 
 api = NinjaAPI(docs=Swagger(settings={"persistAuthorization": True}))
 ...
@@ -129,7 +129,7 @@ In a Django template, for example:
 To create your own view for OpenAPI - create a class inherited from DocsBase and overwrite `render_page` method:
 
 ```python
-from ninja.openapi.docs import DocsBase
+from hattori.openapi.docs import DocsBase
 
 class MyDocsViewer(DocsBase):
     def render_page(self, request, api):
@@ -143,7 +143,7 @@ api = NinjaAPI(docs=MyDocsViewer())
 
 ## Using a custom favicon
 
-The django-ninja OpenAPI docs contain a default favicon, the ninja star.
+The django-hattori OpenAPI docs contain a default favicon, the ninja star.
 To use your own, overwrite the `ninja/favicon.html` django template.
 
 ```html

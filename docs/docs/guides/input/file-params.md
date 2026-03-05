@@ -3,8 +3,8 @@
 Handling files are no different from other parameters.
 
 ```python hl_lines="1 2 5"
-from ninja import NinjaAPI, File
-from ninja.files import UploadedFile
+from hattori import NinjaAPI, File
+from hattori.files import UploadedFile
 
 @api.post("/upload")
 def upload(request, file: File[UploadedFile]):
@@ -32,8 +32,8 @@ To **upload several files** at the same time, just declare a `List` of `Uploaded
 
 ```python hl_lines="1 6"
 from typing import List
-from ninja import NinjaAPI, File
-from ninja.files import UploadedFile
+from hattori import NinjaAPI, File
+from hattori.files import UploadedFile
 
 @api.post("/upload-many")
 def upload_many(request, files: File[List[UploadedFile]]):
@@ -47,7 +47,7 @@ Note: The HTTP protocol does not allow you to send files in `application/json` f
 To send files along with some extra attributes, you need to send bodies with `multipart/form-data` encoding. You can do it by simply marking fields with `Form`:
 
 ```python hl_lines="14"
-from ninja import NinjaAPI, Schema, UploadedFile, Form, File
+from hattori import NinjaAPI, Schema, UploadedFile, Form, File
 from datetime import date
 
 api = NinjaAPI()
@@ -120,7 +120,7 @@ def create_user(request, details: Form[UserDetails], avatar: File[UploadedFile] 
 **Solution**
 
 Django Ninja provides a built-in middleware to automatically fix this behavior:
-`ninja.compatibility.files.fix_request_files_middleware`
+`hattori.compatibility.files.fix_request_files_middleware`
 
 This middleware will manually parse multipart/form-data for PUT and PATCH requests and populate request.FILES, making file uploads work as expected across all HTTP methods.
 
@@ -131,7 +131,7 @@ To enable the middleware, add the following to your Django settings:
 ```python
 MIDDLEWARE = [
     # ... your existing middleware ...
-    "ninja.compatibility.files.fix_request_files_middleware",
+    "hattori.compatibility.files.fix_request_files_middleware",
 ]
 ```
 

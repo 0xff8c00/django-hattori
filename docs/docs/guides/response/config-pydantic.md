@@ -16,7 +16,7 @@ Using Pydantic's example in **Django Ninja** can look something like:
 
 ```python hl_lines="10"
 from pydantic import ConfigDict
-from ninja import Schema
+from hattori import Schema
 
 
 def to_camel(string: str) -> str:
@@ -33,7 +33,7 @@ Keep in mind that when you want modify output for field names (like camel case) 
 
 ```python hl_lines="6 13"
 from pydantic import ConfigDict
-from ninja import Schema
+from hattori import Schema
 
 class UserSchema(Schema):
     model_config = ConfigDict(

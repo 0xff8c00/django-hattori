@@ -18,8 +18,8 @@ By default, **Django Ninja** has CSRF protection turned **OFF** for all operatio
 
 
 ```python hl_lines="8"
-from ninja import NinjaAPI
-from ninja.security import APIKeyCookie
+from hattori import NinjaAPI
+from hattori.security import APIKeyCookie
 
 class CookieAuth(APIKeyCookie):
     def authenticate(self, request, key):
@@ -33,8 +33,8 @@ api = NinjaAPI(auth=CookieAuth())
 or django-auth based (which is inherited from cookie based auth):
 
 ```python hl_lines="4"
-from ninja import NinjaAPI
-from ninja.security import django_auth
+from hattori import NinjaAPI
+from hattori.security import django_auth
 
 api = NinjaAPI(auth=django_auth)
 ```

@@ -110,7 +110,7 @@ If you want to override global behavior, you can inherit the NinjaAPI instance a
 It will be called for each operation that you defined, so you can set your custom naming logic like this:
 
 ```python hl_lines="5 6 7 9"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 class MySuperApi(NinjaAPI):
 
@@ -235,7 +235,7 @@ See the [Reverse Resolution of URLs](../guides/urls.md) guide for more details.
 ## Specifying servers
 If you want to specify single or multiple servers for OpenAPI specification `servers` can be used when initializing NinjaAPI instance:
 ```python hl_lines="4 5 6 7"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI(
         servers=[

@@ -8,7 +8,7 @@ parameters into database queries.
 Start off with defining a subclass of `FilterSchema`:
 
 ```python hl_lines="6 7 8 9"
-from ninja import FilterSchema
+from hattori import FilterSchema
 from typing import Optional
 from datetime import datetime
 
@@ -75,7 +75,7 @@ The `name` field will be converted into `Q(name=...)` expression.
 
 When your database lookups are more complicated than that, you can annotate your fields with an instance of `FilterLookup` where you specify how you wish your field to be looked up for filtering:
 ```python hl_lines="5"
-from ninja import FilterSchema, FilterLookup
+from hattori import FilterSchema, FilterLookup
 from typing import Annotated
 
 class BookFilterSchema(FilterSchema):
@@ -106,7 +106,7 @@ class BookFilterSchema(FilterSchema):
 
     In previous versions, database lookups were specified using `Field(q=...)` syntax:
     ```python
-    from ninja import FilterSchema, Field
+    from hattori import FilterSchema, Field
     
     class BookFilterSchema(FilterSchema):
         name: Optional[str] = Field(None, q="name__icontains")
@@ -144,7 +144,7 @@ the `FilterSchema` instance will look for popular books that have `harry` in the
 
 You can customize this behavior using an `expression_connector` argument in field-level and class-level definition:
 ```python hl_lines="12"
-from ninja import FilterConfigDict, FilterLookup, FilterSchema
+from hattori import FilterConfigDict, FilterLookup, FilterSchema
 
 class BookFilterSchema(FilterSchema):
     active: Annotated[

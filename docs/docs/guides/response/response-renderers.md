@@ -5,11 +5,11 @@ The most common response type for a REST API is usually JSON.
 
 ## Create a renderer
 
-To create your own renderer, you need to inherit `ninja.renderers.BaseRenderer` and override the `render` method. Then you can pass an instance of your class to `NinjaAPI` as the `renderer` argument:
+To create your own renderer, you need to inherit `hattori.renderers.BaseRenderer` and override the `render` method. Then you can pass an instance of your class to `NinjaAPI` as the `renderer` argument:
 
 ```python hl_lines="5 8 9"
-from ninja import NinjaAPI
-from ninja.renderers import BaseRenderer
+from hattori import NinjaAPI
+from hattori.renderers import BaseRenderer
 
 
 class MyRenderer(BaseRenderer):
@@ -39,8 +39,8 @@ Here's an example renderer class that uses `orjson`:
 
 ```python hl_lines="9 10"
 import orjson
-from ninja import NinjaAPI
-from ninja.renderers import BaseRenderer
+from hattori import NinjaAPI
+from hattori.renderers import BaseRenderer
 
 
 class ORJSONRenderer(BaseRenderer):
@@ -64,8 +64,8 @@ This is how you create a renderer that outputs all responses as XML:
 from io import StringIO
 from django.utils.encoding import force_str
 from django.utils.xmlutils import SimplerXMLGenerator
-from ninja import NinjaAPI
-from ninja.renderers import BaseRenderer
+from hattori import NinjaAPI
+from hattori.renderers import BaseRenderer
 
 
 class XMLRenderer(BaseRenderer):

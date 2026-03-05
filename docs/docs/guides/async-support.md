@@ -3,7 +3,7 @@
 Django comes with **async views support**. This allows you run efficient concurrent views that are network and/or IO bound.
 
 ```
-pip install django-ninja
+pip install django-hattori
 ```
 
 Async views work more efficiently when it comes to:
@@ -133,7 +133,7 @@ pip install elasticsearch>=7.8.0
 And now instead of the `Elasticsearch` class, use the `AsyncElasticsearch` class and `await` the results:
 
 ```python hl_lines="2 7 11 12"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 from elasticsearch import AsyncElasticsearch
 
 

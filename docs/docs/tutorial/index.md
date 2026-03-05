@@ -7,12 +7,12 @@ This tutorial assumes that you know at least some basics of the <a href="https:/
 ## Installation
 
 ```console
-pip install django-ninja
+pip install django-hattori
 ```
 
 !!! note
 
-    It is not required, but you can also put `ninja` to `INSTALLED_APPS`.
+    It is not required, but you can also put `hattori` to `INSTALLED_APPS`.
     In that case the OpenAPI/Swagger UI (or Redoc) will be loaded (faster) from the included JavaScript bundle (otherwise the JavaScript bundle comes from a CDN).
 
 ## Create a Django project
@@ -28,7 +28,7 @@ django-admin startproject myproject
 Let's create a module for our API. Create an `api.py` file in the same directory location as your Django project's root `urls.py`:
 
 ```python
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 ```
@@ -53,7 +53,7 @@ urlpatterns = [
 operation.
 
 ```python hl_lines="5-7"
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 

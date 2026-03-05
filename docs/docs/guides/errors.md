@@ -55,19 +55,19 @@ function must return http response
 **Django Ninja** registers default exception handlers for the types shown below.
 You can register your own handlers with `@api.exception_handler` to override the default handlers.
 
-#### `ninja.errors.AuthenticationError`
+#### `hattori.errors.AuthenticationError`
 
 Raised when authentication data is not valid
 
-#### `ninja.errors.AuthorizationError`
+#### `hattori.errors.AuthorizationError`
 
 Raised when authentication data is valid, but doesn't allow you to access the resource
 
-#### `ninja.errors.ValidationError`
+#### `hattori.errors.ValidationError`
 
 Raised when request data does not validate
 
-#### `ninja.errors.HttpError`
+#### `hattori.errors.HttpError`
 
 Used to throw http error with status code from any place of the code
 
@@ -87,7 +87,7 @@ Default behavior
 
 ## Customizing request validation errors
 
-Requests that fail validation raise `ninja.errors.ValidationError` (not to be confused with `pydantic.ValidationError`).
+Requests that fail validation raise `hattori.errors.ValidationError` (not to be confused with `pydantic.ValidationError`).
 `ValidationError`s have a default exception handler that returns a 422 (Unprocessable Content) JSON response of the form:
 ```json
 {
@@ -98,7 +98,7 @@ Requests that fail validation raise `ninja.errors.ValidationError` (not to be co
 You can change this behavior by overriding the default handler for `ValidationError`s:
 
 ```python hl_lines="1 4"
-from ninja.errors import ValidationError
+from hattori.errors import ValidationError
 ...
 
 @api.exception_handler(ValidationError)
@@ -110,7 +110,7 @@ If you need even more control over validation errors (for example, if you need t
 the model that failed validation), you can supply your own `validation_error_from_error_contexts` in a `NinjaAPI` subclass:
 
 ```python hl_lines="4"
-from ninja.errors import ValidationError, ValidationErrorContext
+from hattori.errors import ValidationError, ValidationErrorContext
 from typing import Any, Dict, List
 
 class CustomNinjaAPI(NinjaAPI):
@@ -163,7 +163,7 @@ As an alternative to custom exceptions and writing handlers for it - you can as 
 
 
 ```python
-from ninja.errors import HttpError
+from hattori.errors import HttpError
 
 @api.get("/some/resource")
 def some_operation(request):

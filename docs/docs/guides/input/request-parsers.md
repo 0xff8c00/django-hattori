@@ -7,7 +7,7 @@ other content types (like YAML, XML, CSV) or use faster JSON parsers, **Django N
 api = NinjaAPI(parser=MyYamlParser())
 ```
 
-To create your own parser, you need to extend the `ninja.parser.Parser` class, and override the `parse_body` method.
+To create your own parser, you need to extend the `hattori.parser.Parser` class, and override the `parse_body` method.
 
 
 ## Example YAML Parser
@@ -17,8 +17,8 @@ Let's create our custom YAML parser:
 ```python hl_lines="4 8 9"
 import yaml
 from typing import List
-from ninja import NinjaAPI
-from ninja.parser import Parser
+from hattori import NinjaAPI
+from hattori.parser import Parser
 
 
 class MyYamlParser(Parser):
@@ -79,8 +79,8 @@ Parser code:
 
 ```python hl_lines="1 8 9"
 import orjson
-from ninja import NinjaAPI
-from ninja.parser import Parser
+from hattori import NinjaAPI
+from hattori.parser import Parser
 
 
 class ORJSONParser(Parser):

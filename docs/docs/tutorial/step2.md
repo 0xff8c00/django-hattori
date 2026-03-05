@@ -99,7 +99,7 @@ To specify that arguments come from the body, we need to declare a Schema.
 *[Schema]: An extension of a Pydantic "Model"
 
 ```python hl_lines="1 5-6 8-10"
-from ninja import NinjaAPI, Schema
+from hattori import NinjaAPI, Schema
 
 api = NinjaAPI()
 

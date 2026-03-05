@@ -11,7 +11,7 @@ To declare a **request body**, you need to use **Django Ninja `Schema`**.
 
 ## Import Schema
 
-First, you need to import `Schema` from `ninja`:
+First, you need to import `Schema` from `hattori`:
 
 ```python hl_lines="2"
 {!./src/tutorial/body/code01.py!}

@@ -18,7 +18,7 @@ Key features:
 ## Installation
 
 ```
-pip install django-ninja
+pip install django-hattori
 ```
 
 ## Quick Example

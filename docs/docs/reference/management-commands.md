@@ -6,11 +6,11 @@ Management commands require **Django Ninja** to be installed in Django's
 ```python
 INSTALLED_APPS = [
     ...
-    'ninja',
+    'hattori',
 ]
 ```
 
-::: ninja.management.commands
+::: hattori.management.commands
     selection:
       filters:
         - "![A-Z]"
