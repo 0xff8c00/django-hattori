@@ -58,9 +58,6 @@ class DjangoGetter:
         self._context = context
 
     def __getattr__(self, key: str) -> Any:
-        # if key.startswith("__pydantic"):
-        #     return getattr(self._obj, key)
-
         resolver = self._schema_cls._ninja_resolvers.get(key)
         if resolver:
             value = resolver(getter=self)
@@ -74,19 +71,12 @@ class DjangoGetter:
                     value = getattr(self._obj, key)
                 except AttributeError:
                     try:
-                        # value = attrgetter(key)(self._obj)
                         value = Variable(key).resolve(self._obj)
                         # TODO: Variable(key) __init__ is actually slower than
                         #       Variable.resolve - so it better be cached
                     except VariableDoesNotExist as e:
                         raise AttributeError(key) from e
         return self._convert_result(value)
-
-    # def get(self, key: Any, default: Any = None) -> Any:
-    #     try:
-    #         return self[key]
-    #     except KeyError:
-    #         return default
 
     def _convert_result(self, result: Any) -> Any:
         if isinstance(result, Manager):
@@ -138,22 +128,6 @@ class Resolver:
         raise NotImplementedError(
             "Non static resolves are not supported yet"
         )  # pragma: no cover
-        # return self._func(self._fake_instance(getter), getter._obj)
-
-    # def _fake_instance(self, getter: DjangoGetter) -> "Schema":
-    #     """
-    #     Generate a partial schema instance that can be used as the ``self``
-    #     attribute of resolver functions.
-    #     """
-
-    #     class PartialSchema(Schema):
-    #         def __getattr__(self, key: str) -> Any:
-    #             value = getattr(getter, key)
-    #             field = getter._schema_cls.model_fields[key]
-    #             value = field.validate(value, values={}, loc=key, cls=None)[0]
-    #             return value
-
-    #     return PartialSchema()
 
 
 @dataclass_transform(kw_only_default=True, field_specifiers=(Field,))
