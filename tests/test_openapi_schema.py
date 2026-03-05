@@ -22,7 +22,6 @@ from ninja import (
     UploadedFile,
 )
 from ninja.openapi.urls import get_openapi_urls
-from ninja.pagination import PaginationBase, paginate
 from ninja.renderers import JSONRenderer
 
 api = NinjaAPI()
@@ -1061,41 +1060,6 @@ def test_all_paths_typed_params_rendered():
     expected_result = {"/api/1": ["post", "get"], "/api/1/{param}": ["get", "delete"]}
     result = {p: list(schema["paths"][p].keys()) for p in schema["paths"].keys()}
     assert expected_result == result
-
-
-def test_no_default_for_custom_items_attribute():
-    api = NinjaAPI(renderer=TestRenderer)
-
-    class EmployeeOut(Schema):
-        id: int
-        first_name: str
-        last_name: str
-
-    class CustomPagination(PaginationBase):
-        class Output(Schema):
-            data: List[Any]  # `items` is a default attribute
-            detail: str
-            total: int
-
-        items_attribute: str = "data"
-
-        def paginate_queryset(self, queryset, pagination, **params):
-            pass
-
-    @api.get(
-        "/employees",
-        auth=["OAuth"],
-        response=List[EmployeeOut],
-    )
-    @paginate(CustomPagination)
-    def get_employees(request):
-        pass
-
-    schema = api.get_openapi_schema()
-
-    paged_employee_out = schema["components"]["schemas"]["PagedEmployeeOut"]
-    # a default value shouldn't be specified automatically
-    assert "default" not in paged_employee_out["properties"]["data"]
 
 
 def test_by_alias_uses_serialization_alias_simple():

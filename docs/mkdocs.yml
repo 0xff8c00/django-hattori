@@ -1,8 +1,8 @@
 site_name: Django Ninja
 site_description: Django Ninja - Django REST framework with high performance, easy to learn, fast to code.
 site_url: https://django-ninja.dev
-repo_name: vitalik/django-ninja
-repo_url: https://github.com/vitalik/django-ninja
+repo_name: 0xff8c00/django-hattori
+repo_url: https://github.com/0xff8c00/django-hattori
 edit_uri: ""
 extra:
   analytics:
@@ -10,8 +10,7 @@ extra:
     property: G-0E3XZ663ZR
 extra_css:
   - extra.css
-extra_javascript:
-  - javascripts/ask-ai-button.js
+extra_javascript: []
 theme:
   name: material
   palette:
@@ -34,9 +33,13 @@ theme:
         name: Switch to light mode
   logo: img/docs-logo.png
   favicon: img/favicon.svg
+  font:
+    text: Inter
+    code: Roboto Mono
   language: en
   features:
     - navigation.expand
+    - navigation.instant
     - search.highlight
     - search.suggest
   icon:
@@ -48,9 +51,6 @@ nav:
       - "First Steps": tutorial/index.md
       - "Parsing Input": tutorial/step2.md
       - "Handling Responses": tutorial/step3.md
-      - Other Tutorials:
-          - tutorial/other/video.md
-          - tutorial/other/crud.md
   - How-to Guides:
       - Parsing input:
           - guides/input/operations.md
@@ -65,7 +65,6 @@ nav:
           - Defining a Schema: guides/response/index.md
           - guides/response/temporal_response.md
           - guides/response/config-pydantic.md
-          - guides/response/pagination.md
           - guides/response/response-renderers.md
       - Splitting your API with Routers: guides/routers.md
       - guides/decorators.md
@@ -85,11 +84,6 @@ nav:
       - reference/settings.md
       - releases.md
   - help.md
-  - Enhancement Proposals:
-      - Intro: proposals/index.md
-      - proposals/cbv.md
-      - proposals/v1.md
-  - What's new in V1: whatsnew_v1.md
 markdown_extensions:
   - markdown_include.include
   - markdown.extensions.codehilite:
@@ -102,6 +96,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
 plugins:
   - search
   - mkdocstrings:
