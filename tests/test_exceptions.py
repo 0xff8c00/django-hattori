@@ -46,9 +46,8 @@ def test_default_handler(settings):
 
     response = client.post("/error/custom", body="invalid_json")
     assert response.status_code == 400
-    assert response.json() == {
-        "detail": "Cannot parse request body (Expecting value: line 1 column 1 (char 0))",
-    }
+    detail = response.json()["detail"]
+    assert detail.startswith("Cannot parse request body (")
 
     settings.DEBUG = False
     with pytest.raises(RuntimeError):

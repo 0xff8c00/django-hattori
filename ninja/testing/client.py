@@ -1,6 +1,4 @@
 import inspect
-from json import dumps as json_dumps
-from json import loads as json_loads
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
 from urllib.parse import urljoin
@@ -9,8 +7,8 @@ from django.http import QueryDict, StreamingHttpResponse
 from django.http.request import HttpHeaders, HttpRequest
 
 from ninja import NinjaAPI, Router
-from ninja.responses import NinjaJSONEncoder
 from ninja.responses import Response as HttpResponse
+from ninja.responses import json_dumps, json_loads
 
 
 def build_absolute_uri(location: Optional[str] = None) -> str:
@@ -87,7 +85,7 @@ class NinjaClientBase:
         **request_params: Any,
     ) -> "NinjaResponse":
         if json is not None:
-            request_params["body"] = json_dumps(json, cls=NinjaJSONEncoder)
+            request_params["body"] = json_dumps(json)
         if data is None:
             data = {}
         if self.headers or request_params.get("headers"):

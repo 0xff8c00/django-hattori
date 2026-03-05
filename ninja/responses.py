@@ -1,22 +1,30 @@
-from enum import Enum
+from datetime import timedelta
+from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
 from typing import Any, FrozenSet
 
-from django.core.serializers.json import DjangoJSONEncoder
-from django.http import JsonResponse
+import orjson
+from django.http import HttpResponse
+from django.utils.duration import duration_iso_string
+from django.utils.functional import Promise
 from pydantic import BaseModel
 from pydantic_core import Url
 
 __all__ = [
-    "NinjaJSONEncoder",
     "Response",
     "Status",
+    "json_default",
+    "json_dumps",
+    "json_loads",
+    "JSON_OPT",
     "codes_1xx",
     "codes_2xx",
     "codes_3xx",
     "codes_4xx",
     "codes_5xx",
 ]
+
+JSON_OPT = orjson.OPT_UTC_Z | orjson.OPT_NON_STR_KEYS
 
 
 class Status:
@@ -34,22 +42,34 @@ class Status:
         self.value = value
 
 
-class NinjaJSONEncoder(DjangoJSONEncoder):
-    def default(self, o: Any) -> Any:
-        if isinstance(o, BaseModel):
-            return o.model_dump()
-        if isinstance(o, Url):
-            return str(o)
-        if isinstance(o, (IPv4Address, IPv4Network, IPv6Address, IPv6Network)):
-            return str(o)
-        if isinstance(o, Enum):
-            return str(o)
-        return super().default(o)
+def json_default(obj: Any) -> Any:
+    if isinstance(obj, BaseModel):
+        return obj.model_dump()
+    if isinstance(obj, Url):
+        return str(obj)
+    if isinstance(obj, (IPv4Address, IPv4Network, IPv6Address, IPv6Network)):
+        return str(obj)
+    if isinstance(obj, timedelta):
+        return duration_iso_string(obj)
+    if isinstance(obj, Decimal):
+        return str(obj)
+    if isinstance(obj, Promise):
+        return str(obj)
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
-class Response(JsonResponse):
+def json_dumps(data: Any) -> bytes:
+    return orjson.dumps(data, default=json_default, option=JSON_OPT)
+
+
+def json_loads(data: Any) -> Any:
+    return orjson.loads(data)
+
+
+class Response(HttpResponse):
     def __init__(self, data: Any, **kwargs: Any) -> None:
-        super().__init__(data, encoder=NinjaJSONEncoder, safe=False, **kwargs)
+        kwargs.setdefault("content_type", "application/json")
+        super().__init__(content=json_dumps(data), **kwargs)
 
 
 def resp_codes(from_code: int, to_code: int) -> FrozenSet[int]:

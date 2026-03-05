@@ -1,13 +1,12 @@
-import json
 from typing import Any, Dict
 
-from ninja.responses import NinjaJSONEncoder
+from ninja.responses import json_dumps
 
 __all__ = ["StreamFormat", "SSE", "JSONL"]
 
 
 def _serialize_item(item: Any) -> str:
-    return json.dumps(item, cls=NinjaJSONEncoder)
+    return json_dumps(item).decode()
 
 
 class _StreamAlias:

@@ -1,14 +1,14 @@
-import json
 from pathlib import Path
 from typing import Any, Optional
 
+import orjson
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.urls.base import resolve
 from django.utils.module_loading import import_string
 
 from ninja.main import NinjaAPI
 from ninja.management.utils import command_docstring
-from ninja.responses import NinjaJSONEncoder
+from ninja.responses import JSON_OPT, json_default
 
 
 class Command(BaseCommand):
@@ -63,39 +63,35 @@ class Command(BaseCommand):
             help="Output schema to a file (outputs to stdout if omitted).",
         )
         parser.add_argument(
-            "--indent", dest="indent", default=None, type=int, help="JSON indent"
+            "--indent",
+            dest="indent",
+            default=False,
+            action="store_true",
+            help="Indent JSON output",
         )
         parser.add_argument(
             "--sorted",
             dest="sort_keys",
             default=False,
             action="store_true",
-            help="Sort Json keys",
-        )
-        parser.add_argument(
-            "--ensure-ascii",
-            dest="ensure_ascii",
-            default=False,
-            action="store_true",
-            help="ensure_ascii for JSON output",
+            help="Sort JSON keys",
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
         api = self._get_api_instance(options["api"])
         schema = api.get_openapi_schema()
-        result = json.dumps(
-            schema,
-            cls=NinjaJSONEncoder,
-            indent=options["indent"],
-            sort_keys=options["sort_keys"],
-            ensure_ascii=options["ensure_ascii"],
-        )
+        opt = JSON_OPT
+        if options["indent"]:
+            opt |= orjson.OPT_INDENT_2
+        if options["sort_keys"]:
+            opt |= orjson.OPT_SORT_KEYS
+        result = orjson.dumps(schema, default=json_default, option=opt)
 
         if options["output"]:
             with Path(options["output"]).open("wb") as f:
-                f.write(result.encode())
+                f.write(result)
         else:
-            self.stdout.write(result)
+            self.stdout.write(result.decode())
 
 
 __doc__ = command_docstring(Command)

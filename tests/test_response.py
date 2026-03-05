@@ -173,7 +173,7 @@ def test_enum_encoding():
     data = {"enum": MyEnum.first}
     response = Response(data)
     response_data = json.loads(response.content)
-    assert response_data["enum"] == str(data["enum"])
+    assert response_data["enum"] == data["enum"].value
 
 
 def test_pydantic_url():
