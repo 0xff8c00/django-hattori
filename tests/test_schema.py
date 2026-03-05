@@ -6,8 +6,8 @@ from django.db.models import Manager, QuerySet
 from django.db.models.fields.files import ImageFieldFile
 from pydantic_core import ValidationError
 
-from ninja import Schema
-from ninja.schema import DjangoGetter, Field
+from hattori import Schema
+from hattori.schema import DjangoGetter, Field
 
 
 class FakeManager(Manager):

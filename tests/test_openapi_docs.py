@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.test import override_settings
 
-from ninja import NinjaAPI, Redoc, Swagger
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Redoc, Swagger
+from hattori.testing import TestClient
 
-NO_NINJA_INSTALLED_APPS = [i for i in settings.INSTALLED_APPS if i != "ninja"]
+NO_HATTORI_INSTALLED_APPS = [i for i in settings.INSTALLED_APPS if i != "hattori"]
 
 
 def test_swagger():
@@ -19,8 +19,8 @@ def test_swagger():
     assert response.status_code == 200
     assert b"swagger-ui-init.js" in response.content
 
-    # Testing without ninja in INSTALLED_APPS
-    @override_settings(INSTALLED_APPS=NO_NINJA_INSTALLED_APPS)
+    # Testing without hattori in INSTALLED_APPS
+    @override_settings(INSTALLED_APPS=NO_HATTORI_INSTALLED_APPS)
     def call_docs():
         response = client.get("/docs")
         assert response.status_code == 200
@@ -45,8 +45,8 @@ def test_redoc():
     assert response.status_code == 200
     assert b"redoc.standalone.js" in response.content
 
-    # Testing without ninja in INSTALLED_APPS
-    @override_settings(INSTALLED_APPS=NO_NINJA_INSTALLED_APPS)
+    # Testing without hattori in INSTALLED_APPS
+    @override_settings(INSTALLED_APPS=NO_HATTORI_INSTALLED_APPS)
     def call_docs():
         response = client.get("/docs")
         assert response.status_code == 200

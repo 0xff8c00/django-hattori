@@ -1,7 +1,7 @@
 import pytest
 
-from ninja import NinjaAPI, Path, Router
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Path, Router
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 router_with_path_type = Router()

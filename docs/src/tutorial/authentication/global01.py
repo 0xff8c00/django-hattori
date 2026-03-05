@@ -1,5 +1,5 @@
-from ninja import NinjaAPI, Form
-from ninja.security import HttpBearer
+from hattori import NinjaAPI, Form
+from hattori.security import HttpBearer
 
 
 class GlobalAuth(HttpBearer):

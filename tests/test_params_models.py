@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ninja.params.models import DictStrAny, ParamModel
+from hattori.params.models import DictStrAny, ParamModel
 
 
 class _NestedParamModel(ParamModel):

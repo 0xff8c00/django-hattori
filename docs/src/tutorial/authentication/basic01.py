@@ -1,4 +1,4 @@
-from ninja.security import HttpBasicAuth
+from hattori.security import HttpBasicAuth
 
 
 class BasicAuth(HttpBasicAuth):

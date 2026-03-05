@@ -1,4 +1,4 @@
-from ninja import Field, NinjaAPI, Schema
+from hattori import Field, NinjaAPI, Schema
 
 
 class SchemaWithAlias(Schema):

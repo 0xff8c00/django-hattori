@@ -3,9 +3,9 @@ import json
 import pytest
 from django.http import HttpResponse
 
-from ninja import NinjaAPI, Schema
-from ninja.streaming import JSONL, SSE, StreamFormat
-from ninja.testing import TestAsyncClient, TestClient
+from hattori import NinjaAPI, Schema
+from hattori.streaming import JSONL, SSE, StreamFormat
+from hattori.testing import TestAsyncClient, TestClient
 
 
 class Item(Schema):

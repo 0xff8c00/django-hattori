@@ -47,7 +47,7 @@ jobs:
       - name: Install Dependencies
         run: flit install --symlink
       - name: Test
-        run: pytest --cov=ninja
+        run: pytest --cov=hattori
 
   codestyle:
     runs-on: ubuntu-latest
@@ -62,8 +62,8 @@ jobs:
       - name: Install Dependencies
         run: flit install --symlink
       - name: Ruff format
-        run: ruff format --check ninja tests
+        run: ruff format --check hattori tests
       - name: Ruff lint
-        run: ruff check ninja tests
+        run: ruff check hattori tests
       - name: mypy
-        run: mypy ninja tests/mypy_test.py
+        run: mypy hattori tests/mypy_test.py

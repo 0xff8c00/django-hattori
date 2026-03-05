@@ -3,8 +3,8 @@ from typing import Union
 from pydantic import Field
 from typing_extensions import Annotated, Literal
 
-from ninja import NinjaAPI, Schema
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Schema
+from hattori.testing import TestClient
 
 
 class Example1(Schema):

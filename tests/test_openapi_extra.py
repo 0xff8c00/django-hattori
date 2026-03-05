@@ -1,4 +1,4 @@
-from ninja import NinjaAPI, Router
+from hattori import NinjaAPI, Router
 
 
 def test_openapi_info_defined():

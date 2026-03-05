@@ -1,5 +1,5 @@
-from ninja import NinjaAPI
-from ninja.security import HttpBearer
+from hattori import NinjaAPI
+from hattori.security import HttpBearer
 
 api = NinjaAPI()
 

@@ -1,8 +1,8 @@
 import pytest
 from main import router
 
-from ninja import Router
-from ninja.testing import TestClient
+from hattori import Router
+from hattori.testing import TestClient
 
 client = TestClient(router)
 

@@ -8,7 +8,7 @@ import pytest
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from ninja.management.commands.export_openapi_schema import Command as ExportCmd
+from hattori.management.commands.export_openapi_schema import Command as ExportCmd
 
 
 def test_export_default():
@@ -46,7 +46,7 @@ def test_export_custom():
     call_command(ExportCmd(), api="demo.urls.api_v2")
 
 
-@patch("ninja.management.commands.export_openapi_schema.resolve")
+@patch("hattori.management.commands.export_openapi_schema.resolve")
 def test_export_default_without_api_endpoint(mock):
     mock.side_effect = AttributeError()
     output = StringIO()

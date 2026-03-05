@@ -5,7 +5,7 @@ import pydantic
 from django.urls import register_converter
 from typing_extensions import Annotated
 
-from ninja import Field, P, Path, PathEx, Query, Router, Schema
+from hattori import Field, P, Path, PathEx, Query, Router, Schema
 
 router = Router()
 

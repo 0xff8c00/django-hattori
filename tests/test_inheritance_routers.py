@@ -1,7 +1,7 @@
 import pytest
 
-from ninja import NinjaAPI, Router
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Router
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 

@@ -1,4 +1,4 @@
-from ninja import Form, Schema
+from hattori import Form, Schema
 
 
 class Item(Schema):

@@ -1,5 +1,5 @@
-from ninja import NinjaAPI, Schema
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Schema
+from hattori.testing import TestClient
 
 
 class ResolveWithKWargs(Schema):

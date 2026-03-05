@@ -10,14 +10,14 @@ install: ## Install dependencies
 
 .PHONY: lint
 lint: ## Run code linters
-	ruff format --check ninja tests
-	ruff check ninja tests
-	mypy ninja
+	ruff format --check hattori tests
+	ruff check hattori tests
+	mypy hattori
 
 .PHONY: fmt format
 fmt format: ## Run code formatters
-	ruff format ninja tests
-	ruff check --fix ninja tests
+	ruff format hattori tests
+	ruff check --fix hattori tests
 
 .PHONY: test
 test: ## Run tests
@@ -25,7 +25,7 @@ test: ## Run tests
 
 .PHONY: test-cov
 test-cov: ## Run tests with coverage
-	pytest --cov=ninja --cov-report term-missing tests
+	pytest --cov=hattori --cov-report term-missing tests
 
 .PHONY: docs
 docs: ## Serve documentation locally

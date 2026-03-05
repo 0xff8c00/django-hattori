@@ -3,8 +3,8 @@ are correctly classified as Body params, not Query params."""
 
 from typing import Dict, Union
 
-from ninja import NinjaAPI, Schema
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Schema
+from hattori.testing import TestClient
 
 
 class ItemSchema(Schema):

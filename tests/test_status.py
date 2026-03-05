@@ -1,9 +1,9 @@
 from typing import List, Union
 import pytest
 
-from ninja import Field, NinjaAPI, Schema, Status
-from ninja.responses import codes_2xx, codes_3xx
-from ninja.testing import TestClient
+from hattori import Field, NinjaAPI, Schema, Status
+from hattori.responses import codes_2xx, codes_3xx
+from hattori.testing import TestClient
 
 # -- Schemas --
 

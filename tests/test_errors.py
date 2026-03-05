@@ -3,14 +3,14 @@ import pickle
 import pydantic
 import pytest
 
-from ninja import Body, Header, NinjaAPI, Query, Schema
-from ninja.errors import (
+from hattori import Body, Header, NinjaAPI, Query, Schema
+from hattori.errors import (
     HttpError,
     ValidationError,
     ValidationErrorDetail,
     ValidationErrorResponse,
 )
-from ninja.testing import TestClient
+from hattori.testing import TestClient
 
 
 def test_validation_error_detail_accepts_str_and_int_loc():

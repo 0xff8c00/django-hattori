@@ -1,7 +1,7 @@
 """Test that empty string POST values don't crash _MultiPartBody parsing."""
 
-from ninja import Body, Form, Router
-from ninja.testing import TestClient
+from hattori import Body, Form, Router
+from hattori.testing import TestClient
 
 router = Router()
 

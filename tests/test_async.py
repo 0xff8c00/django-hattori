@@ -2,9 +2,9 @@ import asyncio
 
 import pytest
 
-from ninja import NinjaAPI
-from ninja.security import APIKeyQuery
-from ninja.testing import TestAsyncClient
+from hattori import NinjaAPI
+from hattori.security import APIKeyQuery
+from hattori.testing import TestAsyncClient
 
 
 @pytest.mark.asyncio

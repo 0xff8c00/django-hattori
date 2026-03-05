@@ -11,10 +11,10 @@ These tests verify that:
 
 import pytest
 
-from ninja import NinjaAPI, Router
-from ninja.errors import ConfigError
-from ninja.operation import Operation, PathView
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Router
+from hattori.errors import ConfigError
+from hattori.operation import Operation, PathView
+from hattori.testing import TestClient
 
 
 class TestRouterReuse:
@@ -533,7 +533,7 @@ class TestThrottleAndTagsInheritance:
 
     def test_throttle_inheritance_from_template(self):
         """Router's own throttle takes precedence over inherited."""
-        from ninja.throttling import BaseThrottle
+        from hattori.throttling import BaseThrottle
 
         class TestThrottle(BaseThrottle):
             def allow_request(self, request):
@@ -561,7 +561,7 @@ class TestThrottleAndTagsInheritance:
 
     def test_throttle_inheritance_from_parent(self):
         """Child router inherits throttle from parent."""
-        from ninja.throttling import BaseThrottle
+        from hattori.throttling import BaseThrottle
 
         class ParentThrottle(BaseThrottle):
             def allow_request(self, request):
@@ -823,7 +823,7 @@ class TestRouterAddRouterWithThrottle:
 
     def test_add_router_with_throttle(self):
         """Test adding a child router with throttle parameter."""
-        from ninja.throttling import BaseThrottle
+        from hattori.throttling import BaseThrottle
 
         class TestThrottle(BaseThrottle):
             def allow_request(self, request):
@@ -857,7 +857,7 @@ class TestDecorateViewMultipleCalls:
 
     def test_decorate_view_multiple_decorators(self):
         """Test applying multiple view decorators to same operation."""
-        from ninja.decorators import decorate_view
+        from hattori.decorators import decorate_view
 
         router = Router()
         calls = []

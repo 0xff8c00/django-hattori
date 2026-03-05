@@ -3,10 +3,10 @@ from typing import List, Union
 import pytest
 from pydantic import ValidationError
 
-from ninja import NinjaAPI, Schema
-from ninja.errors import ConfigError
-from ninja.responses import codes_2xx, codes_3xx
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Schema
+from hattori.errors import ConfigError
+from hattori.responses import codes_2xx, codes_3xx
+from hattori.testing import TestClient
 
 pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 

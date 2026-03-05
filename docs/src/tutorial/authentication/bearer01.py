@@ -1,4 +1,4 @@
-from ninja.security import HttpBearer
+from hattori.security import HttpBearer
 
 
 class AuthBearer(HttpBearer):

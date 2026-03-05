@@ -3,8 +3,8 @@ from functools import wraps
 
 import pytest
 
-from ninja import NinjaAPI, Router
-from ninja.testing import TestAsyncClient, TestClient
+from hattori import NinjaAPI, Router
+from hattori.testing import TestAsyncClient, TestClient
 
 
 # Async test decorators
@@ -160,7 +160,7 @@ async def test_mixed_sync_async_decorators():
     assert response.json() == {"type": "async", "sync_decorated": True}
 
     # Test sync endpoint with regular TestClient
-    from ninja.testing import TestClient
+    from hattori.testing import TestClient
 
     sync_client = TestClient(api)
     response = sync_client.get("/sync")

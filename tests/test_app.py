@@ -5,8 +5,8 @@ from tempfile import NamedTemporaryFile
 import pytest
 from django.http import FileResponse, HttpResponse
 
-from ninja import NinjaAPI
-from ninja.testing import TestClient
+from hattori import NinjaAPI
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 

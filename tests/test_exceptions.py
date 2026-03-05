@@ -1,8 +1,8 @@
 import pytest
 from django.http import Http404
 
-from ninja import NinjaAPI, Schema
-from ninja.testing import TestAsyncClient, TestClient
+from hattori import NinjaAPI, Schema
+from hattori.testing import TestAsyncClient, TestClient
 
 api = NinjaAPI()
 

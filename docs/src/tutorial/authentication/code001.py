@@ -1,5 +1,5 @@
-from ninja import NinjaAPI
-from ninja.security import django_auth
+from hattori import NinjaAPI
+from hattori.security import django_auth
 
 api = NinjaAPI()
 

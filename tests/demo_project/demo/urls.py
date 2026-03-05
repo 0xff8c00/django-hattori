@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api_v1 = NinjaAPI()
 api_v1.add_router("events", "someapp.api.router")

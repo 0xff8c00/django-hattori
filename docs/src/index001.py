@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 

@@ -18,5 +18,5 @@ A clear and concise description of what the bug is.
 
 Note you can quickly get this by runninng in `./manage.py shell` this line:
 ```
-import django; import pydantic; import ninja; django.__version__; ninja.__version__; pydantic.__version__
+import django; import pydantic; import hattori; django.__version__; hattori.__version__; pydantic.__version__
 ```

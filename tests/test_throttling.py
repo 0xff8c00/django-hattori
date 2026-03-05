@@ -2,9 +2,9 @@ import pytest
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
-from ninja import NinjaAPI, Router
-from ninja.testing import TestAsyncClient, TestClient
-from ninja.throttling import (
+from hattori import NinjaAPI, Router
+from hattori.testing import TestAsyncClient, TestClient
+from hattori.throttling import (
     AnonRateThrottle,
     AuthRateThrottle,
     BaseThrottle,
@@ -272,7 +272,7 @@ def test_rate_parser():
 
 
 def test_proxy_throttle():
-    from ninja.conf import settings
+    from hattori.conf import settings
 
     settings.NUM_PROXIES = 0  # instead of None
 
@@ -320,13 +320,13 @@ def test_throttle_rates_updated_by_settings_override():
 
     custom_rates = {"anon": "1/min", "auth": "2/min", "user": "3/min"}
     with override_settings(NINJA_DEFAULT_THROTTLE_RATES=custom_rates):
-        from ninja.conf import Settings
+        from hattori.conf import Settings
         from django.conf import settings as django_settings
 
         # Reload settings to pick up the override
-        import ninja.conf
+        import hattori.conf
 
-        ninja.conf.settings = Settings.model_validate(django_settings)
+        hattori.conf.settings = Settings.model_validate(django_settings)
 
         th = AnonRateThrottle()
         assert th.rate == "1/min"
@@ -338,7 +338,7 @@ def test_throttle_rates_updated_by_settings_override():
         assert th.rate == "3/min"
 
     # Restore settings
-    ninja.conf.settings = Settings.model_validate(django_settings)
+    hattori.conf.settings = Settings.model_validate(django_settings)
 
 
 def set_throttle_timer(throttle: BaseThrottle, value: int):

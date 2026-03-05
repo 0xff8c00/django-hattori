@@ -1,4 +1,4 @@
-from ninja.conf import settings
+from hattori.conf import settings
 
 
 def test_default_configuration():

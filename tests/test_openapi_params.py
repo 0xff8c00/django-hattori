@@ -1,4 +1,4 @@
-from ninja import NinjaAPI
+from hattori import NinjaAPI
 
 api = NinjaAPI()
 

@@ -3,8 +3,8 @@ from enum import IntEnum
 
 from pydantic import BaseModel, Field
 
-from ninja import NinjaAPI, Query, Schema
-from ninja.testing.client import TestClient
+from hattori import NinjaAPI, Query, Schema
+from hattori.testing.client import TestClient
 
 
 class Range(IntEnum):
@@ -155,7 +155,7 @@ def test_schema_all_of_no_ref():
     }
     definitions = {"Type": {"title": "Best Type Ever!"}}
 
-    from ninja.openapi.schema import resolve_allOf
+    from hattori.openapi.schema import resolve_allOf
 
     resolve_allOf(details, definitions)
 

@@ -1,8 +1,8 @@
 import pytest
 
-from ninja import Form, NinjaAPI, Schema
-from ninja.errors import ConfigError
-from ninja.testing import TestClient
+from hattori import Form, NinjaAPI, Schema
+from hattori.errors import ConfigError
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 

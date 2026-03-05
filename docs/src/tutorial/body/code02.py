@@ -1,4 +1,4 @@
-from ninja import Schema
+from hattori import Schema
 
 
 class Item(Schema):

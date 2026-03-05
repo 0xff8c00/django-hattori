@@ -2,9 +2,9 @@ from typing import List, Optional
 
 import pytest
 
-from ninja import Field, NinjaAPI, Schema
-from ninja.patch_dict import PatchDict
-from ninja.testing import TestClient
+from hattori import Field, NinjaAPI, Schema
+from hattori.patch_dict import PatchDict
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 

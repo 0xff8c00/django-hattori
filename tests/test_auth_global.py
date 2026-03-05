@@ -1,6 +1,6 @@
-from ninja import NinjaAPI, Router
-from ninja.security import APIKeyQuery
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Router
+from hattori.security import APIKeyQuery
+from hattori.testing import TestClient
 
 
 class KeyQuery1(APIKeyQuery):

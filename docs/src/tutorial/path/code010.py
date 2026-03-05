@@ -1,5 +1,5 @@
 import datetime
-from ninja import Schema, Path
+from hattori import Schema, Path
 
 
 class PathDate(Schema):

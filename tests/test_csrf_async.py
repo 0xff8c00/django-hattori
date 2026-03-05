@@ -1,9 +1,9 @@
 import pytest
 from django.conf import settings
 
-from ninja import NinjaAPI
-from ninja.security import APIKeyCookie
-from ninja.testing import TestAsyncClient as BaseTestAsyncClient
+from hattori import NinjaAPI
+from hattori.security import APIKeyCookie
+from hattori.testing import TestAsyncClient as BaseTestAsyncClient
 
 
 class AnyCookieAuth(APIKeyCookie):

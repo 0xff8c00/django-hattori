@@ -1,7 +1,7 @@
 import pytest
 
-from ninja import NinjaAPI, Router
-from ninja.errors import ConfigError
+from hattori import NinjaAPI, Router
+from hattori.errors import ConfigError
 
 
 def test_api_instance():

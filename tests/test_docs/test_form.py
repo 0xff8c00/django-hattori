@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-from ninja import NinjaAPI
-from ninja.testing import TestClient
+from hattori import NinjaAPI
+from hattori.testing import TestClient
 
 
 def test_examples():

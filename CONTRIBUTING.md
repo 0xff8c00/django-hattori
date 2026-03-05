@@ -34,7 +34,7 @@ When you're done please make sure you to test your functionality
 and check the coverage of your contribution.
 
 ```
-pytest --cov=ninja --cov-report term-missing tests
+pytest --cov=hattori --cov-report term-missing tests
 ```
 
 or using Makefile:
@@ -52,9 +52,9 @@ Run `pre-commit install` to create a git hook to fix your styles before you comm
 Alternatively, manually check your code with:
 
 ```
-ruff format --check ninja tests
-ruff check ninja tests
-mypy ninja
+ruff format --check hattori tests
+ruff check hattori tests
+mypy hattori
 ```
 
 or using Makefile:
@@ -66,8 +66,8 @@ make lint
 Or reformat your code with:
 
 ```
-ruff format ninja tests
-ruff check ninja tests --fix
+ruff format hattori tests
+ruff check hattori tests --fix
 ```
 
 or using Makefile:

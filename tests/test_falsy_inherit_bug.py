@@ -12,11 +12,11 @@ This same bug exists in operation.py _set_auth:
   When auth=[]: True and [] -> [], then [] or [[]] -> [[]]
 """
 
-from ninja import NinjaAPI, Router
-from ninja.constants import NOT_SET
-from ninja.operation import Operation
-from ninja.security import APIKeyQuery
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Router
+from hattori.constants import NOT_SET
+from hattori.operation import Operation
+from hattori.security import APIKeyQuery
+from hattori.testing import TestClient
 
 
 class KeyAuth(APIKeyQuery):

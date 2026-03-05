@@ -1,8 +1,8 @@
 import pytest
 from pydantic import BaseModel
 
-from ninja import Form, Query, Router
-from ninja.testing import TestClient
+from hattori import Form, Query, Router
+from hattori.testing import TestClient
 
 
 class SomeModel(BaseModel):

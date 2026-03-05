@@ -1,65 +1,36 @@
-"""Django Ninja - Fast Django REST framework"""
+"""Backwards-compatibility shim: redirects all ninja.* imports to hattori.*"""
 
-__version__ = "1.5.3"
+import importlib
+import sys
+import warnings
 
 
-from pydantic import Field
+class _NinjaImportRedirector:
+    """Meta path finder that redirects ninja.* imports to hattori.* with a deprecation warning."""
 
-from ninja.files import UploadedFile
-from ninja.filter_schema import FilterConfigDict, FilterLookup, FilterSchema
-from ninja.main import NinjaAPI
-from ninja.openapi.docs import Redoc, Swagger
-from ninja.params import (
-    Body,
-    BodyEx,
-    Cookie,
-    CookieEx,
-    File,
-    FileEx,
-    Form,
-    FormEx,
-    Header,
-    HeaderEx,
-    P,
-    Path,
-    PathEx,
-    Query,
-    QueryEx,
-)
-from ninja.patch_dict import PatchDict
-from ninja.responses import Status
-from ninja.router import Router
-from ninja.schema import Schema
-from ninja.streaming import JSONL, SSE
+    @classmethod
+    def find_module(cls, fullname, path=None):
+        if fullname == "ninja" or fullname.startswith("ninja."):
+            return cls
+        return None
 
-__all__ = [
-    "Field",
-    "UploadedFile",
-    "NinjaAPI",
-    "Body",
-    "Cookie",
-    "File",
-    "Form",
-    "Header",
-    "Path",
-    "Query",
-    "BodyEx",
-    "CookieEx",
-    "FileEx",
-    "FormEx",
-    "HeaderEx",
-    "PathEx",
-    "QueryEx",
-    "Router",
-    "P",
-    "Schema",
-    "FilterSchema",
-    "FilterLookup",
-    "FilterConfigDict",
-    "Swagger",
-    "Redoc",
-    "PatchDict",
-    "SSE",
-    "JSONL",
-    "Status",
-]
+    @classmethod
+    def load_module(cls, fullname):
+        if fullname in sys.modules:
+            return sys.modules[fullname]
+
+        new_name = "hattori" + fullname[5:]
+        warnings.warn(
+            f"Importing from '{fullname}' is deprecated, use '{new_name}' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        mod = importlib.import_module(new_name)
+        sys.modules[fullname] = mod
+        return mod
+
+
+# Install the redirector and immediately redirect this module
+sys.meta_path.insert(0, _NinjaImportRedirector)
+_mod = importlib.import_module("hattori")
+sys.modules[__name__] = _mod

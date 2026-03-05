@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from ninja import Schema
+from hattori import Schema
 
 
 class OptModel(BaseModel):

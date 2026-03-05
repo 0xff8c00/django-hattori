@@ -1,8 +1,8 @@
 from functools import wraps
 
-from ninja import NinjaAPI
-from ninja.decorators import decorate_view
-from ninja.testing import TestClient
+from hattori import NinjaAPI
+from hattori.decorators import decorate_view
+from hattori.testing import TestClient
 
 
 def some_decorator(view_func):

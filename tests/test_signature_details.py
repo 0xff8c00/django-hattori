@@ -2,7 +2,7 @@ import typing
 
 import pytest
 
-from ninja.signature.details import is_collection_type
+from hattori.signature.details import is_collection_type
 
 
 @pytest.mark.parametrize(

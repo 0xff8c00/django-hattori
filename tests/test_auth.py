@@ -3,9 +3,9 @@ from unittest.mock import Mock
 import pytest
 from django.utils.asyncio import async_unsafe
 
-from ninja import NinjaAPI
-from ninja.errors import AuthorizationError, ConfigError
-from ninja.security import (
+from hattori import NinjaAPI
+from hattori.errors import AuthorizationError, ConfigError
+from hattori.security import (
     APIKeyCookie,
     APIKeyHeader,
     APIKeyQuery,
@@ -15,9 +15,9 @@ from ninja.security import (
     django_auth_is_staff,
     django_auth_superuser,
 )
-from ninja.security.base import AuthBase
-from ninja.testing import TestClient
-from ninja.testing.client import TestAsyncClient
+from hattori.security.base import AuthBase
+from hattori.testing import TestClient
+from hattori.testing.client import TestAsyncClient
 
 
 def callable_auth(request):

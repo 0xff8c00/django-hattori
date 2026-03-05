@@ -9,7 +9,7 @@ from django.db import models
 from django.test import Client, override_settings
 from typing_extensions import Annotated
 
-from ninja import (
+from hattori import (
     Body,
     Field,
     File,
@@ -21,8 +21,8 @@ from ninja import (
     Schema,
     UploadedFile,
 )
-from ninja.openapi.urls import get_openapi_urls
-from ninja.renderers import JSONRenderer
+from hattori.openapi.urls import get_openapi_urls
+from hattori.renderers import JSONRenderer
 
 api = NinjaAPI()
 
@@ -211,8 +211,8 @@ def test_schema_views_no_INSTALLED_APPS(client: Client):
     "Making sure that cdn and included js works fine"
     from django.conf import settings
 
-    # removing ninja from settings:
-    INSTALLED_APPS = [i for i in settings.INSTALLED_APPS if i != "ninja"]
+    # removing hattori from settings:
+    INSTALLED_APPS = [i for i in settings.INSTALLED_APPS if i != "hattori"]
 
     @override_settings(INSTALLED_APPS=INSTALLED_APPS)
     def call_docs():

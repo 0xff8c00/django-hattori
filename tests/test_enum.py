@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from ninja import NinjaAPI, Query
-from ninja.testing import TestClient
+from hattori import NinjaAPI, Query
+from hattori.testing import TestClient
 
 
 class RoomEnum(str, Enum):

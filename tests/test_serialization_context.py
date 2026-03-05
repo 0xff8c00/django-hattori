@@ -1,7 +1,7 @@
 from pydantic import model_serializer
 
-from ninja import Router, Schema
-from ninja.testing import TestClient
+from hattori import Router, Schema
+from hattori.testing import TestClient
 
 
 def api_endpoint_test(request):

@@ -3,8 +3,8 @@ from typing import List
 from typing_extensions import Annotated
 from util import pydantic_ref_fix
 
-from ninja import Body, Cookie, Form, Header, NinjaAPI, Path, Query, Schema
-from ninja.testing import TestClient
+from hattori import Body, Cookie, Form, Header, NinjaAPI, Path, Query, Schema
+from hattori.testing import TestClient
 
 api = NinjaAPI()
 

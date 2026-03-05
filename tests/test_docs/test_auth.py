@@ -2,8 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from ninja import NinjaAPI
-from ninja.testing import TestClient
+from hattori import NinjaAPI
+from hattori.testing import TestClient
 
 
 def test_intro():

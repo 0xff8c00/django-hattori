@@ -6,7 +6,7 @@ from django.db.models import Q, QuerySet
 from pydantic import Field
 from typing_extensions import Annotated
 
-from ninja import FilterConfigDict, FilterLookup, FilterSchema
+from hattori import FilterConfigDict, FilterLookup, FilterSchema
 
 
 class FakeQS(QuerySet):

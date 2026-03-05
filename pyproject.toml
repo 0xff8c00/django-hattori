@@ -3,8 +3,8 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
-module = "ninja"
-dist-name = "django-ninja"
+module = "hattori"
+dist-name = "django-hattori"
 author = "Vitaliy Kucheryaviy"
 author-email = "ppr.vitaly@gmail.com"
 home-page = "https://django-ninja.dev"
@@ -45,7 +45,7 @@ requires-python = ">=3.11"
 
 [tool.flit.metadata.urls]
 Documentation = "https://django-ninja.dev"
-Repository = "https://github.com/vitalik/django-ninja"
+Repository = "https://github.com/0xff8c00/django-hattori"
 
 
 [tool.flit.metadata.requires-extra]
@@ -89,13 +89,13 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"ninja/compatibility/datastructures.py" = ["C416"]
-"ninja/utils.py" = ["B004"]
+"hattori/compatibility/datastructures.py" = ["C416"]
+"hattori/utils.py" = ["B004"]
 "tests/*" = ["C408"]
 
 
 [tool.coverage.run]
-omit = ["ninja/compatibility/*"]
+omit = ["hattori/compatibility/*"]
 branch = true
 
 [tool.coverage.report]

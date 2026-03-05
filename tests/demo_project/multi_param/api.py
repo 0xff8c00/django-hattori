@@ -2,7 +2,7 @@
 
 from pydantic import ConfigDict
 
-from ninja import (
+from hattori import (
     Body,
     Cookie,
     Field,
