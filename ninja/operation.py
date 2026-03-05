@@ -46,7 +46,7 @@ from ninja.utils import is_async_callable
 if TYPE_CHECKING:
     from ninja import NinjaAPI  # pragma: no cover
 
-__all__ = ["Operation", "PathView", "ResponseObject"]
+__all__ = ["Operation", "PathView"]
 
 
 class Operation:
@@ -112,6 +112,12 @@ class Operation:
             self.response_models = self._create_response_model_multiple(response)
         else:
             self.response_models = {200: self._create_response_model(response)}
+
+        self._resp_annotations: Dict[int, Any] = {
+            id(model): model.model_fields["response"].annotation
+            for model in self.response_models.values()
+            if model is not NOT_SET and model is not None
+        }
 
         if need_to_fix_request_files(methods, self.models):
             raise ConfigError(
@@ -179,6 +185,7 @@ class Operation:
 
         # Copy response models (dict copy for isolation)
         cloned.response_models = dict(self.response_models)
+        cloned._resp_annotations = self._resp_annotations
 
         # Copy metadata
         cloned.operation_id = self.operation_id
@@ -223,16 +230,17 @@ class Operation:
                 e.args = (msg,) + e.args[1:]
             return self.api.on_exception(request, e)
 
-    def _validate_stream_item(self, item: Any, request: HttpRequest) -> str:
+    def _validate_stream_item(
+        self, item: Any, request: HttpRequest, ctx: Dict[str, Any]
+    ) -> str:
         """Validate a single stream item and return serialized JSON string."""
         assert self.stream_item_model is not None
-        resp_object = ResponseObject(item)
         validated = self.stream_item_model.model_validate(
-            resp_object, context={"request": request, "response_status": 200}
+            {"response": item}, context=ctx
         )
 
         result = validated.model_dump(
-            context={"request": request, "response_status": 200},
+            context=ctx,
             by_alias=self.by_alias,
             exclude_unset=self.exclude_unset,
             exclude_defaults=self.exclude_defaults,
@@ -250,9 +258,11 @@ class Operation:
         assert self.stream_format is not None
         fmt = self.stream_format
 
+        ctx = {"request": request, "response_status": 200}
+
         def content_iter() -> Any:
             for item in generator:
-                data = self._validate_stream_item(item, request)
+                data = self._validate_stream_item(item, request, ctx)
                 yield fmt.format_chunk(data)
             # Copy headers/cookies after generator completes (user may set them inside)
             for key, value in temporal_response.items():
@@ -330,9 +340,6 @@ class Operation:
             return self.api.on_exception(request, Throttled(wait=duration))  # type: ignore
         return None
 
-    def _model_dump_kwargs(self, request: HttpRequest, status: int) -> Dict[str, Any]:
-        return {"context": {"request": request, "response_status": status}}
-
     def _result_to_response(
         self, request: HttpRequest, result: Any, temporal_response: HttpResponse
     ) -> HttpResponseBase:
@@ -383,10 +390,10 @@ class Operation:
             # Empty response.
             return temporal_response
 
-        model_dump_kwargs = self._model_dump_kwargs(request, status)
+        ctx = {"request": request, "response_status": status}
 
         # Skip re-validation for pydantic model instances matching the response type
-        resp_annotation = response_model.model_fields["response"].annotation
+        resp_annotation = self._resp_annotations[id(response_model)]
         if (
             isinstance(resp_annotation, type)
             and isinstance(result, BaseModel)
@@ -397,16 +404,14 @@ class Operation:
                 exclude_unset=self.exclude_unset,
                 exclude_defaults=self.exclude_defaults,
                 exclude_none=self.exclude_none,
-                **model_dump_kwargs,
+                context=ctx,
             )
             return self.api.create_response(
                 request, result, temporal_response=temporal_response
             )
 
-        resp_object = ResponseObject(result)
-        # ^ we need object because getter_dict seems work only with model_validate
         validated_object = response_model.model_validate(
-            resp_object, context={"request": request, "response_status": status}
+            {"response": result}, context=ctx
         )
 
         result = validated_object.model_dump(
@@ -414,7 +419,7 @@ class Operation:
             exclude_unset=self.exclude_unset,
             exclude_defaults=self.exclude_defaults,
             exclude_none=self.exclude_none,
-            **model_dump_kwargs,
+            context=ctx,
         )["response"]
         return self.api.create_response(
             request, result, temporal_response=temporal_response
@@ -495,9 +500,11 @@ class AsyncOperation(Operation):
         assert self.stream_format is not None
         fmt = self.stream_format
 
+        ctx = {"request": request, "response_status": 200}
+
         async def content_iter() -> Any:
             async for item in generator:
-                data = self._validate_stream_item(item, request)
+                data = self._validate_stream_item(item, request, ctx)
                 yield fmt.format_chunk(data)
             # Copy headers/cookies after generator completes
             for key, value in temporal_response.items():
@@ -691,14 +698,6 @@ class PathView:
         return self._method_map.get(request.method)
 
     def _not_allowed(self) -> HttpResponse:
-        allowed_methods = set()
-        for op in self.operations:
-            allowed_methods.update(op.methods)
-        return HttpResponseNotAllowed(allowed_methods, content=b"Method not allowed")
+        return HttpResponseNotAllowed(self._method_map.keys(), content=b"Method not allowed")
 
 
-class ResponseObject:
-    "Basically this is just a helper to be able to pass response to pydantic's model_validate"
-
-    def __init__(self, response: HttpResponse) -> None:
-        self.response = response

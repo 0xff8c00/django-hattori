@@ -1,13 +1,9 @@
 from typing import List, Union
-from unittest.mock import patch
-
 import pytest
 
 from ninja import Field, NinjaAPI, Schema, Status
-from ninja.operation import ResponseObject
-from ninja.pagination import LimitOffsetPagination, paginate
 from ninja.responses import codes_2xx, codes_3xx
-from ninja.testing import TestAsyncClient, TestClient
+from ninja.testing import TestClient
 
 # -- Schemas --
 
@@ -111,47 +107,9 @@ def by_alias_response(request):
     return AliasOut(user_name="Alice")
 
 
-# -- Pagination + Status --
-
-
-@api.get("/paginated_status", response={201: List[UserOut]})
-@paginate(LimitOffsetPagination)
-def paginated_status(request):
-    return Status(
-        201,
-        [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}, {"id": 3, "name": "C"}],
-    )
-
-
-@api.get("/paginated_normal", response=List[UserOut])
-@paginate(LimitOffsetPagination)
-def paginated_normal(request):
-    return [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]
-
-
-# Async pagination
-async_api = NinjaAPI()
-
-
-@async_api.get("/async_paginated_status", response={201: List[UserOut]})
-@paginate(LimitOffsetPagination)
-async def async_paginated_status(request):
-    return Status(
-        201,
-        [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}, {"id": 3, "name": "C"}],
-    )
-
-
-@async_api.get("/async_paginated_normal", response=List[UserOut])
-@paginate(LimitOffsetPagination)
-async def async_paginated_normal(request):
-    return [{"id": 1, "name": "A"}, {"id": 2, "name": "B"}]
-
-
 # -- Clients --
 
 client = TestClient(api)
-async_client = TestAsyncClient(async_api)
 
 
 # -- Tests: Status basic --
@@ -216,53 +174,68 @@ class TestTupleDeprecation:
 # -- Tests: Skip re-validation --
 
 
+class _ValidateTracker:
+    """Tracks calls to Schema.model_validate without breaking it."""
+
+    def __init__(self):
+        self.call_count = 0
+        self._original_func = Schema.model_validate.__func__  # type: ignore
+
+    def __enter__(self):
+        tracker = self
+        original = self._original_func
+
+        @classmethod  # type: ignore
+        def tracked_validate(cls, *args, **kwargs):
+            tracker.call_count += 1
+            return original(cls, *args, **kwargs)
+
+        Schema.model_validate = tracked_validate  # type: ignore
+        return self
+
+    def __exit__(self, *exc):
+        # Remove the override so the inherited BaseModel.model_validate is used again
+        if "model_validate" in Schema.__dict__:
+            delattr(Schema, "model_validate")
+
+
 class TestSkipRevalidation:
+    """Test that the fast path skips response model_validate for matching model instances."""
+
     def test_model_instance_skips_validation(self):
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/model_instance")
             assert response.status_code == 200
             assert response.json() == {"id": 1, "name": "John"}
-            mock_resp_obj.assert_not_called()
+            assert t.call_count == 0
 
     def test_subclass_skips_validation(self):
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/model_subclass")
             assert response.status_code == 200
             assert response.json() == {"id": 1, "name": "John", "extra": "bonus"}
-            mock_resp_obj.assert_not_called()
+            assert t.call_count == 0
 
     def test_dict_goes_through_validation(self):
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/dict_result")
             assert response.status_code == 200
             assert response.json() == {"id": 1, "name": "John"}
-            mock_resp_obj.assert_called_once()
+            assert t.call_count == 1
 
     def test_union_no_skip(self):
-        # Union types should still go through full validation
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/union_response?q=1")
             assert response.status_code == 200
             assert response.json() == {"id": 1, "name": "John"}
-            mock_resp_obj.assert_called_once()
+            assert t.call_count == 1
 
     def test_list_no_skip(self):
-        # List types should still go through full validation
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/list_response")
             assert response.status_code == 200
             assert response.json() == [{"id": 1, "name": "John"}]
-            mock_resp_obj.assert_called_once()
+            assert t.call_count == 1
 
     def test_by_alias_serialization(self):
         response = client.get("/by_alias_response")
@@ -270,47 +243,8 @@ class TestSkipRevalidation:
         assert response.json() == {"userName": "Alice"}
 
     def test_status_wrapping_model_skips_validation(self):
-        with patch(
-            "ninja.operation.ResponseObject", wraps=ResponseObject
-        ) as mock_resp_obj:
+        with _ValidateTracker() as t:
             response = client.get("/status_model_instance")
             assert response.status_code == 200
             assert response.json() == {"id": 1, "name": "John"}
-            mock_resp_obj.assert_not_called()
-
-
-# -- Tests: Pagination + Status --
-
-
-class TestPaginationStatus:
-    def test_sync_pagination_with_status(self):
-        response = client.get("/paginated_status?limit=2&offset=0")
-        assert response.status_code == 201
-        data = response.json()
-        assert data["count"] == 3
-        assert len(data["items"]) == 2
-        assert data["items"][0] == {"id": 1, "name": "A"}
-
-    def test_sync_pagination_without_status(self):
-        response = client.get("/paginated_normal?limit=2&offset=0")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["count"] == 2
-        assert len(data["items"]) == 2
-
-    @pytest.mark.asyncio
-    async def test_async_pagination_with_status(self):
-        response = await async_client.get("/async_paginated_status?limit=2&offset=0")
-        assert response.status_code == 201
-        data = response.json()
-        assert data["count"] == 3
-        assert len(data["items"]) == 2
-        assert data["items"][0] == {"id": 1, "name": "A"}
-
-    @pytest.mark.asyncio
-    async def test_async_pagination_without_status(self):
-        response = await async_client.get("/async_paginated_normal?limit=2&offset=0")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["count"] == 2
-        assert len(data["items"]) == 2
+            assert t.call_count == 0

@@ -2,9 +2,9 @@
 
 ## OpenAPI docs
 
-Once you configured your Ninja API and started runserver -  go to <a href="http://127.0.0.1:8000/api/docs" target="_blank">http://127.0.0.1:8000/api/docs</a>
+Once you configured your Ninja API and started runserver -  go to [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs)
 
-You will see the automatic, interactive API documentation (provided by the <a href="https://github.com/swagger-api/swagger-ui" target="_blank">OpenAPI / Swagger UI</a>
+You will see the automatic, interactive API documentation (provided by the [OpenAPI / Swagger UI](https://github.com/swagger-api/swagger-ui)
 
 
 ## CDN vs staticfiles
@@ -23,7 +23,7 @@ api = NinjaAPI(docs=Redoc())
 
 ```
 
-Then you will see the alternative automatic documentation (provided by <a href="https://github.com/Redocly/redoc" target="_blank">Redoc</a>).
+Then you will see the alternative automatic documentation (provided by [Redoc](https://github.com/Redocly/redoc)).
 
 ## Changing docs display settings
 

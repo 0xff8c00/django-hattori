@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 from ninja.errors import HttpError
+from ninja.responses import json_loads
 from ninja.types import DictStrAny
 
 if TYPE_CHECKING:
@@ -84,13 +85,23 @@ class ParamModel(BaseModel, ABC):
             current[path[-1]] = value
 
 
+def _parse_querydict(data: Any, list_fields: List[str]) -> DictStrAny:
+    result: DictStrAny = {}
+    for key in data.keys():
+        if key in list_fields:
+            result[key] = data.getlist(key)
+        else:
+            result[key] = data[key]
+    return result
+
+
 class QueryModel(ParamModel):
     @classmethod
     def get_request_data(
         cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
     ) -> Optional[DictStrAny]:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
-        return api.parser.parse_querydict(request.GET, list_fields, request)
+        return _parse_querydict(request.GET, list_fields)
 
 
 class PathModel(ParamModel):
@@ -133,7 +144,7 @@ class BodyModel(ParamModel):
     ) -> Optional[DictStrAny]:
         if request.body:
             try:
-                data = api.parser.parse_body(request)
+                data = json_loads(request.body)
             except Exception as e:
                 msg = "Cannot parse request body"
                 if settings.DEBUG:
@@ -154,7 +165,7 @@ class FormModel(ParamModel):
         cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
     ) -> Optional[DictStrAny]:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
-        return api.parser.parse_querydict(request.POST, list_fields, request)
+        return _parse_querydict(request.POST, list_fields)
 
 
 class FileModel(ParamModel):
@@ -163,7 +174,7 @@ class FileModel(ParamModel):
         cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
     ) -> Optional[DictStrAny]:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
-        return api.parser.parse_querydict(request.FILES, list_fields, request)
+        return _parse_querydict(request.FILES, list_fields)
 
 
 class _HttpRequest(HttpRequest):

@@ -6,7 +6,7 @@ For example, when creating a resource using POST or PUT, the request body usuall
 To declare a **request body**, you need to use **Django Ninja `Schema`**.
 
 !!! info
-    Under the hood **Django Ninja** uses <a href="https://pydantic-docs.helpmanual.io/" class="external-link" target="_blank">Pydantic</a> models with all their power and benefits.
+    Under the hood **Django Ninja** uses [Pydantic](https://pydantic-docs.helpmanual.io/) models with all their power and benefits.
     The alias `Schema` was chosen to avoid confusion in code when using Django models, as Pydantic's model class is called Model by default, and conflicts with Django's Model class.
 
 ## Import Schema
@@ -70,7 +70,7 @@ With just that Python type declaration, **Django Ninja** will:
 * Give you the received data in the parameter `item`.
     * Because you declared it in the function to be of type `Item`, you will also have all the editor support
       (completion, etc.) for all the attributes and their types.
-* Generate <a href="https://json-schema.org" class="external-link" target="_blank">JSON Schema</a> definitions for
+* Generate [JSON Schema](https://json-schema.org) definitions for
   your models, and you can also use them anywhere else you like if it makes sense for your project.
 * Those schemas will be part of the generated OpenAPI schema, and used by the automatic documentation <abbr title="User Interfaces">UI's</abbr>.
 
@@ -91,9 +91,9 @@ In your editor, inside your function you will get type hints and completion ever
 ![Type hints](../../img/body-editor.gif)
 
 
-The previous screenshots were taken with <a href="https://code.visualstudio.com" class="external-link" target="_blank">Visual Studio Code</a>.
+The previous screenshots were taken with [Visual Studio Code](https://code.visualstudio.com).
 
-You would get the same editor support with <a href="https://www.jetbrains.com/pycharm/" class="external-link" target="_blank">PyCharm</a> and most of the other Python editors.
+You would get the same editor support with [PyCharm](https://www.jetbrains.com/pycharm/) and most of the other Python editors.
 
 
 ## Request body + path parameters

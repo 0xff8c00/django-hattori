@@ -28,7 +28,6 @@ from ninja.openapi import get_schema
 from ninja.openapi.docs import DocsBase, Swagger
 from ninja.openapi.schema import OpenAPISchema
 from ninja.openapi.urls import get_openapi_urls, get_root_url
-from ninja.parser import Parser
 from ninja.renderers import BaseRenderer, JSONRenderer
 from ninja.router import BoundRouter, Router, RouterMount
 from ninja.throttling import BaseThrottle
@@ -64,7 +63,6 @@ class NinjaAPI:
         auth: Optional[Union[Sequence[Callable], Callable, NOT_SET_TYPE]] = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
         renderer: Optional[BaseRenderer] = None,
-        parser: Optional[Parser] = None,
         default_router: Optional[Router] = None,
         openapi_extra: Optional[Dict[str, Any]] = None,
     ):
@@ -80,7 +78,6 @@ class NinjaAPI:
             servers: List of target hosts used in openAPI spec.
             auth (Callable | Sequence[Callable] | NOT_SET | None): Authentication class
             renderer: Default response renderer
-            parser: Default request parser
         """
         self.title = title
         self.version = version
@@ -92,7 +89,7 @@ class NinjaAPI:
         self.servers = servers or []
         self.urls_namespace = urls_namespace or f"api-{self.version}"
         self.renderer = renderer or JSONRenderer()
-        self.parser = parser or Parser()
+        self._content_type = f"{self.renderer.media_type}; charset={self.renderer.charset}"
         self.openapi_extra = openapi_extra or {}
 
         self._exception_handlers: Dict[Exc, ExcHandler] = {}
@@ -568,7 +565,7 @@ class NinjaAPI:
         return HttpResponse("", content_type=self.get_content_type())
 
     def get_content_type(self) -> str:
-        return f"{self.renderer.media_type}; charset={self.renderer.charset}"
+        return self._content_type
 
     def get_openapi_schema(
         self,

@@ -2,7 +2,7 @@
 
 ## Intro
 
-**Django Ninja** provides several tools to help you deal with authentication and authorization easily, rapidly, in a standard way, and without having to study and learn <a href="https://swagger.io/docs/specification/authentication/" target="_blank">all the security specifications</a>.
+**Django Ninja** provides several tools to help you deal with authentication and authorization easily, rapidly, in a standard way, and without having to study and learn [all the security specifications](https://swagger.io/docs/specification/authentication/).
 
 The core concept is that when you describe an API operation, you can define an authentication object.
 
@@ -24,7 +24,7 @@ Here's an example where the client, in order to authenticate, needs to pass a he
 {!./src/tutorial/authentication/bearer01.py!}
 ```
 
-Now go to the docs at <a href="http://localhost:8000/api/docs" target="_blank">http://localhost:8000/api/docs</a>.
+Now go to the docs at [http://localhost:8000/api/docs](http://localhost:8000/api/docs).
 
 
 ![Swagger UI Auth](../img/auth-swagger-ui.png)

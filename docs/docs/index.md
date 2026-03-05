@@ -1,24 +1,17 @@
-# Django Ninja - Fast Django REST Framework
+# Django Hattori - Fast Django REST Framework
 
-<div style="background-color: black; color: red; font-size: 16px; padding: 8px;">
- RUSSIA INVADED UKRAINE - <a href="https://github.com/vitalik/django-ninja/issues/383">Please read</a>
-</div>
-
-
-![Django Ninja](img/hero.png)
-
-Django Ninja is a web framework for building APIs with Django and Python type hints.
+Django Hattori is an opinionated fork of [Django Ninja](https://github.com/vitalik/django-ninja), a web framework for building APIs with Django and Python type hints.
 
 Key features:
 
  - **Easy**: Designed to be easy to use and intuitive.
- - **FAST execution**: Very high performance thanks to **<a href="https://pydantic-docs.helpmanual.io" target="_blank">Pydantic</a>** and **<a href="guides/async-support/">async support</a>**. 
+ - **FAST execution**: Very high performance thanks to **[Pydantic](https://pydantic-docs.helpmanual.io)** and **[async support](guides/async-support/)**.
  - **Fast to code**: Type hints and automatic docs lets you focus only on business logic.
  - **Standards-based**: Based on the open standards for APIs: **OpenAPI** (previously known as Swagger) and **JSON Schema**.
  - **Django friendly**: (obviously) has good integration with the Django core and ORM.
- - **Production ready**: Used by multiple companies on live projects (If you use Django Ninja and would like to publish your feedback, please email ppr.vitaly@gmail.com).
+ - **Production ready**: Used by multiple companies on live projects.
 
-<a href="https://github.com/vitalik/django-ninja-benchmarks" target="_blank">Benchmarks</a>:
+[Benchmarks](https://github.com/0xff8c00/django-hattori-benchmarks):
 
 ![Django Ninja REST Framework](img/benchmark.png)
 
@@ -50,7 +43,7 @@ Note: You don't have to add Django Ninja to your installed apps for it to work.
 
 ## Check it
 
-Open your browser at <a href="http://127.0.0.1:8000/api/add?a=1&b=2" target="_blank">http://127.0.0.1:8000/api/add?a=1&b=2</a>
+Open your browser at [http://127.0.0.1:8000/api/add?a=1&b=2](http://127.0.0.1:8000/api/add?a=1&b=2)
 
 You will see the JSON response as:
 ```JSON
@@ -65,9 +58,9 @@ Now you've just created an API that:
 
 ## Interactive API docs
 
-Now go to <a href="http://127.0.0.1:8000/api/docs" target="_blank">http://127.0.0.1:8000/api/docs</a>
+Now go to [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs)
 
-You will see the automatic, interactive API documentation (provided by the <a href="https://github.com/swagger-api/swagger-ui" target="_blank">OpenAPI / Swagger UI</a> or <a href="https://github.com/Redocly/redoc" target="_blank">Redoc</a>):
+You will see the automatic, interactive API documentation (provided by the [OpenAPI / Swagger UI](https://github.com/swagger-api/swagger-ui) or [Redoc](https://github.com/Redocly/redoc)):
 
 ![Swagger UI](img/index-swagger-ui.png)
 
@@ -117,5 +110,5 @@ def operation(a: Item):
     * Files
 * Automatic, interactive API documentation
 
-This project was heavily inspired by <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a> (developed by <a href="https://github.com/tiangolo" target="_blank">Sebastián Ramírez</a>)
+This project was heavily inspired by [FastAPI](https://fastapi.tiangolo.com/) (developed by [Sebastián Ramírez](https://github.com/tiangolo))
 

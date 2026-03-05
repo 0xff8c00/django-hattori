@@ -20,29 +20,33 @@ Async views work more efficiently when it comes to:
 
 Let's take an example.  We have an API operation that does some work (currently just sleeps for provided number of seconds) and returns a word:
 
-```python hl_lines="5"
-import time
+=== "Sync"
 
-@api.get("/say-after")
-def say_after(request, delay: int, word: str):
-    time.sleep(delay)
-    return {"saying": word}
-```
+    ```python hl_lines="5"
+    import time
 
-To make this code asynchronous, all you have to do is add the **`async`** keyword to a function (and use async aware libraries for work processing - in our case we will replace the stdlib `sleep` with `asyncio.sleep`):
+    @api.get("/say-after")
+    def say_after(request, delay: int, word: str):
+        time.sleep(delay)
+        return {"saying": word}
+    ```
 
-```python hl_lines="1 4 5"
-import asyncio
+=== "Async"
 
-@api.get("/say-after")
-async def say_after(request, delay: int, word: str):
-    await asyncio.sleep(delay)
-    return {"saying": word}
-```
+    ```python hl_lines="1 4 5"
+    import asyncio
+
+    @api.get("/say-after")
+    async def say_after(request, delay: int, word: str):
+        await asyncio.sleep(delay)
+        return {"saying": word}
+    ```
+
+To make this code asynchronous, all you have to do is add the **`async`** keyword to a function (and use async aware libraries for work processing - in our case we will replace the stdlib `sleep` with `asyncio.sleep`).
 
 ### Run
 
-To run this code you need an ASGI server like <a href="https://www.uvicorn.org/" target="_blank">Uvicorn</a> or <a href="https://github.com/django/daphne" target="_blank">Daphne</a>. Let's use Uvicorn for, example:
+To run this code you need an ASGI server like [Uvicorn](https://www.uvicorn.org/) or [Daphne](https://github.com/django/daphne). Let's use Uvicorn for, example:
 
 To install Uvicorn, use:
 
@@ -66,7 +70,7 @@ uvicorn your_project.asgi:application --reload
 
 ### Test
 
-Go to your browser and open <a href="http://127.0.0.1:8000/api/say-after?delay=3&word=hello" target="_blank">http://127.0.0.1:8000/api/say-after?delay=3&word=hello</a> (**delay=3**)
+Go to your browser and open [http://127.0.0.1:8000/api/say-after?delay=3&word=hello](http://127.0.0.1:8000/api/say-after?delay=3&word=hello) (**delay=3**)
 After a 3-second wait you should see the "hello" message.
 
 Now let's flood this operation with **100 parallel requests**:
@@ -152,7 +156,7 @@ async def search(request, q: str):
 
 Currently, certain key parts of Django are not able to operate safely in an async environment, as they have global state that is not coroutine-aware. These parts of Django are classified as “async-unsafe”, and are protected from execution in an async environment. **The ORM** is the main example, but there are other parts that are also protected in this way.
 
-Learn more about async safety here in the <a href="https://docs.djangoproject.com/en/stable/topics/async/#async-safety" target="_blank">official Django docs</a>.
+Learn more about async safety here in the [official Django docs](https://docs.djangoproject.com/en/stable/topics/async/#async-safety).
 
 So, if you do this:
 
@@ -221,4 +225,4 @@ all_blogs = [blog async for blog in Blog.objects.all()]
 ...
 ```
 
-Learn more about the async ORM interface in the <a href="https://docs.djangoproject.com/en/4.1/releases/4.1/#asynchronous-orm-interface" target="_blank">official Django docs</a>.
+Learn more about the async ORM interface in the [official Django docs](https://docs.djangoproject.com/en/4.1/releases/4.1/#asynchronous-orm-interface).

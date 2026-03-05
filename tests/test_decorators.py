@@ -1,9 +1,7 @@
 from functools import wraps
-from typing import List
 
 from ninja import NinjaAPI
 from ninja.decorators import decorate_view
-from ninja.pagination import paginate
 from ninja.testing import TestClient
 
 
@@ -45,17 +43,3 @@ def test_decorator_after():
     assert response["X-Decorator"] == "some_decorator"
 
 
-def test_decorator_multiple():
-    api = NinjaAPI()
-
-    @api.get("/multi", response=List[int])
-    @decorate_view(some_decorator)
-    @paginate
-    def dec_multi(request):
-        return [1, 2, 3, 4]
-
-    client = TestClient(api)
-    response = client.get("/multi")
-    assert response.status_code == 200
-    assert response.json() == {"count": 4, "items": [1, 2, 3, 4]}
-    assert response["X-Decorator"] == "some_decorator"

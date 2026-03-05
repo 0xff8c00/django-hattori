@@ -1,5 +1,5 @@
 # Path parameters
-You can declare path "parameters" with the same syntax used by Python format-strings (which luckily also matches the <a href="https://swagger.io/docs/specification/describing-parameters/#path-parameters" target="_blank">OpenAPI path parameters</a>):
+You can declare path "parameters" with the same syntax used by Python format-strings (which luckily also matches the [OpenAPI path parameters](https://swagger.io/docs/specification/describing-parameters/#path-parameters)):
 
 ```python hl_lines="1 2"
 {!./src/tutorial/path/code01.py!}
@@ -7,7 +7,7 @@ You can declare path "parameters" with the same syntax used by Python format-str
 
 The value of the path parameter `item_id` will be passed to your function as the argument `item_id`.
 
-So, if you run this example and go to <a href="http://localhost:8000/api/items/foo" target="_blank">http://localhost:8000/api/items/foo</a>, you will see this response:
+So, if you run this example and go to [http://localhost:8000/api/items/foo](http://localhost:8000/api/items/foo), you will see this response:
 
 ```JSON
 {"item_id":"foo"}
@@ -23,7 +23,7 @@ You can declare the type of path parameter in the function using standard Python
 
 In this case,`item_id` is declared to be an **`int`**. This will give you editor and linter support for error checks, completion, etc.
 
-If you run this in your browser with <a href="http://localhost:8000/api/items/3" target="_blank">http://localhost:8000/api/items/3</a>, you will see this response:
+If you run this in your browser with [http://localhost:8000/api/items/3](http://localhost:8000/api/items/3), you will see this response:
 ```JSON
 {"item_id":3}
 ```
@@ -35,7 +35,7 @@ If you run this in your browser with <a href="http://localhost:8000/api/items/3"
 
 
 ### Data validation
-On the other hand, if you go to the browser at <a href="http://localhost:8000/api/items/foo" target="_blank">http://localhost:8000/api/items/foo</a> <small>*(`"foo"` is not int)*</small>, you will see an HTTP error like this:
+On the other hand, if you go to the browser at [http://localhost:8000/api/items/foo](http://localhost:8000/api/items/foo) <small>*(`"foo"` is not int)*</small>, you will see an HTTP error like this:
 
 ```JSON hl_lines="8"
 {
@@ -113,5 +113,5 @@ You can also use Schema to encapsulate path parameters that depend on each other
     Notice that here we used a `Path` source hint to let **Django Ninja** know that this schema will be applied to path parameters.
 
 ### Documentation
-Now, when you open your browser at <a href="http://localhost:8000/api/docs" target="_blank">http://localhost:8000/api/docs</a>, you will see the automatic, interactive, API documentation.
+Now, when you open your browser at [http://localhost:8000/api/docs](http://localhost:8000/api/docs), you will see the automatic, interactive, API documentation.
 ![Django Ninja Swagger](../../img/tutorial-path-swagger.png)
