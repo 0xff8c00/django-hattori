@@ -211,6 +211,49 @@ router = Router(auth=BasicAuth())
 This overrides any API level authentication. To allow router operations to not use the API-level authentication by default, you can explicitly set the router's `auth=None`.
 
 
+## Error responses in OpenAPI docs
+
+When an operation uses authentication, a `401 Unauthorized` response is automatically added to the OpenAPI schema using the default `AuthErrorResponse` model (`{"detail": "string"}`).
+
+You can customize the error responses for your auth class by setting the `openapi_responses` class attribute:
+
+```python
+import pydantic
+from hattori.security import HttpBearer
+
+
+class MyErrorResponse(pydantic.BaseModel):
+    detail: str
+    code: str
+
+
+class ForbiddenResponse(pydantic.BaseModel):
+    detail: str
+
+
+class MyAuth(HttpBearer):
+    openapi_responses = {401: MyErrorResponse, 403: ForbiddenResponse}
+
+    def authenticate(self, request, token):
+        ...
+```
+
+This will document both `401` and `403` responses on every operation that uses `MyAuth`.
+
+To disable automatic error responses for an auth class, set `openapi_responses` to an empty dict:
+
+```python
+class MyAuth(HttpBearer):
+    openapi_responses = {}
+
+    def authenticate(self, request, token):
+        ...
+```
+
+!!! note
+    When multiple auth classes on the same operation define different models for the same status code, or when an operation's `response` also defines that status code, all schemas are merged using `oneOf` in the OpenAPI spec.
+
+
 ## Custom exceptions
 
 Raising an exception that has an exception handler will return the response from that handler in

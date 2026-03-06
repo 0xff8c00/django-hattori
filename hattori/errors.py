@@ -17,6 +17,7 @@ __all__ = [
     "ConfigError",
     "AuthenticationError",
     "AuthorizationError",
+    "AuthErrorResponse",
     "ValidationError",
     "ValidationErrorDetail",
     "ValidationErrorResponse",
@@ -84,6 +85,10 @@ class Throttled(HttpError):
     def __init__(self, wait: Optional[int]) -> None:
         self.wait = wait
         super().__init__(status_code=429, message="Too many requests.")
+
+
+class AuthErrorResponse(pydantic.BaseModel):
+    detail: str
 
 
 class ValidationErrorDetail(pydantic.BaseModel):

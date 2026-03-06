@@ -329,6 +329,56 @@ class OpenAPISchema(dict):
                 },
             }
 
+        if operation.auth_callbacks:
+            auth_error_responses = self._collect_auth_responses(operation)
+            for status, models in auth_error_responses.items():
+                auth_refs = []
+                for model in models:
+                    auth_schema = self._create_schema_from_model(
+                        model, remove_level=False
+                    )[0]
+                    auth_title = auth_schema.get("title", model.__name__)
+                    self.schemas[auth_title] = auth_schema
+                    auth_refs.append({"$ref": REF_TEMPLATE.format(model=auth_title)})
+
+                if status not in result:
+                    schema = auth_refs[0] if len(auth_refs) == 1 else {"oneOf": auth_refs}
+                    result[status] = {
+                        "description": responses.get(status, "Unknown Status Code"),
+                        "content": {
+                            self.api.renderer.media_type: {"schema": schema}
+                        },
+                    }
+                else:
+                    existing = result[status].get("content", {}).get(
+                        self.api.renderer.media_type, {}
+                    ).get("schema")
+                    if existing:
+                        all_schemas = []
+                        if "oneOf" in existing:
+                            all_schemas.extend(existing["oneOf"])
+                        else:
+                            all_schemas.append(existing)
+                        for ref in auth_refs:
+                            if ref not in all_schemas:
+                                all_schemas.append(ref)
+                        if len(all_schemas) > 1:
+                            result[status]["content"][self.api.renderer.media_type]["schema"] = {
+                                "oneOf": all_schemas
+                            }
+                        else:
+                            result[status]["content"][self.api.renderer.media_type]["schema"] = all_schemas[0]
+
+        return result
+
+    def _collect_auth_responses(self, operation: Operation) -> Dict[int, List[Any]]:
+        """Collect openapi_responses from all auth callbacks on an operation."""
+        result: Dict[int, List[Any]] = {}
+        for auth in operation.auth_callbacks:
+            for status, model in getattr(auth, "openapi_responses", {}).items():
+                result.setdefault(status, [])
+                if model not in result[status]:
+                    result[status].append(model)
         return result
 
     def operation_security(self, operation: Operation) -> Optional[List[DictStrAny]]:

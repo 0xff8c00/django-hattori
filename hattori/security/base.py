@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Type
 
 from django.http import HttpRequest
 
-from hattori.errors import ConfigError
+from hattori.errors import AuthErrorResponse, ConfigError
 from hattori.utils import is_async_callable
 
 __all__ = ["SecuritySchema", "AuthBase"]
@@ -15,13 +15,15 @@ class SecuritySchema(dict):
 
 
 class AuthBase(ABC):
+    openapi_responses: Dict[int, Type] = {401: AuthErrorResponse}
+
     def __init__(self) -> None:
         if not hasattr(self, "openapi_type"):
             raise ConfigError("If you extend AuthBase you need to define openapi_type")
 
         kwargs = {}
         for attr in dir(self):
-            if attr.startswith("openapi_"):
+            if attr.startswith("openapi_") and attr != "openapi_responses":
                 name = attr.replace("openapi_", "", 1)
                 kwargs[name] = getattr(self, attr)
         self.openapi_security_schema = SecuritySchema(**kwargs)
