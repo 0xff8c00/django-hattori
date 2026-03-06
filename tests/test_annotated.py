@@ -135,7 +135,7 @@ def test_openapi_schema():
                         "description": "Cookie params",
                     },
                 ],
-                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
+                "responses": {200: {"description": "OK", "content": {"application/json": {"schema": {"title": "Response"}}}}, 422: VALIDATION_ERROR_422},
                 "requestBody": {
                     "content": {
                         "application/x-www-form-urlencoded": {
@@ -172,7 +172,7 @@ def test_openapi_schema():
                         "description": "User ID",
                     }
                 ],
-                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
+                "responses": {200: {"description": "OK", "content": {"application/json": {"schema": {"title": "Response"}}}}, 422: VALIDATION_ERROR_422},
             }
         },
         "/api/headers": {
@@ -191,7 +191,7 @@ def test_openapi_schema():
                         "required": False,
                     }
                 ],
-                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
+                "responses": {200: {"description": "OK", "content": {"application/json": {"schema": {"title": "Response"}}}}, 422: VALIDATION_ERROR_422},
             }
         },
         "/api/body": {
@@ -199,7 +199,7 @@ def test_openapi_schema():
                 "operationId": "test_annotated_body_op",
                 "summary": "Body Op",
                 "parameters": [],
-                "responses": {200: {"description": "OK"}, 422: VALIDATION_ERROR_422},
+                "responses": {200: {"description": "OK", "content": {"application/json": {"schema": {"title": "Response"}}}}, 422: VALIDATION_ERROR_422},
                 "requestBody": {
                     "content": {
                         "application/json": {

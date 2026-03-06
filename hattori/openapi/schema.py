@@ -1,6 +1,9 @@
 import itertools
 import re
-from http.client import responses
+from http.client import responses as _stdlib_responses
+
+# Override phrases updated in RFC 9110 so output is consistent across Python versions.
+responses = {**_stdlib_responses, 422: "Unprocessable Content"}
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set, Tuple
 
 from django.utils.termcolors import make_style

@@ -866,6 +866,11 @@ def test_schema_deprecated_example_examples(schema):
     assert method_list["responses"] == {
         200: {
             "description": "OK",
+            "content": {
+                "application/json": {
+                    "schema": {"title": "Response"},
+                }
+            },
         },
         422: VALIDATION_ERROR_422,
     }
