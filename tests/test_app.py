@@ -1,11 +1,12 @@
 import contextlib
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Annotated, Any
 
 import pytest
 from django.http import FileResponse, HttpResponse
 
-from hattori import NinjaAPI
+from hattori import NinjaAPI, Response
 from hattori.testing import TestClient
 
 api = NinjaAPI()
@@ -21,47 +22,47 @@ client = TestClient(api)
 
 
 @api.get("")
-def emptypath(request):
-    return "/"
+def emptypath(request) -> Annotated[Response[Any], 200]:
+    return Response(200, "/")
 
 
 @api.get("/get")
-def get(request):
-    return f"this is {request.method}"
+def get(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.post("/post")
-def post(request):
-    return f"this is {request.method}"
+def post(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.put("/put")
-def put(request):
-    return f"this is {request.method}"
+def put(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.patch("/patch")
-def patch(request):
-    return f"this is {request.method}"
+def patch(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.delete("/delete")
-def delete(request):
-    return f"this is {request.method}"
+def delete(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.api_operation(["GET", "POST"], "/multi")
-def multiple(request):
-    return f"this is {request.method}"
+def multiple(request) -> Annotated[Response[Any], 200]:
+    return Response(200, f"this is {request.method}")
 
 
 @api.get("/html")
-def html(request):
+def html(request) -> Annotated[Response[Any], 200]:
     return HttpResponse("html")
 
 
 @api.get("/file")
-def file_response(request):
+def file_response(request) -> Annotated[Response[Any], 200]:
     tmp = NamedTemporaryFile(delete=False)
     try:
         p = Path(tmp.name)

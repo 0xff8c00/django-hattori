@@ -1,6 +1,8 @@
+from typing import Annotated, Any
+
 import pytest
 
-from hattori import NinjaAPI, Router
+from hattori import NinjaAPI, Response, Router
 from hattori.security import APIKeyQuery
 from hattori.testing import TestClient
 
@@ -36,40 +38,40 @@ client = TestClient(api)
 
 
 @r1.get("/")
-def op1(request):
-    return request.auth
+def op1(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r2.get("/")
-def op2(request):
-    return request.auth
+def op2(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r3.get("/")
-def op3(request):
-    return request.auth
+def op3(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r4.get("/")
-def op4(request):
-    return request.auth
+def op4(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r3.get("/op5", auth=Auth("op5_auth"))
-def op5(request):
-    return request.auth
+def op5(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @o3.get("/")
-def op_o3(request):
+def op_o3(request) -> Annotated[Response[Any], 200]:
     assert request.auth is None
-    return "ok"
+    return Response(200, "ok")
 
 
 @o4.get("/")
-def op_o4(request):
+def op_o4(request) -> Annotated[Response[Any], 200]:
     assert request.auth is None
-    return "ok"
+    return Response(200, "ok")
 
 
 @pytest.mark.parametrize(

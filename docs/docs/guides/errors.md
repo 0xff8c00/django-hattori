@@ -149,12 +149,12 @@ class CustomError(Schema):
     message: str
     errors: list
 
-@api.post("/items", response={200: Item, 422: CustomError})
-def create_item(request, data: ItemIn):
+@api.post("/items")
+def create_item(request, data: ItemIn) -> Annotated[Response[Item], 200] | Annotated[Response[CustomError], 422]:
     ...
 ```
 
-When you explicitly include `422` in your `response` dict, Django Ninja will use your schema instead of the default one.
+When you explicitly include a `422` response in your return type annotation, Django Ninja will use your schema instead of the default one.
 
 
 ## Throwing HTTP responses with exceptions

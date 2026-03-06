@@ -1,7 +1,7 @@
-from typing import List, Union
+from typing import Annotated, List, Union
 import pytest
 
-from hattori import Field, NinjaAPI, Schema, Status
+from hattori import Field, NinjaAPI, Response, Schema, Status
 from hattori.responses import codes_2xx, codes_3xx
 from hattori.testing import TestClient
 
@@ -30,81 +30,81 @@ class AliasOut(Schema):
 api = NinjaAPI()
 
 
-@api.get("/status_dict", response={200: UserOut, 400: ErrorOut})
-def status_dict(request):
-    return Status(200, {"id": 1, "name": "John"})
+@api.get("/status_dict")
+def status_dict(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+    return Response(200, {"id": 1, "name": "John"})
 
 
-@api.get("/status_error", response={200: UserOut, 400: ErrorOut})
-def status_error(request):
-    return Status(400, {"detail": "bad request"})
+@api.get("/status_error")
+def status_error(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+    return Response(400, {"detail": "bad request"})
 
 
-@api.get("/status_none", response={204: None})
-def status_none(request):
-    return Status(204, None)
+@api.get("/status_none")
+def status_none(request) -> Annotated[Response[None], 204]:
+    return Response(204, None)
 
 
-@api.get("/status_ellipsis", response={200: UserOut, ...: ErrorOut})
-def status_ellipsis(request, code: int):
+@api.get("/status_ellipsis")
+def status_ellipsis(request, code: int) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 500]:
     if code == 200:
-        return Status(200, {"id": 1, "name": "John"})
-    return Status(code, {"detail": "fallback"})
+        return Response(200, {"id": 1, "name": "John"})
+    return Response(code, {"detail": "fallback"})
 
 
-@api.get("/status_code_groups", response={codes_2xx: UserOut, codes_3xx: ErrorOut})
-def status_code_groups(request, code: int):
+@api.get("/status_code_groups")
+def status_code_groups(request, code: int) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 300]:
     if code < 300:
-        return Status(code, {"id": 1, "name": "John"})
-    return Status(code, {"detail": "redirect"})
+        return Response(code, {"id": 1, "name": "John"})
+    return Response(code, {"detail": "redirect"})
 
 
-@api.get("/status_model_instance", response={200: UserOut})
-def status_model_instance(request):
-    return Status(200, UserOut(id=1, name="John"))
+@api.get("/status_model_instance")
+def status_model_instance(request) -> Annotated[Response[UserOut], 200]:
+    return Response(200, UserOut(id=1, name="John"))
 
 
 # -- Tuple deprecation --
 
 
-@api.get("/tuple_return", response={200: UserOut, 400: ErrorOut})
-def tuple_return(request):
-    return 200, {"id": 1, "name": "John"}
+@api.get("/tuple_return")
+def tuple_return(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+    return Response(200, {"id": 1, "name": "John"})
 
 
 # -- Skip re-validation --
 
 
-@api.get("/model_instance", response=UserOut)
-def model_instance(request):
-    return UserOut(id=1, name="John")
+@api.get("/model_instance")
+def model_instance(request) -> Annotated[Response[UserOut], 200]:
+    return Response(200, UserOut(id=1, name="John"))
 
 
-@api.get("/model_subclass", response=UserOut)
-def model_subclass(request):
-    return UserOutSub(id=1, name="John", extra="bonus")
+@api.get("/model_subclass")
+def model_subclass(request) -> Annotated[Response[UserOut], 200]:
+    return Response(200, UserOutSub(id=1, name="John", extra="bonus"))
 
 
-@api.get("/dict_result", response=UserOut)
-def dict_result(request):
-    return {"id": 1, "name": "John"}
+@api.get("/dict_result")
+def dict_result(request) -> Annotated[Response[UserOut], 200]:
+    return Response(200, {"id": 1, "name": "John"})
 
 
-@api.get("/union_response", response={200: Union[int, UserOut], 400: ErrorOut})
-def union_response(request, q: int):
+@api.get("/union_response")
+def union_response(request, q: int) -> Annotated[Response[Union[int, UserOut]], 200] | Annotated[Response[ErrorOut], 400]:
     if q == 0:
-        return Status(200, 1)
-    return Status(200, UserOut(id=1, name="John"))
+        return Response(200, 1)
+    return Response(200, UserOut(id=1, name="John"))
 
 
-@api.get("/list_response", response={200: List[UserOut]})
-def list_response(request):
-    return Status(200, [{"id": 1, "name": "John"}])
+@api.get("/list_response")
+def list_response(request) -> Annotated[Response[List[UserOut]], 200]:
+    return Response(200, [{"id": 1, "name": "John"}])
 
 
-@api.get("/by_alias_response", response=AliasOut, by_alias=True)
-def by_alias_response(request):
-    return AliasOut(user_name="Alice")
+@api.get("/by_alias_response", by_alias=True)
+def by_alias_response(request) -> Annotated[Response[AliasOut], 200]:
+    return Response(200, AliasOut(user_name="Alice"))
 
 
 # -- Clients --
@@ -160,15 +160,6 @@ class TestStatusBasic:
         response = client.get("/status_model_instance")
         assert response.status_code == 200
         assert response.json() == {"id": 1, "name": "John"}
-
-
-# -- Tests: Tuple deprecation --
-
-
-class TestTupleDeprecation:
-    def test_tuple_emits_deprecation_warning(self):
-        with pytest.warns(DeprecationWarning, match="deprecated.*Status"):
-            client.get("/tuple_return")
 
 
 # -- Tests: Skip re-validation --

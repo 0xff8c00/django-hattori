@@ -1,9 +1,8 @@
-from typing import List
+from typing import Annotated, Any, List
 
-from typing_extensions import Annotated
 from util import pydantic_ref_fix
 
-from hattori import Body, Cookie, Form, Header, NinjaAPI, Path, Query, Schema
+from hattori import Body, Cookie, Form, Header, NinjaAPI, Path, Query, Response, Schema
 from hattori.testing import TestClient
 
 api = NinjaAPI()
@@ -37,28 +36,28 @@ def multi_op(
     p: Annotated[int, Path(description="Path param")],
     f: Annotated[FormData, Form(description="Form params")],
     c: Annotated[str, Cookie(description="Cookie params")],
-):
-    return {"q": q, "p": p, "f": f.dict(), "c": c}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"q": q, "p": p, "f": f.dict(), "c": c})
 
 
 @api.post("/query_list")
 def query_list(
     request,
     q: Annotated[List[str], Query(description="User ID")],
-):
-    return {"q": q}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"q": q})
 
 
 @api.post("/headers")
-def headers(request, h: Annotated[str, Header()] = "some-default"):
-    return {"h": h}
+def headers(request, h: Annotated[str, Header()] = "some-default") -> Annotated[Response[Any], 200]:
+    return Response(200, {"h": h})
 
 
 @api.post("/body")
 def body_op(
     request, payload: Annotated[Payload, Body(examples=[{"t": 42, "p": "test"}])]
-):
-    return {"payload": payload}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"payload": payload})
 
 
 client = TestClient(api)

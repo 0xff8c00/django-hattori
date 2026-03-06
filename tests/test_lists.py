@@ -1,10 +1,10 @@
-from typing import List
+from typing import Annotated, Any, List
 
 import pytest
 from django.http import QueryDict  # noqa
 from pydantic import BaseModel, Field, conlist
 
-from hattori import Body, Form, Query, Router, Schema
+from hattori import Body, Form, Query, Response, Router, Schema
 from hattori.testing import TestClient
 
 router = Router()
@@ -15,11 +15,11 @@ def listview1(
     request,
     query: List[int] = Query(...),
     form: List[int] = Form(...),
-):
-    return {
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {
         "query": query,
         "form": form,
-    }
+    })
 
 
 @router.post("/list2")
@@ -27,11 +27,11 @@ def listview2(
     request,
     body: List[int],
     query: List[int] = Query(...),
-):
-    return {
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {
         "query": query,
         "body": body,
-    }
+    })
 
 
 class BodyModel(BaseModel):
@@ -40,18 +40,18 @@ class BodyModel(BaseModel):
 
 
 @router.post("/list3")
-def listview3(request, body: List[BodyModel]):
-    return {
+def listview3(request, body: List[BodyModel]) -> Annotated[Response[Any], 200]:
+    return Response(200, {
         "body": body,
-    }
+    })
 
 
 @router.post("/list-default")
-def listviewdefault(request, body: List[int] = [1]):  # noqa: B006
+def listviewdefault(request, body: List[int] = [1]) -> Annotated[Response[Any], 200]:  # noqa: B006
     # By default List[anything] is treated for body
-    return {
+    return Response(200, {
         "body": body,
-    }
+    })
 
 
 class Filters(Schema):
@@ -63,10 +63,10 @@ class Filters(Schema):
 def listview4(
     request,
     filters: Filters = Query(...),
-):
-    return {
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {
         "filters": filters,
-    }
+    })
 
 
 class ConListSchema(Schema):
@@ -82,19 +82,19 @@ def listview5(
     request,
     body: conlist(int, min_length=1) = Body(...),
     a_query: Data = Query(...),
-):
-    return {
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {
         "query": a_query.data.query,
         "body": body,
-    }
+    })
 
 
 @router.post("/list6")
 def listview6(
     request,
     object_id: List[int] = Query(None, alias="id"),
-):
-    return {"query": object_id}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"query": object_id})
 
 
 client = TestClient(router)

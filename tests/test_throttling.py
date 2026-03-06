@@ -1,8 +1,10 @@
+from typing import Annotated, Any
+
 import pytest
 from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 
-from hattori import NinjaAPI, Router
+from hattori import NinjaAPI, Response, Router
 from hattori.testing import TestAsyncClient, TestClient
 from hattori.throttling import (
     AnonRateThrottle,
@@ -25,8 +27,8 @@ def test_global_throttling():
     api = NinjaAPI(throttle=[th])
 
     @api.get("/check")
-    def check(request):
-        return "OK"
+    def check(request) -> Annotated[Response[Any], 200]:
+        return Response(200, "OK")
 
     client = TestClient(api)
 
@@ -52,8 +54,8 @@ def test_router_throttling():
     router = Router()
 
     @router.get("/check")
-    def check(request):
-        return "OK"
+    def check(request) -> Annotated[Response[Any], 200]:
+        return Response(200, "OK")
 
     api.add_router("/router", router, throttle=th)
 
@@ -77,8 +79,8 @@ def test_router2_throttling():
     router = Router()
 
     @router.get("/check")
-    def check(request):
-        return "OK"
+    def check(request) -> Annotated[Response[Any], 200]:
+        return Response(200, "OK")
 
     api.add_router("/router", router)
 
@@ -100,8 +102,8 @@ def test_operation_throttling():
     api = NinjaAPI()
 
     @api.get("/check1", throttle=th)
-    def check(request):
-        return "OK"
+    def check(request) -> Annotated[Response[Any], 200]:
+        return Response(200, "OK")
 
     client = TestClient(api)
 
@@ -122,8 +124,8 @@ async def test_async_throttling():
     api = NinjaAPI(throttle=th)
 
     @api.get("/check-async")
-    async def check(request):
-        return "OK"
+    async def check(request) -> Annotated[Response[Any], 200]:
+        return Response(200, "OK")
 
     client = TestAsyncClient(api)
 

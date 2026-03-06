@@ -1,9 +1,10 @@
 import pickle
+from typing import Annotated, Any
 
 import pydantic
 import pytest
 
-from hattori import Body, Header, NinjaAPI, Query, Schema
+from hattori import Body, Header, NinjaAPI, Query, Response, Schema
 from hattori.errors import (
     HttpError,
     ValidationError,
@@ -38,8 +39,8 @@ def test_validation_error_response_matches_actual_422():
     api = NinjaAPI()
 
     @api.get("/items")
-    def get_items(request, count: int = Query(...)):
-        return []
+    def get_items(request, count: int = Query(...)) -> Annotated[Response[Any], 200]:
+        return Response(200, [])
 
     client = TestClient(api)
     response = client.get("/items?count=notanumber")
@@ -69,8 +70,8 @@ def test_422_with_combined_param_types():
         q: int = Query(...),
         x_tag: int = Header(...),
         body: Payload = Body(...),
-    ):
-        return {}
+    ) -> Annotated[Response[Any], 200]:
+        return Response(200, {})
 
     client = TestClient(api)
 

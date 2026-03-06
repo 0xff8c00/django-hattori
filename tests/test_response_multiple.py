@@ -1,9 +1,9 @@
-from typing import List, Union
+from typing import Annotated, Any, List, Union
 
 import pytest
 from pydantic import ValidationError
 
-from hattori import NinjaAPI, Schema
+from hattori import NinjaAPI, Response, Schema
 from hattori.errors import ConfigError
 from hattori.responses import codes_2xx, codes_3xx
 from hattori.testing import TestClient
@@ -13,39 +13,38 @@ pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
 api = NinjaAPI()
 
 
-@api.get("/check_int", response={200: int})
-def check_int(request):
-    return 200, "1"
+@api.get("/check_int")
+def check_int(request) -> Annotated[Response[int], 200]:
+    return Response(200, "1")
 
 
-@api.get("/check_int2", response={200: int})
-def check_int2(request):
-    return 200, "str"
+@api.get("/check_int2")
+def check_int2(request) -> Annotated[Response[int], 200]:
+    return Response(200, "str")
 
 
-@api.get("/check_single_with_status", response=int)
-def check_single_with_status(request, code: int):
-    return code, 1
+@api.get("/check_single_with_status")
+def check_single_with_status(request, code: int) -> Annotated[Response[int], 200]:
+    return Response(code, 1)
 
 
-@api.get("/check_response_schema", response={400: int})
-def check_response_schema(request):
-    return 200, 1
+@api.get("/check_response_schema")
+def check_response_schema(request) -> Annotated[Response[int], 400]:
+    return Response(200, 1)
 
 
-@api.get("/check_no_content", response={204: None})
-def check_no_content(request, return_code: bool):
+@api.get("/check_no_content")
+def check_no_content(request, return_code: bool) -> Annotated[Response[None], 204]:
     if return_code:
-        return 204, None
-    return  # None
+        return Response(204, None)
+    return Response(204, None)
 
 
-@api.get(
-    "/check_multiple_codes",
-    response={codes_2xx: int, codes_3xx: str, ...: float},
-)
-def check_multiple_codes(request, code: int):
-    return code, "1"
+@api.get("/check_multiple_codes")
+def check_multiple_codes(
+    request, code: int
+) -> Annotated[Response[int], 200] | Annotated[Response[str], 300] | Annotated[Response[float], 400] | Annotated[Response[float], 500]:
+    return Response(code, "1")
 
 
 class User:
@@ -65,25 +64,25 @@ class ErrorModel(Schema):
     detail: str
 
 
-@api.get("/check_model", response={200: UserModel, 202: UserModel})
-def check_model(request):
-    return 202, User(1, "John", "Password")
+@api.get("/check_model")
+def check_model(request) -> Annotated[Response[UserModel], 200] | Annotated[Response[UserModel], 202]:
+    return Response(202, User(1, "John", "Password"))
 
 
-@api.get("/check_list_model", response={200: List[UserModel]})
-def check_list_model(request):
-    return 200, [User(1, "John", "Password")]
+@api.get("/check_list_model")
+def check_list_model(request) -> Annotated[Response[List[UserModel]], 200]:
+    return Response(200, [User(1, "John", "Password")])
 
 
-@api.get("/check_union", response={200: Union[int, UserModel], 400: ErrorModel})
-def check_union(request, q: int):
+@api.get("/check_union")
+def check_union(request, q: int) -> Annotated[Response[Union[int, UserModel]], 200] | Annotated[Response[ErrorModel], 400]:
     if q == 0:
-        return 200, 1
+        return Response(200, 1)
     if q == 1:
-        return 200, User(1, "John", "Password")
+        return Response(200, User(1, "John", "Password"))
     if q == 2:
-        return 400, {"detail": "error"}
-    return "invalid"
+        return Response(400, {"detail": "error"})
+    return Response(200, "invalid")
 
 
 client = TestClient(api)

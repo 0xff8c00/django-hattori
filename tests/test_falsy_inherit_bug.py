@@ -12,7 +12,9 @@ This same bug exists in operation.py _set_auth:
   When auth=[]: True and [] -> [], then [] or [[]] -> [[]]
 """
 
-from hattori import NinjaAPI, Router
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Response, Router
 from hattori.constants import NOT_SET
 from hattori.operation import Operation
 from hattori.security import APIKeyQuery
@@ -80,8 +82,8 @@ def test_api_auth_none_propagates():
     api = NinjaAPI(auth=None)
 
     @api.get("/test")
-    def endpoint(request):
-        return {"ok": True}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"ok": True})
 
     client = TestClient(api)
     response = client.get("/test")
@@ -93,8 +95,8 @@ def test_api_auth_empty_list_propagates():
     api = NinjaAPI(auth=[])
 
     @api.get("/test")
-    def endpoint(request):
-        return {"ok": True}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"ok": True})
 
     client = TestClient(api)
     response = client.get("/test")
@@ -106,28 +108,28 @@ def test_api_auth_none_all_methods():
     api = NinjaAPI(auth=None)
 
     @api.get("/get")
-    def get_ep(request):
-        return {"m": "get"}
+    def get_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "get"})
 
     @api.post("/post")
-    def post_ep(request):
-        return {"m": "post"}
+    def post_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "post"})
 
     @api.put("/put")
-    def put_ep(request):
-        return {"m": "put"}
+    def put_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "put"})
 
     @api.patch("/patch")
-    def patch_ep(request):
-        return {"m": "patch"}
+    def patch_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "patch"})
 
     @api.delete("/delete")
-    def delete_ep(request):
-        return {"m": "delete"}
+    def delete_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "delete"})
 
     @api.api_operation(["GET"], "/api-op")
-    def api_op_ep(request):
-        return {"m": "api_op"}
+    def api_op_ep(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"m": "api_op"})
 
     client = TestClient(api)
     assert client.get("/get").status_code == 200
@@ -146,8 +148,8 @@ def test_endpoint_auth_overrides_api_none():
     api = NinjaAPI(auth=None)
 
     @api.get("/protected", auth=KeyAuth())
-    def endpoint(request):
-        return {"auth": request.auth}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"auth": request.auth})
 
     client = TestClient(api)
     assert client.get("/protected").status_code == 401
@@ -162,8 +164,8 @@ def test_router_by_alias_false_propagates():
     router = Router(by_alias=False)
 
     @router.get("/test")
-    def endpoint(request):
-        return {"ok": True}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"ok": True})
 
     path_view = list(router.path_operations.values())[0]
     operation = path_view.operations[0]
@@ -177,8 +179,8 @@ def test_router_exclude_none_false_propagates():
     router = Router(exclude_none=False)
 
     @router.get("/test")
-    def endpoint(request):
-        return {"ok": True}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"ok": True})
 
     path_view = list(router.path_operations.values())[0]
     operation = path_view.operations[0]

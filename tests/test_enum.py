@@ -1,10 +1,10 @@
 from datetime import date
 from enum import Enum
-from typing import List, Optional
+from typing import Annotated, Any, List, Optional
 
 from pydantic import BaseModel
 
-from hattori import NinjaAPI, Query
+from hattori import NinjaAPI, Query, Response
 from hattori.testing import TestClient
 
 
@@ -29,30 +29,30 @@ api = NinjaAPI()
 
 
 @api.post("/book")
-def create_booking(request, booking: Booking):
-    return booking
+def create_booking(request, booking: Booking) -> Annotated[Response[Any], 200]:
+    return Response(200, booking)
 
 
 @api.get("/search")
-def booking_search(request, room: RoomEnum):
-    return {"room": room}
+def booking_search(request, room: RoomEnum) -> Annotated[Response[Any], 200]:
+    return Response(200, {"room": room})
 
 
 @api.get("/optional")
 def enum_optional(
     request, room: Optional[RoomEnum] = Query(None, description="description")
-):
-    return {"room": room}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"room": room})
 
 
 @api.get("/optional2")
-def enum_optional2(request, extra: Optional[ExtraEnum] = None):
-    return {"extra": extra}
+def enum_optional2(request, extra: Optional[ExtraEnum] = None) -> Annotated[Response[Any], 200]:
+    return Response(200, {"extra": extra})
 
 
 @api.get("/list")
-def enum_list(request, rooms: List[RoomEnum] = Query(None, description="description")):
-    return {"rooms": rooms}
+def enum_list(request, rooms: List[RoomEnum] = Query(None, description="description")) -> Annotated[Response[Any], 200]:
+    return Response(200, {"rooms": rooms})
 
 
 class QueryOnlyEnum(str, Enum):
@@ -63,8 +63,8 @@ class QueryOnlyEnum(str, Enum):
 @api.get("/new-list")
 def new_enum_list(
     request, q: List[QueryOnlyEnum] = Query(None, description="description")
-):
-    return {"q": q}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"q": q})
 
 
 client = TestClient(api)

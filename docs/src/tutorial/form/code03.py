@@ -1,5 +1,6 @@
-from hattori import Form, Schema
-from typing import Annotated, TypeVar
+from typing import Annotated, Any, TypeVar
+
+from hattori import Form, Response, Schema
 from pydantic import WrapValidator
 from pydantic_core import PydanticUseDefault
 
@@ -23,5 +24,5 @@ class Item(Schema):
 
 
 @api.post("/items-blank-default")
-def update(request, item: Form[Item]):
-    return item.dict()
+def update(request, item: Form[Item]) -> Annotated[Response[Any], 200]:
+    return Response(200, item.dict())

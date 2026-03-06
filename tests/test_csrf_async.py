@@ -1,7 +1,9 @@
+from typing import Annotated, Any
+
 import pytest
 from django.conf import settings
 
-from hattori import NinjaAPI
+from hattori import NinjaAPI, Response
 from hattori.security import APIKeyCookie
 from hattori.testing import TestAsyncClient as BaseTestAsyncClient
 
@@ -33,8 +35,8 @@ async def test_csrf_off():
     csrf_OFF = NinjaAPI(urls_namespace="csrf_OFF")
 
     @csrf_OFF.post("/post")
-    async def post_off(request):
-        return {"success": True}
+    async def post_off(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"success": True})
 
     client = TestAsyncClient(csrf_OFF)
     response = await client.post("/post", COOKIES=COOKIES)
@@ -46,8 +48,8 @@ async def test_csrf_on():
     csrf_ON = NinjaAPI(urls_namespace="csrf_ON", auth=AnyCookieAuth())
 
     @csrf_ON.post("/post")
-    async def post_on(request):
-        return {"success": True}
+    async def post_on(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"success": True})
 
     client = TestAsyncClient(csrf_ON)
 
@@ -73,8 +75,8 @@ async def test_csrf_exempt_async():
     csrf_ON = NinjaAPI(urls_namespace="csrf_exempt_async", auth=AnyCookieAuth())
 
     # Define the async function and manually set csrf_exempt attribute
-    async def post_on_with_exempt(request):
-        return {"success": True}
+    async def post_on_with_exempt(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"success": True})
 
     # Manually set the csrf_exempt attribute (simulating what @csrf_exempt would do)
     post_on_with_exempt.csrf_exempt = True

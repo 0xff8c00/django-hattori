@@ -1,18 +1,18 @@
 import inspect
-import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Coroutine,
     Dict,
-    Iterable,
     List,
     Optional,
     Sequence,
     Type,
     Union,
     cast,
+    get_args,
+    get_origin,
 )
 
 import pydantic
@@ -25,8 +25,10 @@ from django.http import (
 )
 from django.http.response import HttpResponseBase
 from pydantic import BaseModel
+from typing_extensions import Annotated, get_type_hints
 
 from hattori.compatibility.files import FIX_MIDDLEWARE_PATH, need_to_fix_request_files
+from hattori.compatibility.util import UNION_TYPES
 from hattori.constants import NOT_SET, NOT_SET_TYPE
 from hattori.errors import (
     AuthenticationError,
@@ -35,10 +37,10 @@ from hattori.errors import (
     ValidationErrorContext,
 )
 from hattori.params.models import TModels
-from hattori.responses import Status
+from hattori.responses import Response
 from hattori.schema import Schema
 from hattori.signature import ViewSignature, is_async
-from hattori.streaming import StreamFormat, _serialize_item, _StreamAlias
+from hattori.streaming import StreamFormat, _StreamAlias, _serialize_item
 from hattori.throttling import BaseThrottle
 from hattori.types import DictStrAny
 from hattori.utils import is_async_callable
@@ -47,6 +49,86 @@ if TYPE_CHECKING:
     from hattori import NinjaAPI  # pragma: no cover
 
 __all__ = ["Operation", "PathView"]
+
+
+class _ParsedAnnotation:
+    __slots__ = ("response_models", "stream_alias")
+
+    def __init__(self) -> None:
+        self.response_models: Dict[int, Any] = {}
+        self.stream_alias: Optional[_StreamAlias] = None
+
+
+def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
+    """Extract {status_code: schema_type} from the function's return type annotation.
+
+    Expects return types of the form:
+        -> Annotated[Response[Item], 200]
+        -> Annotated[Response[Item], 200] | Annotated[Response[Error], 404]
+        -> Annotated[Response[JSONL[Item]], 200]  (streaming)
+    """
+    hints = get_type_hints(view_func, include_extras=True)
+    annotation = hints.get("return", inspect.Parameter.empty)
+
+    # If the function has no return annotation, check __wrapped__ (for decorators
+    # that don't use functools.wraps)
+    if annotation is inspect.Parameter.empty and hasattr(view_func, "__wrapped__"):
+        hints = get_type_hints(view_func.__wrapped__, include_extras=True)
+        annotation = hints.get("return", inspect.Parameter.empty)
+
+    if annotation is inspect.Parameter.empty:
+        raise ConfigError(
+            f"Function {view_func.__name__} must have a return type annotation. "
+            f"Example: -> Annotated[Response[Item], 200]"
+        )
+
+    # Collect all arms of a Union (or just the single annotation)
+    origin = get_origin(annotation)
+    if origin in UNION_TYPES:
+        arms = get_args(annotation)
+    else:
+        arms = (annotation,)
+
+    parsed = _ParsedAnnotation()
+    for arm in arms:
+        arm_origin = get_origin(arm)
+        if arm_origin is not Annotated:
+            raise ConfigError(
+                f"Return type annotation for {view_func.__name__} must use "
+                f"Annotated[Response[T], status_code]. Got: {arm}"
+            )
+        arm_args = get_args(arm)
+        # arm_args = (Response[Item], 200)
+        if len(arm_args) < 2 or not isinstance(arm_args[1], int):
+            raise ConfigError(
+                f"Return type annotation for {view_func.__name__} must have an int "
+                f"status code as second Annotated argument. Got: {arm_args}"
+            )
+
+        response_type = arm_args[0]  # Response[Item]
+        status_code = arm_args[1]
+
+        # Extract T from Response[T]
+        resp_origin = get_origin(response_type)
+        if resp_origin is not Response:
+            raise ConfigError(
+                f"Return type annotation for {view_func.__name__} must use "
+                f"Response[T] inside Annotated. Got: {response_type}"
+            )
+        resp_args = get_args(response_type)
+        if not resp_args:
+            raise ConfigError(
+                f"Response must be parameterized with a type, e.g. Response[Item]. "
+                f"Got bare Response in {view_func.__name__}"
+            )
+
+        schema_type = resp_args[0]  # Item or _StreamAlias
+        if isinstance(schema_type, _StreamAlias):
+            parsed.stream_alias = schema_type
+            schema_type = schema_type.item_type
+        parsed.response_models[status_code] = schema_type
+
+    return parsed
 
 
 class Operation:
@@ -58,7 +140,6 @@ class Operation:
         *,
         auth: Optional[Union[Sequence[Callable], Callable, NOT_SET_TYPE]] = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -102,21 +183,25 @@ class Operation:
         self.stream_format: Optional[Type[StreamFormat]] = None
         self.stream_item_model: Optional[Type[Schema]] = None
         self.response_models: Dict[Any, Any]
-        if isinstance(response, _StreamAlias):
-            self.stream_format = response.format_cls
-            self.stream_item_model = self._create_response_model(response.item_type)
-            self.response_models = {200: self.stream_item_model}
-        elif response is NOT_SET:
-            self.response_models = {200: NOT_SET}
-        elif isinstance(response, dict):
-            self.response_models = self._create_response_model_multiple(response)
-        else:
-            self.response_models = {200: self._create_response_model(response)}
+
+        # Parse response schema from return type annotation
+        parsed = _parse_return_annotation(view_func)
+        if parsed.stream_alias is not None:
+            self.stream_format = parsed.stream_alias.format_cls
+        self.response_models = {}
+        for status_code, schema_type in parsed.response_models.items():
+            if schema_type is type(None):
+                self.response_models[status_code] = None
+            else:
+                self.response_models[status_code] = self._create_response_model(schema_type)
+        if self.stream_format and self.response_models:
+            first_model = next(iter(self.response_models.values()))
+            self.stream_item_model = first_model
 
         self._resp_annotations: Dict[int, Any] = {
             id(model): model.model_fields["response"].annotation
             for model in self.response_models.values()
-            if model is not NOT_SET and model is not None
+            if model is not None
         }
 
         if need_to_fix_request_files(methods, self.models):
@@ -346,45 +431,36 @@ class Operation:
         """
         The protocol for results
          - if HttpResponse - returns as is
-         - if Status object - uses status code + body
-         - if tuple with 2 elements - means http_code + body (deprecated)
-         - otherwise it's a body
+         - if Response object - uses status code + value
         """
         if isinstance(result, HttpResponseBase):
             return result
 
-        status: int = 200
-        if len(self.response_models) == 1:
-            status = next(iter(self.response_models))
-
-        if isinstance(result, Status):
-            status = result.status_code
-            result = result.value
-        elif isinstance(result, tuple) and len(result) == 2:
-            warnings.warn(
-                "Returning tuple (status_code, response) is deprecated. "
-                "Use Status(status_code, response) instead.",
-                DeprecationWarning,
-                stacklevel=2,
+        if not isinstance(result, Response):
+            raise ConfigError(
+                f"View {self.view_func.__name__} must return a Response object. "
+                f"Got: {type(result).__name__}"
             )
-            status, result = result
+
+        status: int = result.status_code
+        result = result.value
 
         if status in self.response_models:
             response_model = self.response_models[status]
-        elif Ellipsis in self.response_models:
-            response_model = self.response_models[Ellipsis]
         else:
-            raise ConfigError(
-                f"Schema for status {status} is not set in response"
-                f" {self.response_models.keys()}"
-            )
+            # Fall back to range matching: e.g., status 201 matches model for 200
+            base_status = (status // 100) * 100
+            if base_status in self.response_models:
+                response_model = self.response_models[base_status]
+            elif Ellipsis in self.response_models:
+                response_model = self.response_models[Ellipsis]
+            else:
+                raise ConfigError(
+                    f"Schema for status {status} is not set in response"
+                    f" {self.response_models.keys()}"
+                )
 
         temporal_response.status_code = status
-
-        if response_model is NOT_SET:
-            return self.api.create_response(
-                request, result, temporal_response=temporal_response
-            )
 
         if response_model is None:
             # Empty response.
@@ -395,7 +471,8 @@ class Operation:
         # Skip re-validation for pydantic model instances matching the response type
         resp_annotation = self._resp_annotations[id(response_model)]
         if (
-            isinstance(resp_annotation, type)
+            resp_annotation is not Any
+            and isinstance(resp_annotation, type)
             and isinstance(result, BaseModel)
             and isinstance(result, resp_annotation)
         ):
@@ -446,16 +523,6 @@ class Operation:
         if self.signature.response_arg:
             values[self.signature.response_arg] = temporal_response
         return values
-
-    def _create_response_model_multiple(
-        self, response_param: DictStrAny
-    ) -> Dict[str, Optional[Type[Schema]]]:
-        result = {}
-        for key, model in response_param.items():
-            status_codes = isinstance(key, Iterable) and key or [key]
-            for code in status_codes:
-                result[code] = self._create_response_model(model)
-        return result
 
     def _create_response_model(self, response_param: Any) -> Optional[Type[Schema]]:
         if response_param is None:
@@ -579,7 +646,6 @@ class PathView:
         *,
         auth: Optional[Union[Sequence[Callable], Callable, NOT_SET_TYPE]] = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -597,10 +663,7 @@ class PathView:
             self.url_name = url_name
 
         OperationClass = Operation
-        is_streaming = isinstance(response, _StreamAlias)
-        if is_async(view_func) or (
-            is_streaming and inspect.isasyncgenfunction(view_func)
-        ):
+        if is_async(view_func) or inspect.isasyncgenfunction(view_func):
             self.is_async = True
             OperationClass = AsyncOperation
 
@@ -610,7 +673,6 @@ class PathView:
             view_func,
             auth=auth,
             throttle=throttle,
-            response=response,
             operation_id=operation_id,
             summary=summary,
             description=description,

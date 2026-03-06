@@ -1,7 +1,9 @@
+from typing import Annotated, Any
+
 import pytest
 from main import router
 
-from hattori import Router
+from hattori import Response, Router
 from hattori.testing import TestClient
 
 client = TestClient(router)
@@ -369,7 +371,7 @@ def test_path_signature_asserts_default():
     with pytest.raises(AssertionError, match=match):
 
         @test_router.get("/path/{item_id}")
-        def get_path_item_id(request, item_id="1"):
+        def get_path_item_id(request, item_id="1") -> Annotated[Response[Any], 200]:
             pass
 
 
@@ -383,5 +385,5 @@ def test_path_signature_warns_missing():
     with pytest.warns(UserWarning, match=match):
 
         @test_router.get("/path/{a_path_param}/{another_path_param}")
-        def get_path_item_id(request):
+        def get_path_item_id(request) -> Annotated[Response[Any], 200]:
             pass

@@ -1,10 +1,11 @@
 import json
+from typing import Annotated
 
 import pytest
 from django.http import HttpResponse
 
-from hattori import NinjaAPI, Schema
-from hattori.streaming import JSONL, SSE, StreamFormat
+from hattori import JSONL, SSE, NinjaAPI, Response, Schema
+from hattori.streaming import StreamFormat
 from hattori.testing import TestAsyncClient, TestClient
 
 
@@ -18,30 +19,30 @@ class Item(Schema):
 api = NinjaAPI()
 
 
-@api.get("/jsonl/items", response=JSONL[Item])
-def jsonl_items(request):
+@api.get("/jsonl/items")
+def jsonl_items(request) -> Annotated[Response[JSONL[Item]], 200]:
     for i in range(3):
         yield {"name": f"item-{i}", "price": float(i)}
 
 
-@api.get("/sse/items", response=SSE[Item])
-def sse_items(request):
+@api.get("/sse/items")
+def sse_items(request) -> Annotated[Response[SSE[Item]], 200]:
     for i in range(3):
         yield {"name": f"item-{i}", "price": float(i)}
 
 
-@api.post("/jsonl/echo", response=JSONL[Item])
-def jsonl_echo(request):
+@api.post("/jsonl/echo")
+def jsonl_echo(request) -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": "posted", "price": 1.0}
 
 
-@api.get("/jsonl/with-params/{item_id}", response=JSONL[Item])
-def jsonl_with_params(request, item_id: int, q: str = "default"):
+@api.get("/jsonl/with-params/{item_id}")
+def jsonl_with_params(request, item_id: int, q: str = "default") -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": f"item-{item_id}-{q}", "price": 0.0}
 
 
-@api.get("/jsonl/with-headers", response=JSONL[Item])
-def jsonl_with_headers(request, response: HttpResponse):
+@api.get("/jsonl/with-headers")
+def jsonl_with_headers(request, response: HttpResponse) -> Annotated[Response[JSONL[Item]], 200]:
     response["X-Custom"] = "hello"
     response.set_cookie("session", "abc123")
     yield {"name": "with-headers", "price": 0.0}
@@ -121,20 +122,20 @@ class TestStreamingHeaders:
 async_api = NinjaAPI()
 
 
-@async_api.get("/jsonl/items", response=JSONL[Item])
-async def async_jsonl_items(request):
+@async_api.get("/jsonl/items")
+async def async_jsonl_items(request) -> Annotated[Response[JSONL[Item]], 200]:
     for i in range(3):
         yield {"name": f"item-{i}", "price": float(i)}
 
 
-@async_api.get("/sse/items", response=SSE[Item])
-async def async_sse_items(request):
+@async_api.get("/sse/items")
+async def async_sse_items(request) -> Annotated[Response[SSE[Item]], 200]:
     for i in range(3):
         yield {"name": f"item-{i}", "price": float(i)}
 
 
-@async_api.get("/jsonl/with-headers", response=JSONL[Item])
-async def async_jsonl_with_headers(request, response: HttpResponse):
+@async_api.get("/jsonl/with-headers")
+async def async_jsonl_with_headers(request, response: HttpResponse) -> Annotated[Response[JSONL[Item]], 200]:
     response["X-Custom"] = "async-hello"
     response.set_cookie("token", "xyz")
     yield {"name": "async-headers", "price": 0.0}
@@ -214,8 +215,8 @@ class NDJSON(StreamFormat):
 custom_api = NinjaAPI()
 
 
-@custom_api.get("/ndjson/items", response=NDJSON[Item])
-def ndjson_items(request):
+@custom_api.get("/ndjson/items")
+def ndjson_items(request) -> Annotated[Response[NDJSON[Item]], 200]:
     for i in range(2):
         yield {"name": f"item-{i}", "price": float(i)}
 
@@ -243,18 +244,18 @@ class TestCustomFormat:
 multi_api = NinjaAPI()
 
 
-@multi_api.patch("/patch-stream", response=JSONL[Item])
-def patch_stream(request):
+@multi_api.patch("/patch-stream")
+def patch_stream(request) -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": "patched", "price": 0.0}
 
 
-@multi_api.put("/put-stream", response=JSONL[Item])
-def put_stream(request):
+@multi_api.put("/put-stream")
+def put_stream(request) -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": "put", "price": 0.0}
 
 
-@multi_api.delete("/delete-stream", response=JSONL[Item])
-def delete_stream(request):
+@multi_api.delete("/delete-stream")
+def delete_stream(request) -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": "deleted", "price": 0.0}
 
 

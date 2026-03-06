@@ -1,4 +1,6 @@
-from hattori import NinjaAPI, Schema
+from typing import Annotated
+
+from hattori import NinjaAPI, Response, Schema
 from hattori.testing import TestClient
 
 
@@ -34,9 +36,9 @@ class DataWithRequestContext(Schema):
 api = NinjaAPI()
 
 
-@api.post("/resolve_ctx", response=DataWithRequestContext)
-def resolve_ctx(request, data: DataWithRequestContext):
-    return {"other": data.dict()}
+@api.post("/resolve_ctx")
+def resolve_ctx(request, data: DataWithRequestContext) -> Annotated[Response[DataWithRequestContext], 200]:
+    return Response(200, {"other": data.dict()})
 
 
 client = TestClient(api)

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
-from typing import Any, FrozenSet
+from typing import Any, FrozenSet, Generic, TypeVar
 
 import orjson
 from django.http import HttpResponse
@@ -12,6 +12,7 @@ from pydantic_core import Url
 
 __all__ = [
     "Response",
+    "JsonResponse",
     "Status",
     "json_default",
     "json_dumps",
@@ -25,6 +26,30 @@ __all__ = [
 ]
 
 JSON_OPT = orjson.OPT_UTC_Z | orjson.OPT_NON_STR_KEYS
+
+T = TypeVar("T")
+
+
+class Response(Generic[T]):
+    """Typed API response with explicit status code.
+
+    Usage::
+
+        from typing import Annotated
+        from hattori import Response
+
+        @api.get("/items/{id}")
+        def get_item(request, id: int) -> Annotated[Response[Item], 200] | Annotated[Response[Error], 404]:
+            if not found:
+                return Response(404, Error(message="not found"))
+            return Response(200, item)
+    """
+
+    __slots__ = ("status_code", "value")
+
+    def __init__(self, status_code: int, value: T) -> None:
+        self.status_code = status_code
+        self.value = value
 
 
 class Status:
@@ -66,7 +91,7 @@ def json_loads(data: Any) -> Any:
     return orjson.loads(data)
 
 
-class Response(HttpResponse):
+class JsonResponse(HttpResponse):
     def __init__(self, data: Any, **kwargs: Any) -> None:
         kwargs.setdefault("content_type", "application/json")
         super().__init__(content=json_dumps(data), **kwargs)

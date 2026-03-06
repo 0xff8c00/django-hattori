@@ -1,30 +1,32 @@
-from hattori import NinjaAPI
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Response
 
 api = NinjaAPI()
 
 
 @api.get("/operation1", operation_id="my_id")
-def operation_1(request):
+def operation_1(request) -> Annotated[Response[Any], 200]:
     """
     This will be in description
     """
-    return {"docstrings": True}
+    return Response(200, {"docstrings": True})
 
 
 @api.get("/operation2", description="description from argument", deprecated=True)
-def operation2(request):
-    return {"description": True, "deprecated": True}
+def operation2(request) -> Annotated[Response[Any], 200]:
+    return Response(200, {"description": True, "deprecated": True})
 
 
 @api.get("/operation3", summary="Summary from argument", description="description arg")
-def operation3(request):
+def operation3(request) -> Annotated[Response[Any], 200]:
     "This one also has docstring description"
-    return {"summary": True, "description": "multiple"}
+    return Response(200, {"summary": True, "description": "multiple"})
 
 
 @api.get("/operation4", tags=["tag1", "tag2"])
-def operation4(request):
-    return {"tags": True}
+def operation4(request) -> Annotated[Response[Any], 200]:
+    return Response(200, {"tags": True})
 
 
 @api.get(
@@ -48,13 +50,13 @@ def operation4(request):
         },
     },
 )
-def operation5(request):
-    return {"openapi_extra": True}
+def operation5(request) -> Annotated[Response[Any], 200]:
+    return Response(200, {"openapi_extra": True})
 
 
 @api.get("/not-included", include_in_schema=False)
-def not_included(request):
-    return True
+def not_included(request) -> Annotated[Response[Any], 200]:
+    return Response(200, True)
 
 
 schema = api.get_openapi_schema()

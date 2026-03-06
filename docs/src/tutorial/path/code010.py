@@ -1,5 +1,6 @@
 import datetime
-from hattori import Schema, Path
+from typing import Annotated, Any
+from hattori import Response, Schema, Path
 
 
 class PathDate(Schema):
@@ -12,5 +13,5 @@ class PathDate(Schema):
 
 
 @api.get("/events/{year}/{month}/{day}")
-def events(request, date: Path[PathDate]):
-    return {"date": date.value()}
+def events(request, date: Path[PathDate]) -> Annotated[Response[Any], 200]:
+    return Response(200, {"date": date.value()})

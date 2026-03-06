@@ -1,4 +1,6 @@
-from hattori import NinjaAPI
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Response
 from hattori.security import HttpBearer
 
 api = NinjaAPI()
@@ -18,5 +20,5 @@ class AuthBearer(HttpBearer):
 
 
 @api.get("/bearer", auth=AuthBearer())
-def bearer(request):
-    return {"token": request.auth}
+def bearer(request) -> Annotated[Response[Any], 200]:
+    return Response(200, {"token": request.auth})

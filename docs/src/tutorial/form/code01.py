@@ -1,4 +1,6 @@
-from hattori import Form, Schema
+from typing import Annotated, Any
+
+from hattori import Form, Response, Schema
 
 
 class Item(Schema):
@@ -9,5 +11,5 @@ class Item(Schema):
 
 
 @api.post("/items")
-def create(request, item: Form[Item]):
-    return item
+def create(request, item: Form[Item]) -> Annotated[Response[Any], 200]:
+    return Response(200, item)

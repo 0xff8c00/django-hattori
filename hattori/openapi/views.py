@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, NoReturn
 from django.http import Http404, HttpRequest, HttpResponse
 
 from hattori.openapi.docs import DocsBase
-from hattori.responses import Response
+from hattori.responses import JsonResponse
 
 if TYPE_CHECKING:
     # if anyone knows a cleaner way to make mypy happy - welcome
@@ -18,7 +18,7 @@ def default_home(request: HttpRequest, api: "NinjaAPI", **kwargs: Any) -> NoRetu
 
 def openapi_json(request: HttpRequest, api: "NinjaAPI", **kwargs: Any) -> HttpResponse:
     schema = api.get_openapi_schema(path_params=kwargs)
-    return Response(schema)
+    return JsonResponse(schema)
 
 
 def openapi_view(request: HttpRequest, api: "NinjaAPI", **kwargs: Any) -> HttpResponse:

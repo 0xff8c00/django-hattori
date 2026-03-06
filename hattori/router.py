@@ -234,7 +234,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -253,7 +253,7 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -274,7 +274,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -293,7 +293,7 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -314,7 +314,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -333,7 +333,7 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -354,7 +354,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -373,7 +373,7 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -394,7 +394,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -413,7 +413,7 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -435,7 +435,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -456,7 +456,7 @@ class Router:
                 view_func,
                 auth=auth,
                 throttle=throttle,
-                response=response,
+    
                 operation_id=operation_id,
                 summary=summary,
                 description=description,
@@ -482,7 +482,7 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        response: Any = NOT_SET,
+
         operation_id: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -524,7 +524,7 @@ class Router:
             view_func=view_func,
             auth=auth,
             throttle=throttle,
-            response=response,
+
             operation_id=operation_id,
             summary=summary,
             description=description,

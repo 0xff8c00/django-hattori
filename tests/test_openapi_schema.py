@@ -23,6 +23,7 @@ from hattori import (
 )
 from hattori.openapi.urls import get_openapi_urls
 from hattori.renderers import JSONRenderer
+from hattori.responses import Response as ApiResponse
 
 api = NinjaAPI()
 
@@ -72,108 +73,107 @@ class Response(Schema):
     f: float = Field(..., title="f title", description="f desc")
 
 
-@api.post("/test", response=Response)
-def method(request, data: Payload):
-    return data.dict()
+@api.post("/test")
+def method(request, data: Payload) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, data.dict())
 
 
-@api.post("/test-alias", response=Response, by_alias=True)
-def method_alias(request, data: Payload):
-    return data.dict()
+@api.post("/test-alias", by_alias=True)
+def method_alias(request, data: Payload) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, data.dict())
 
 
-@api.post("/test_list", response=List[Response])
-def method_list_response(request, data: List[Payload]):
-    return []
+@api.post("/test_list")
+def method_list_response(request, data: List[Payload]) -> Annotated[ApiResponse[List[Response]], 200]:
+    return ApiResponse(200, [])
 
 
-@api.post("/test-body", response=Response)
-def method_body(request, i: int = Body(...), f: float = Body(...)):
-    return dict(i=i, f=f)
+@api.post("/test-body")
+def method_body(request, i: int = Body(...), f: float = Body(...)) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=i, f=f))
 
 
-@api.post("/test-body-schema", response=Response)
-def method_body_schema(request, data: Payload):
-    return dict(i=data.i, f=data.f)
+@api.post("/test-body-schema")
+def method_body_schema(request, data: Payload) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
-@api.get("/test-path/{int:i}/{f}", response=Response)
+@api.get("/test-path/{int:i}/{f}")
 def method_path(
     request,
     i: int,
     f: float,
-):
-    return dict(i=i, f=f)
+) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=i, f=f))
 
 
-@api.get("/test-pathex/{path_ex}", response=AnnotatedStr)
+@api.get("/test-pathex/{path_ex}")
 def method_pathex(
     request,
     path_ex: PathEx[
         AnnotatedStr,
         P(description="path_ex description"),
     ],
-):
-    return path_ex
+) -> Annotated[ApiResponse[AnnotatedStr], 200]:
+    return ApiResponse(200, path_ex)
 
 
-@api.post("/test-form", response=Response)
-def method_form(request, data: Payload = Form(...)):
-    return dict(i=data.i, f=data.f)
+@api.post("/test-form")
+def method_form(request, data: Payload = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
-@api.post("/test-form-single", response=Response)
-def method_form_single(request, data: float = Form(...)):
-    return dict(i=int(data), f=data)
+@api.post("/test-form-single")
+def method_form_single(request, data: float = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=int(data), f=data))
 
 
-@api.post("/test-form-body", response=Response)
-def method_form_body(request, i: int = Form(10), s: str = Body("10")):
-    return dict(i=i, s=s)
+@api.post("/test-form-body")
+def method_form_body(request, i: int = Form(10), s: str = Body("10")) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=i, s=s))
 
 
-@api.post("/test-form-file", response=Response)
-def method_form_file(request, files: List[UploadedFile], data: Payload = Form(...)):
-    return dict(i=data.i, f=data.f)
+@api.post("/test-form-file")
+def method_form_file(request, files: List[UploadedFile], data: Payload = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
-@api.post("/test-body-file", response=Response)
+@api.post("/test-body-file")
 def method_body_file(
     request,
     files: List[UploadedFile],
     body: Payload = Body(...),
-):
-    return dict(i=body.i, f=body.f)
+) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=body.i, f=body.f))
 
 
-@api.post("/test-union-type", response=Response)
-def method_union_payload(request, data: Union[TypeA, TypeB]):
-    return dict(i=data.i, f=data.f)
+@api.post("/test-union-type")
+def method_union_payload(request, data: Union[TypeA, TypeB]) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
-@api.post("/test-union-type-with-simple", response=Response)
-def method_union_payload_and_simple(request, data: Union[int, TypeB]):
-    return data.dict()
+@api.post("/test-union-type-with-simple")
+def method_union_payload_and_simple(request, data: Union[int, TypeB]) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, data.dict())
 
 
-@api.post("/test-new-union-type", response=Response)
-def method_new_union_payload(request, data: "TypeA | TypeB"):
-    return dict(i=data.i, f=data.f)
+@api.post("/test-new-union-type")
+def method_new_union_payload(request, data: "TypeA | TypeB") -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
 @api.post(
     "/test-title-description/",
     tags=["a-tag"],
     summary="Best API Ever",
-    response=Response,
 )
 def method_test_title_description(
     request,
     param1: int = Query(..., title="param 1 title"),
     param2: str = Query("A Default", description="param 2 desc"),
     file: UploadedFile = File(..., description="file param desc"),
-):
-    return dict(i=param1, f=param2)
+) -> Annotated[ApiResponse[Response], 200]:
+    return ApiResponse(200, dict(i=param1, f=param2))
 
 
 @api.post("/test-deprecated-example-examples/")
@@ -197,8 +197,8 @@ def method_test_deprecated_example_examples(
         },
     ),
     param4: int = Query(None, deprecated=True, include_in_schema=False),
-):
-    return dict(i=param2, f=param3)
+) -> Annotated[ApiResponse[Any], 200]:
+    return ApiResponse(200, dict(i=param2, f=param3))
 
 
 def test_schema_views(client: Client):
@@ -949,11 +949,11 @@ def test_unique_operation_ids(capsys):
     api = NinjaAPI()
 
     @api.get("/1")
-    def same_name(request):
+    def same_name(request) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.get("/2")  # noqa: F811
-    def same_name(request):  # noqa: F811
+    def same_name(request) -> Annotated[ApiResponse[Any], 200]:  # noqa: F811
         pass
 
     api.get_openapi_schema()
@@ -984,10 +984,10 @@ class TestRenderer(JSONRenderer):
 def test_renderer_media_type():
     api = NinjaAPI(renderer=TestRenderer)
 
-    @api.get("/1", response=TypeA)
+    @api.get("/1")
     def same_name(
         request,
-    ):
+    ) -> Annotated[ApiResponse[TypeA], 200]:
         pass
 
     schema = api.get_openapi_schema()
@@ -1008,21 +1008,21 @@ def test_all_paths_rendered():
     @api.post("/1")
     def some_name_create(
         request,
-    ):
+    ) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.get("/1")
     def some_name_list(
         request,
-    ):
+    ) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.get("/1/{param}")
-    def some_name_get_one(request, param: int):
+    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.delete("/1/{param}")
-    def some_name_delete(request, param: int):
+    def some_name_delete(request, param: int) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     schema = api.get_openapi_schema()
@@ -1038,21 +1038,21 @@ def test_all_paths_typed_params_rendered():
     @api.post("/1")
     def some_name_create(
         request,
-    ):
+    ) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.get("/1")
     def some_name_list(
         request,
-    ):
+    ) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.get("/1/{int:param}")
-    def some_name_get_one(request, param: int):
+    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     @api.delete("/1/{str:param}")
-    def some_name_delete(request, param: str):
+    def some_name_delete(request, param: str) -> Annotated[ApiResponse[Any], 200]:
         pass
 
     schema = api.get_openapi_schema()
@@ -1070,9 +1070,9 @@ def test_by_alias_uses_serialization_alias_simple():
         uuid: str = Field(..., serialization_alias="id")
         name: str = Field(..., serialization_alias="fullName")
 
-    @api.get("/person", response={200: PersonOut}, by_alias=True)
-    def get_user(request):
-        return {"uuid": uuid4(), "fullname": "John Snow"}
+    @api.get("/person", by_alias=True)
+    def get_user(request) -> Annotated[ApiResponse[PersonOut], 200]:
+        return ApiResponse(200, {"uuid": uuid4(), "fullname": "John Snow"})
 
     schema = api.get_openapi_schema()
     user_alias_schema = schema["components"]["schemas"]["PersonOut"]
@@ -1096,8 +1096,8 @@ def test_by_alias_uses_validation_alias_simple():
         name: str = Field(..., validation_alias="fullName")
 
     @api.get("/person", by_alias=True)
-    def get_user(request, param: PersonIn):
-        return {"uuid": uuid4(), "fullname": "John Snow"}
+    def get_user(request, param: PersonIn) -> Annotated[ApiResponse[Any], 200]:
+        return ApiResponse(200, {"uuid": uuid4(), "fullname": "John Snow"})
 
     schema = api.get_openapi_schema()
     user_alias_schema = schema["components"]["schemas"]["PersonIn"]
@@ -1123,9 +1123,9 @@ def test_by_alias_uses_serialization_alias_model():
         uuid: str = Field(..., serialization_alias="id")
         created: datetime
 
-    @api.get("/person", response={200: PersonModelOut}, by_alias=True)
-    def get_user(request):
-        return {"uuid": "abc", "created": "2024-01-01T00:00:00"}
+    @api.get("/person", by_alias=True)
+    def get_user(request) -> Annotated[ApiResponse[PersonModelOut], 200]:
+        return ApiResponse(200, {"uuid": "abc", "created": "2024-01-01T00:00:00"})
 
     schema = api.get_openapi_schema()
     user_alias_schema = schema["components"]["schemas"]["PersonModelOut"]
@@ -1143,9 +1143,9 @@ def test_by_alias_uses_serialization_alias_model():
 def test_422_auto_documented():
     api = NinjaAPI()
 
-    @api.get("/items", response={200: TypeA})
-    def get_items(request, q: str = Query(...)):
-        return {"a": q}
+    @api.get("/items")
+    def get_items(request, q: str = Query(...)) -> Annotated[ApiResponse[TypeA], 200]:
+        return ApiResponse(200, {"a": q})
 
     schema = api.get_openapi_schema()
     method = schema["paths"]["/api/items"]["get"]
@@ -1162,9 +1162,9 @@ def test_422_auto_documented():
 def test_422_not_on_parameterless():
     api = NinjaAPI()
 
-    @api.get("/ping", response={200: TypeA})
-    def ping(request):
-        return {"a": "pong"}
+    @api.get("/ping")
+    def ping(request) -> Annotated[ApiResponse[TypeA], 200]:
+        return ApiResponse(200, {"a": "pong"})
 
     schema = api.get_openapi_schema()
     method = schema["paths"]["/api/ping"]["get"]
@@ -1177,9 +1177,9 @@ def test_422_not_overwritten():
     class CustomError(Schema):
         error: str
 
-    @api.get("/items", response={200: TypeA, 422: CustomError})
-    def get_items(request, q: str = Query(...)):
-        return {"a": q}
+    @api.get("/items")
+    def get_items(request, q: str = Query(...)) -> Annotated[ApiResponse[TypeA], 200] | Annotated[ApiResponse[CustomError], 422]:
+        return ApiResponse(200, {"a": q})
 
     schema = api.get_openapi_schema()
     method = schema["paths"]["/api/items"]["get"]

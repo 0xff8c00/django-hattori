@@ -1,6 +1,8 @@
+from typing import Annotated, Any
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from hattori import File, Form, NinjaAPI, UploadedFile
+from hattori import File, Form, NinjaAPI, Response, UploadedFile
 from hattori.testing import TestClient
 
 api = NinjaAPI()
@@ -12,8 +14,8 @@ def str_and_file(
     title: str = Form(...),
     description: str = Form(""),
     file: UploadedFile = File(...),
-):
-    return {"title": title, "data": file.read().decode()}
+) -> Annotated[Response[Any], 200]:
+    return Response(200, {"title": title, "data": file.read().decode()})
 
 
 client = TestClient(api)

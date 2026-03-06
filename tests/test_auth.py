@@ -1,9 +1,10 @@
+from typing import Annotated, Any
 from unittest.mock import Mock
 
 import pytest
 from django.utils.asyncio import async_unsafe
 
-from hattori import NinjaAPI
+from hattori import NinjaAPI, Response
 from hattori.errors import AuthorizationError, ConfigError
 from hattori.security import (
     APIKeyCookie,
@@ -80,8 +81,8 @@ class AsyncBearerAuth(HttpBearer):
             raise AuthorizationError
 
 
-def demo_operation(request):
-    return {"auth": request.auth}
+def demo_operation(request) -> Annotated[Response[Any], 200]:
+    return Response(200, {"auth": request.auth})
 
 
 api = NinjaAPI()
@@ -387,8 +388,8 @@ async def test_async_auth():
             _sync_auth_called = True
             return True
 
-    async def handle_request(request):
-        return {"ok": True}
+    async def handle_request(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"ok": True})
 
     api = NinjaAPI()
     api.get("/foobar", auth=[AsyncAuth(), SyncAuth()])(handle_request)

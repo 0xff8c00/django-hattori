@@ -1,28 +1,28 @@
 import json
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
-from typing import List, Union
+from typing import Annotated, Any, List, Union
 
 import pytest
 from django.http import HttpResponse
 from pydantic import BaseModel, ValidationError
 from pydantic_core import Url
 
-from hattori import Router
-from hattori.responses import Response
+from hattori import Response, Router
+from hattori.responses import JsonResponse
 from hattori.testing import TestClient
 
 router = Router()
 
 
-@router.get("/check_int", response=int)
-def check_int(request):
-    return "1"
+@router.get("/check_int")
+def check_int(request) -> Annotated[Response[int], 200]:
+    return Response(200, "1")
 
 
-@router.get("/check_int2", response=int)
-def check_int2(request):
-    return "str"
+@router.get("/check_int2")
+def check_int2(request) -> Annotated[Response[int], 200]:
+    return Response(200, "str")
 
 
 class User:
@@ -54,47 +54,47 @@ class UserModel(BaseModel):
     )
 
 
-@router.get("/check_model", response=UserModel)
-def check_model(request):
-    return User(1, "John", "Password")
+@router.get("/check_model")
+def check_model(request) -> Annotated[Response[UserModel], 200]:
+    return Response(200, User(1, "John", "Password"))
 
 
-@router.get("/check_list_model", response=List[UserModel])
-def check_list_model(request):
-    return [User(1, "John", "Password")]
+@router.get("/check_list_model")
+def check_list_model(request) -> Annotated[Response[List[UserModel]], 200]:
+    return Response(200, [User(1, "John", "Password")])
 
 
-@router.get("/check_model_alias", response=UserModel, by_alias=True)
-def check_model_alias(request):
-    return User(1, "John", "Password")
+@router.get("/check_model_alias", by_alias=True)
+def check_model_alias(request) -> Annotated[Response[UserModel], 200]:
+    return Response(200, User(1, "John", "Password"))
 
 
-@router.get("/check_union", response=Union[int, UserModel])
-def check_union(request, q: int):
+@router.get("/check_union")
+def check_union(request, q: int) -> Annotated[Response[Union[int, UserModel]], 200]:
     if q == 0:
-        return 1
+        return Response(200, 1)
     if q == 1:
-        return User(1, "John", "Password")
-    return "invalid"
+        return Response(200, User(1, "John", "Password"))
+    return Response(200, "invalid")
 
 
 @router.get("/check_set_header")
-def check_set_header(request, response: HttpResponse):
+def check_set_header(request, response: HttpResponse) -> Annotated[Response[Any], 200]:
     response["Cache-Control"] = "no-cache"
-    return 1
+    return Response(200, 1)
 
 
 @router.get("/check_set_cookie")
-def check_set_cookie(request, set: bool, response: HttpResponse):
+def check_set_cookie(request, set: bool, response: HttpResponse) -> Annotated[Response[Any], 200]:
     if set:
         response.set_cookie("test", "me")
-    return 1
+    return Response(200, 1)
 
 
 @router.get("/check_del_cookie")
-def check_del_cookie(request, response: HttpResponse):
+def check_del_cookie(request, response: HttpResponse) -> Annotated[Response[Any], 200]:
     response.delete_cookie("test")
-    return 1
+    return Response(200, 1)
 
 
 client = TestClient(router)
@@ -157,27 +157,27 @@ def test_del_cookie():
 
 def test_ipv4address_encoding():
     data = {"ipv4": IPv4Address("127.0.0.1")}
-    response = Response(data)
+    response = JsonResponse(data)
     response_data = json.loads(response.content)
     assert response_data["ipv4"] == str(data["ipv4"])
 
 
 def test_ipv6address_encoding():
     data = {"ipv6": IPv6Address("::1")}
-    response = Response(data)
+    response = JsonResponse(data)
     response_data = json.loads(response.content)
     assert response_data["ipv6"] == str(data["ipv6"])
 
 
 def test_enum_encoding():
     data = {"enum": MyEnum.first}
-    response = Response(data)
+    response = JsonResponse(data)
     response_data = json.loads(response.content)
     assert response_data["enum"] == data["enum"].value
 
 
 def test_pydantic_url():
     data = {"url": Url("https://django-ninja.dev/")}
-    response = Response(data)
+    response = JsonResponse(data)
     response_data = json.loads(response.content)
     assert response_data == {"url": "https://django-ninja.dev/"}

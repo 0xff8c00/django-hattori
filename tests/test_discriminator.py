@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Any, Union
 
 from pydantic import Field
 from typing_extensions import Annotated, Literal
 
-from hattori import NinjaAPI, Schema
+from hattori import NinjaAPI, Response, Schema
 from hattori.testing import TestClient
 
 
@@ -28,13 +28,13 @@ api = NinjaAPI()
 
 
 @api.post("/descr-union")
-def create_example(request, payload: UnionDiscriminator):
-    return {"data": payload.model_dump(), "type": payload.__class__.__name__}
+def create_example(request, payload: UnionDiscriminator) -> Annotated[Response[Any], 200]:
+    return Response(200, {"data": payload.model_dump(), "type": payload.__class__.__name__})
 
 
 @api.post("/regular-union")
-def create_example_regular(request, payload: RegularUnion):
-    return {"data": payload.model_dump(), "type": payload.__class__.__name__}
+def create_example_regular(request, payload: RegularUnion) -> Annotated[Response[Any], 200]:
+    return Response(200, {"data": payload.model_dump(), "type": payload.__class__.__name__})
 
 
 client = TestClient(api)

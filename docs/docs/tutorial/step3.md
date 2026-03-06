@@ -7,7 +7,8 @@
 We'll create a third operation that will return information about the current Django user.
 
 ```python
-from hattori import Schema
+from typing import Annotated
+from hattori import Response, Schema
 
 class UserSchema(Schema):
     username: str
@@ -17,9 +18,9 @@ class UserSchema(Schema):
     first_name: str = None
     last_name: str = None
 
-@api.get("/me", response=UserSchema)
-def me(request):
-    return request.user
+@api.get("/me")
+def me(request) -> Annotated[Response[UserSchema], 200]:
+    return Response(200, request.user)
 ```
 
 This will convert the Django `User` object into a dictionary of only the defined fields.
@@ -28,7 +29,10 @@ This will convert the Django `User` object into a dictionary of only the defined
 
 Let's return a different response if the current user is not authenticated.
 
-```python hl_lines="2-5 7-8 10 12-13"
+```python hl_lines="1-2 4-8 10-11 13-16"
+from typing import Annotated
+from hattori import Response, Schema
+
 class UserSchema(Schema):
     username: str
     email: str
@@ -38,14 +42,14 @@ class UserSchema(Schema):
 class Error(Schema):
     message: str
 
-@api.get("/me", response={200: UserSchema, 403: Error})
-def me(request):
+@api.get("/me")
+def me(request) -> Annotated[Response[UserSchema], 200] | Annotated[Response[Error], 403]:
     if not request.user.is_authenticated:
-        return 403, {"message": "Please sign in first"}
-    return request.user 
+        return Response(403, {"message": "Please sign in first"})
+    return Response(200, request.user)
 ```
 
-As you see, you can return a 2-part tuple which will be interpreted as the HTTP response code and the data.
+As you see, you define multiple response types using union (`|`) type annotations, and return `Response(status_code, value)` objects to specify the HTTP status code and data.
 
 !!! success
 

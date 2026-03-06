@@ -1,9 +1,9 @@
 import datetime
-from typing import List
+from typing import Annotated, Any, List
 
 from pydantic import Field
 
-from hattori import Query, Schema
+from hattori import Query, Response, Schema
 
 
 class Filters(Schema):
@@ -14,5 +14,5 @@ class Filters(Schema):
 
 
 @api.get("/filter")
-def events(request, filters: Query[Filters]):
-    return {"filters": filters.dict()}
+def events(request, filters: Query[Filters]) -> Annotated[Response[Any], 200]:
+    return Response(200, {"filters": filters.dict()})

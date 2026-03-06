@@ -2,6 +2,8 @@
 
 **Django Hattori** is an opinionated fork of [Django Ninja](https://github.com/vitalik/django-ninja), a web framework for building APIs with **Django** and Python **type hints**.
 
+**Documentation**: [https://0xff8c00.github.io/django-hattori/](https://0xff8c00.github.io/django-hattori/)
+
 *Fast to learn, fast to code, fast to run*
 
 **Key features:**
@@ -17,49 +19,80 @@
 ## Installation
 
 ```
-pip install django-ninja
+pip install django-hattori
 ```
 
-## Usage
+## Quick Start
 
-In your django project next to urls.py create new `api.py` file:
+Create `api.py` next to your `urls.py`:
 
 ```python
-from ninja import NinjaAPI
+from typing import Annotated
+
+from django.contrib.auth.models import User
+from hattori import NinjaAPI, Response, Schema
+from hattori.security import HttpBearer
+
 
 api = NinjaAPI()
 
 
-@api.get("/add")
-def add(request, a: int, b: int):
-    return {"result": a + b}
+# --- Schemas ---
+
+class SignupIn(Schema):
+    username: str
+    password: str
+
+class UserOut(Schema):
+    id: int
+    username: str
+
+class Error(Schema):
+    detail: str
+
+
+# --- Auth ---
+
+class BearerAuth(HttpBearer):
+    def authenticate(self, request, token):
+        if token == "supersecret":
+            return token
+
+
+# --- Endpoints ---
+
+@api.post("/signup")
+def signup(request, data: SignupIn) -> Annotated[Response[UserOut], 201] | Annotated[Response[Error], 400]:
+    if User.objects.filter(username=data.username).exists():
+        return Response(400, {"detail": "Username taken"})
+    user = User.objects.create_user(username=data.username, password=data.password)
+    return Response(201, user)
+
+
+@api.get("/me", auth=BearerAuth())
+def me(request) -> Annotated[Response[UserOut], 200]:
+    return Response(200, request.auth)
 ```
 
-Now go to `urls.py` and add the following:
+Wire it up in `urls.py`:
 
 ```python
-...
 from .api import api
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("api/", api.urls),  # <---------- !
+    path("api/", api.urls),
 ]
 ```
 
-**That's it!**
+**That's it.** Every status code, request body, and response schema is auto-documented in your OpenAPI spec — no extra configuration needed.
 
-Now you've just created an API that:
+### What you get for free
 
- - receives an HTTP GET request at `/api/add`
- - takes, validates and type-casts GET parameters `a` and `b`
- - decodes the result to JSON
- - generates an OpenAPI schema for defined operation
-
-### Interactive API docs
-
-Now go to [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs)
-
-You will see the automatic interactive API documentation (provided by [Swagger UI](https://github.com/swagger-api/swagger-ui) or [Redoc](https://github.com/Redocly/redoc)):
+- **Input validation** — `SignupIn` validates and type-casts the request body
+- **Output filtering** — `UserOut` strips fields like `password` from the response
+- **Multiple responses** — `201 | 400` union types map directly to OpenAPI response schemas
+- **Auth** — `401 Unauthorized` is auto-documented when `auth=` is set
+- **422 errors** — validation error responses are added to the schema automatically
+- **Interactive docs** — visit `/api/docs` for Swagger UI with everything above
 
 ![Swagger UI](docs/docs/img/index-swagger-ui.png)

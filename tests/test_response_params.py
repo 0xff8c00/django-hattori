@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from hattori import NinjaAPI, Schema
+from hattori import NinjaAPI, Response, Schema
 from hattori.testing import TestClient
 
 api = NinjaAPI()
@@ -12,26 +12,26 @@ class SomeResponse(Schema):
     field3: Optional[int] = None
 
 
-@api.get("/test-no-params", response=SomeResponse)
-def op_no_params(request):
-    return {}  # should set defaults from schema
+@api.get("/test-no-params")
+def op_no_params(request) -> Annotated[Response[SomeResponse], 200]:
+    return Response(200, {})  # should set defaults from schema
 
 
-@api.get("/test-unset", response=SomeResponse, exclude_unset=True)
-def op_exclude_unset(request):
-    return {"field3": 10}
+@api.get("/test-unset", exclude_unset=True)
+def op_exclude_unset(request) -> Annotated[Response[SomeResponse], 200]:
+    return Response(200, {"field3": 10})
 
 
-@api.get("/test-defaults", response=SomeResponse, exclude_defaults=True)
-def op_exclude_defaults(request):
+@api.get("/test-defaults", exclude_defaults=True)
+def op_exclude_defaults(request) -> Annotated[Response[SomeResponse], 200]:
     # changing only field1
-    return {"field1": 3, "field2": "default value"}
+    return Response(200, {"field1": 3, "field2": "default value"})
 
 
-@api.get("/test-none", response=SomeResponse, exclude_none=True)
-def op_exclude_none(request):
+@api.get("/test-none", exclude_none=True)
+def op_exclude_none(request) -> Annotated[Response[SomeResponse], 200]:
     # setting field1 to None to exclude
-    return {"field1": None, "field2": "default value"}
+    return Response(200, {"field1": None, "field2": "default value"})
 
 
 client = TestClient(api)

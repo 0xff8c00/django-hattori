@@ -22,10 +22,11 @@ def create_user(request, data: UserIn):
     # ... return ?
 ```
 
-Now let's define the output schema, and pass it as a `response` argument to the `@api.post` decorator:
+Now let's define the output schema, and use a return type annotation to declare the response:
 
-```python hl_lines="8 9 10 13 18"
-from hattori import Schema
+```python hl_lines="1 8 9 10 14 19"
+from typing import Annotated
+from hattori import Response, Schema
 
 class UserIn(Schema):
     username: str
@@ -37,15 +38,15 @@ class UserOut(Schema):
     username: str
 
 
-@api.post("/users/", response=UserOut)
-def create_user(request, data: UserIn):
+@api.post("/users/")
+def create_user(request, data: UserIn) -> Annotated[Response[UserOut], 200]:
     user = User(username=data.username)
     user.set_password(data.password)
     user.save()
-    return user
+    return Response(200, user)
 ```
 
-**Django Ninja** will use this `response` schema to:
+**Django Ninja** will use this response schema to:
 
 - convert the output data to declared schema
 - validate the data
@@ -70,9 +71,9 @@ class Task(models.Model):
 
 Now let's output all tasks, and for each task, output some fields about the user.
 
-```python hl_lines="13 16"
-from typing import List
-from hattori import Schema
+```python hl_lines="1 13 17"
+from typing import Annotated, List
+from hattori import Response, Schema
 
 class UserSchema(Schema):
     id: int
@@ -86,10 +87,10 @@ class TaskSchema(Schema):
     owner: UserSchema = None  # ! None - to mark it as optional
 
 
-@api.get("/tasks", response=List[TaskSchema])
-def tasks(request):
+@api.get("/tasks")
+def tasks(request) -> Annotated[Response[List[TaskSchema]], 200]:
     queryset = Task.objects.select_related("owner")
-    return list(queryset)
+    return Response(200, list(queryset))
 ```
 
 If you execute this operation, you should get a response like this:
@@ -208,9 +209,9 @@ In the previous example we specifically converted a queryset into a list (and ex
 You can avoid that and return a queryset as a result, and it will be automatically evaluated to List:
 
 ```python hl_lines="3"
-@api.get("/tasks", response=List[TaskSchema])
-def tasks(request):
-    return Task.objects.all()
+@api.get("/tasks")
+def tasks(request) -> Annotated[Response[List[TaskSchema]], 200]:
+    return Response(200, Task.objects.all())
 ```
 
 !!! warning
@@ -218,9 +219,9 @@ def tasks(request):
     If your operation is async, this example will not work because the ORM query needs to be called safely.
 
     ```python hl_lines="2"
-    @api.get("/tasks", response=List[TaskSchema])
-    async def tasks(request):
-        return Task.objects.all()
+    @api.get("/tasks")
+    async def tasks(request) -> Annotated[Response[List[TaskSchema]], 200]:
+        return Response(200, Task.objects.all())
     ```
 
     See the [async support](../async-support.md#using-orm) guide for more information.
@@ -256,7 +257,7 @@ Once you output this to a response, the URL will be automatically generated for 
 
 ## Multiple Response Schemas
 
-Sometimes you need to define more than response schemas.
+Sometimes you need to define more than one response schema.
 In case of authentication, for example, you can return:
 
 - **200** successful -> token
@@ -267,17 +268,13 @@ In case of authentication, for example, you can return:
 
 In fact, the [OpenAPI specification](https://swagger.io/docs/specification/describing-responses/) allows you to pass multiple response schemas.
 
-You can pass to a `response` argument a dictionary where:
-
-- key is a response code
-- value is a schema for that code
-
-Also, when you return the result - you have to also pass a status code to tell **Django Ninja** which schema should be used for validation and serialization.
+You can use a union of `Annotated[Response[...], code]` types to declare multiple possible responses. When you return the result, use `Response(status_code, body)` to tell **Django Ninja** which schema should be used for validation and serialization.
 
 An example:
 
-```python hl_lines="1 9 12 14 16"
-from hattori import Status
+```python hl_lines="1 2 10 13 15 17"
+from typing import Annotated
+from hattori import Response, Schema
 
 class Token(Schema):
     token: str
@@ -287,73 +284,40 @@ class Message(Schema):
     message: str
 
 
-@api.post('/login', response={200: Token, 401: Message, 402: Message})
-def login(request, payload: Auth):
+@api.post('/login')
+def login(request, payload: Auth) -> Annotated[Response[Token], 200] | Annotated[Response[Message], 401] | Annotated[Response[Message], 402]:
     if auth_not_valid:
-        return Status(401, {'message': 'Unauthorized'})
+        return Response(401, {'message': 'Unauthorized'})
     if negative_balance:
-        return Status(402, {'message': 'Insufficient balance amount. Please proceed to a payment page.'})
-    return Status(200, {'token': xxx, ...})
+        return Response(402, {'message': 'Insufficient balance amount. Please proceed to a payment page.'})
+    return Response(200, {'token': xxx, ...})
 ```
 
-!!! warning "Deprecated: tuple syntax"
-    Returning `(status_code, body)` tuples is deprecated and will be removed in a future version.
-    Use `Status(status_code, body)` instead.
+### Status code range matching
 
-## Multiple response codes
+In the previous example you saw that we basically repeated the `Message` schema for both 401 and 402. You can simplify this by declaring the base status code of the range.
 
-In the previous example you saw that we basically repeated the `Message` schema twice:
+When you declare `Annotated[Response[Message], 400]`, it automatically covers all 4xx codes (401, 402, etc. will fall back to 400's schema):
 
-```
-...401: Message, 402: Message}
-```
-
-To avoid this duplication you can use multiple response codes for a schema:
-
-```python hl_lines="2 3 6 9 11"
-...
-from hattori import Status
-from hattori.responses import codes_4xx
-
-
-@api.post('/login', response={200: Token, codes_4xx: Message})
-def login(request, payload: Auth):
+```python hl_lines="3"
+@api.post('/login')
+def login(request, payload: Auth) -> Annotated[Response[Token], 200] | Annotated[Response[Message], 400]:
     if auth_not_valid:
-        return Status(401, {'message': 'Unauthorized'})
+        return Response(401, {'message': 'Unauthorized'})
     if negative_balance:
-        return Status(402, {'message': 'Insufficient balance amount. Please proceed to a payment page.'})
-    return Status(200, {'token': xxx, ...})
-```
-
-**Django Ninja** comes with the following HTTP codes:
-
-```python
-from hattori.responses import codes_1xx
-from hattori.responses import codes_2xx
-from hattori.responses import codes_3xx
-from hattori.responses import codes_4xx
-from hattori.responses import codes_5xx
-```
-
-You can also create your own range using a `frozenset`:
-
-```python
-my_codes = frozenset({416, 418, 425, 429, 451})
-
-@api.post('/login', response={200: Token, my_codes: Message})
-def login(request, payload: Auth):
-    ...
+        return Response(402, {'message': 'Insufficient balance amount. Please proceed to a payment page.'})
+    return Response(200, {'token': xxx, ...})
 ```
 
 ## Empty responses
 
 Some responses, such as [204 No Content](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204), have no body.
-To indicate the response body is empty mark `response` argument with `None` instead of Schema:
+To indicate the response body is empty, use `Response[None]` as the schema type:
 
 ```python hl_lines="1 3"
-@api.post("/no_content", response={204: None})
-def no_content(request):
-    return Status(204, None)
+@api.post("/no_content")
+def no_content(request) -> Annotated[Response[None], 204]:
+    return Response(204, None)
 ```
 
 ## Error responses
@@ -378,8 +342,8 @@ class Organization(Schema):
 Organization.model_rebuild()  # !!! this is important
 
 
-@api.get('/organizations', response=List[Organization])
-def list_organizations(request):
+@api.get('/organizations')
+def list_organizations(request) -> Annotated[Response[List[Organization]], 200]:
     ...
 ```
 

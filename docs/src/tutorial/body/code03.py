@@ -1,4 +1,6 @@
-from hattori import Schema
+from typing import Annotated, Any
+
+from hattori import Response, Schema
 
 
 class Item(Schema):
@@ -9,5 +11,5 @@ class Item(Schema):
 
 
 @api.post("/items/{item_id}")
-def update(request, item_id: int, item: Item, q: str):
-    return {"item_id": item_id, "item": item.dict(), "q": q}
+def update(request, item_id: int, item: Item, q: str) -> Annotated[Response[Any], 200]:
+    return Response(200, {"item_id": item_id, "item": item.dict(), "q": q})

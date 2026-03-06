@@ -3,7 +3,9 @@ from enum import IntEnum
 
 from pydantic import BaseModel, Field
 
-from hattori import NinjaAPI, Query, Schema
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Query, Response, Schema
 from hattori.testing.client import TestClient
 
 
@@ -28,8 +30,8 @@ api = NinjaAPI()
 
 
 @api.get("/test")
-def query_params_schema(request, filters: Filter = Query(...)):
-    return filters.model_dump()
+def query_params_schema(request, filters: Filter = Query(...)) -> Annotated[Response[Any], 200]:
+    return Response(200, filters.model_dump())
 
 
 @api.get("/test-mixed")
@@ -39,13 +41,13 @@ def query_params_mixed_schema(
     query2: int = 5,
     filters: Filter = Query(...),
     data: Data = Query(...),
-):
-    return dict(
+) -> Annotated[Response[Any], 200]:
+    return Response(200, dict(
         query1=query1,
         query2=query2,
         filters=filters.model_dump(),
         data=data.model_dump(),
-    )
+    ))
 
 
 def test_request():
@@ -106,8 +108,8 @@ def test_request_query_params_using_basemodel():
     temp_api = NinjaAPI()
 
     @temp_api.get("/foo")
-    def view(request, foo: Foo = Query(...)):
-        return foo.model_dump()
+    def view(request, foo: Foo = Query(...)) -> Annotated[Response[Any], 200]:
+        return Response(200, foo.model_dump())
 
     client = TestClient(temp_api)
     resp = client.get("/foo?start=1")

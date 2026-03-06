@@ -1,7 +1,9 @@
+from typing import Annotated, Any
+
 import pytest
 from django.http import Http404
 
-from hattori import NinjaAPI, Schema
+from hattori import NinjaAPI, Response, Schema
 from hattori.testing import TestAsyncClient, TestClient
 
 api = NinjaAPI()
@@ -21,13 +23,14 @@ class Payload(Schema):
 
 
 @api.post("/error/{code}")
-def err_thrower(request, code: str, payload: Payload = None):
+def err_thrower(request, code: str, payload: Payload = None) -> Annotated[Response[Any], 200]:
     if code == "base":
         raise RuntimeError("test")
     if code == "404":
         raise Http404("test")
     if code == "custom":
         raise CustomException("test")
+    return Response(200, None)
 
 
 client = TestClient(api)
@@ -76,7 +79,7 @@ async def test_asyncio_exceptions():
     api = NinjaAPI()
 
     @api.get("/error")
-    async def thrower(request):
+    async def thrower(request) -> Annotated[Response[Any], 200]:
         raise Http404("test")
 
     client = TestAsyncClient(api)
@@ -89,7 +92,7 @@ def test_no_handlers():
     api._exception_handlers = {}
 
     @api.get("/error")
-    def thrower(request):
+    def thrower(request) -> Annotated[Response[Any], 200]:
         raise RuntimeError("test")
 
     client = TestClient(api)

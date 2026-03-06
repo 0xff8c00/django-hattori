@@ -1,4 +1,6 @@
-from hattori import Field, NinjaAPI, Schema
+from typing import Annotated
+
+from hattori import Field, NinjaAPI, Response, Schema
 
 
 class SchemaWithAlias(Schema):
@@ -8,9 +10,9 @@ class SchemaWithAlias(Schema):
 api = NinjaAPI()
 
 
-@api.get("/path", response=SchemaWithAlias)
-def alias_operation(request):
-    return {"bar": "value"}
+@api.get("/path")
+def alias_operation(request) -> Annotated[Response[SchemaWithAlias], 200]:
+    return Response(200, {"bar": "value"})
 
 
 def test_alias():

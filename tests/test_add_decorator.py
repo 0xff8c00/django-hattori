@@ -1,8 +1,9 @@
 from functools import wraps
+from typing import Annotated, Any
 
 import pytest
 
-from hattori import NinjaAPI, Router
+from hattori import NinjaAPI, Response, Router
 from hattori.testing import TestClient
 
 
@@ -13,8 +14,8 @@ def operation_decorator(func):
     @wraps(func)
     def wrapper(request, *args, **kwargs):
         result = func(request, *args, **kwargs)
-        if isinstance(result, dict):
-            result["operation_decorated"] = True
+        if isinstance(result, Response) and isinstance(result.value, dict):
+            result.value["operation_decorated"] = True
         return result
 
     return wrapper
@@ -39,8 +40,8 @@ def counter_decorator(func):
     def wrapper(request, *args, **kwargs):
         wrapper.call_count = getattr(wrapper, "call_count", 0) + 1
         result = func(request, *args, **kwargs)
-        if isinstance(result, dict):
-            result["call_count"] = wrapper.call_count
+        if isinstance(result, Response) and isinstance(result.value, dict):
+            result.value["call_count"] = wrapper.call_count
         return result
 
     return wrapper
@@ -55,8 +56,8 @@ def test_router_add_decorator_operation_mode():
     router.add_decorator(operation_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     api.add_router("/", router)
     client = TestClient(api)
@@ -75,8 +76,8 @@ def test_router_add_decorator_view_mode():
     router.add_decorator(view_decorator, mode="view")
 
     @router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     api.add_router("/", router)
     client = TestClient(api)
@@ -95,12 +96,12 @@ def test_api_add_decorator_operation_mode():
     api.add_decorator(operation_decorator, mode="operation")
 
     @api.get("/test1")
-    def endpoint1(request):
-        return {"message": "test1"}
+    def endpoint1(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test1"})
 
     @api.get("/test2")
-    def endpoint2(request):
-        return {"message": "test2"}
+    def endpoint2(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test2"})
 
     client = TestClient(api)
 
@@ -122,8 +123,8 @@ def test_api_add_decorator_view_mode():
     api.add_decorator(view_decorator, mode="view")
 
     @api.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     client = TestClient(api)
 
@@ -142,8 +143,8 @@ def test_multiple_decorators():
     router.add_decorator(counter_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     api.add_router("/", router)
     client = TestClient(api)
@@ -169,22 +170,22 @@ def test_decorator_cascading():
 
     # Add decorator at API level
     api.add_decorator(
-        lambda f: wraps(f)(lambda req, *a, **k: {**f(req, *a, **k), "api": True})
+        lambda f: wraps(f)(lambda req, *a, **k: Response(200, {**f(req, *a, **k).value, "api": True}))
     )
 
     # Add decorator at parent router level
     parent_router.add_decorator(
-        lambda f: wraps(f)(lambda req, *a, **k: {**f(req, *a, **k), "parent": True})
+        lambda f: wraps(f)(lambda req, *a, **k: Response(200, {**f(req, *a, **k).value, "parent": True}))
     )
 
     # Add decorator at child router level
     child_router.add_decorator(
-        lambda f: wraps(f)(lambda req, *a, **k: {**f(req, *a, **k), "child": True})
+        lambda f: wraps(f)(lambda req, *a, **k: Response(200, {**f(req, *a, **k).value, "child": True}))
     )
 
     @child_router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     parent_router.add_router("/child", child_router)
     api.add_router("/parent", parent_router)
@@ -212,8 +213,8 @@ def test_api_decorator_applies_to_new_routers():
     router = Router()
 
     @router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     api.add_router("/", router)
 
@@ -233,8 +234,8 @@ def test_mix_view_and_operation_decorators():
     router.add_decorator(operation_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request):
-        return {"message": "test"}
+    def endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"message": "test"})
 
     api.add_router("/", router)
     client = TestClient(api)
@@ -254,8 +255,8 @@ def test_decorator_with_path_params():
         @wraps(func)
         def wrapper(request, *args, **kwargs):
             result = func(request, *args, **kwargs)
-            if isinstance(result, dict):
-                result["decorated"] = True
+            if isinstance(result, Response) and isinstance(result.value, dict):
+                result.value["decorated"] = True
             return result
 
         return wrapper
@@ -263,8 +264,8 @@ def test_decorator_with_path_params():
     router.add_decorator(param_decorator, mode="operation")
 
     @router.get("/test/{item_id}")
-    def endpoint(request, item_id: int):
-        return {"item_id": item_id}
+    def endpoint(request, item_id: int) -> Annotated[Response[Any], 200]:
+        return Response(200, {"item_id": item_id})
 
     api.add_router("/", router)
     client = TestClient(api)

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set, Tup
 from django.utils.termcolors import make_style
 from pydantic.json_schema import JsonSchemaMode
 
-from hattori.constants import NOT_SET
+
 from hattori.errors import ValidationErrorResponse
 from hattori.operation import Operation
 from hattori.params.models import TModel, TModels
@@ -299,7 +299,7 @@ class OpenAPISchema(dict):
 
             description = responses.get(status, "Unknown Status Code")
             details: Dict[int, Any] = {status: {"description": description}}
-            if model not in [None, NOT_SET]:
+            if model is not None:
                 # ::TODO:: test this: by_alias == True
                 schema = self._create_schema_from_model(
                     model, by_alias=operation.by_alias, mode="serialization"

@@ -1,9 +1,10 @@
 import asyncio
 from functools import wraps
+from typing import Annotated, Any
 
 import pytest
 
-from hattori import NinjaAPI, Router
+from hattori import NinjaAPI, Response, Router
 from hattori.testing import TestAsyncClient, TestClient
 
 
@@ -14,8 +15,8 @@ def async_operation_decorator(func):
     @wraps(func)
     async def wrapper(request, *args, **kwargs):
         result = await func(request, *args, **kwargs)
-        if isinstance(result, dict):
-            result["async_operation_decorated"] = True
+        if isinstance(result, Response) and isinstance(result.value, dict):
+            result.value["async_operation_decorated"] = True
         return result
 
     return wrapper
@@ -43,9 +44,9 @@ async def test_router_add_decorator_async_operation_mode():
     router.add_decorator(async_operation_decorator, mode="operation")
 
     @router.get("/test")
-    async def endpoint(request):
+    async def endpoint(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)  # Simulate async work
-        return {"message": "async test"}
+        return Response(200, {"message": "async test"})
 
     api.add_router("/", router)
     client = TestAsyncClient(api)
@@ -68,9 +69,9 @@ async def test_router_add_decorator_async_view_mode():
     router.add_decorator(async_view_decorator, mode="view")
 
     @router.get("/test")
-    async def endpoint(request):
+    async def endpoint(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"message": "async test"}
+        return Response(200, {"message": "async test"})
 
     api.add_router("/", router)
     client = TestAsyncClient(api)
@@ -90,14 +91,14 @@ async def test_api_add_decorator_async():
     api.add_decorator(async_operation_decorator, mode="operation")
 
     @api.get("/test1")
-    async def endpoint1(request):
+    async def endpoint1(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"message": "test1"}
+        return Response(200, {"message": "test1"})
 
     @api.get("/test2")
-    async def endpoint2(request):
+    async def endpoint2(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"message": "test2"}
+        return Response(200, {"message": "test2"})
 
     client = TestAsyncClient(api)
 
@@ -127,15 +128,15 @@ async def test_mixed_sync_async_decorators():
 
                 async def async_wrapper():
                     actual_result = await result
-                    if isinstance(actual_result, dict):
-                        actual_result["sync_decorated"] = True
+                    if isinstance(actual_result, Response) and isinstance(actual_result.value, dict):
+                        actual_result.value["sync_decorated"] = True
                     return actual_result
 
                 return async_wrapper()
             else:
                 # For sync functions, modify the result directly
-                if isinstance(result, dict):
-                    result["sync_decorated"] = True
+                if isinstance(result, Response) and isinstance(result.value, dict):
+                    result.value["sync_decorated"] = True
                 return result
 
         return wrapper
@@ -143,13 +144,13 @@ async def test_mixed_sync_async_decorators():
     router.add_decorator(sync_decorator, mode="operation")
 
     @router.get("/async")
-    async def async_endpoint(request):
+    async def async_endpoint(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"type": "async"}
+        return Response(200, {"type": "async"})
 
     @router.get("/sync")
-    def sync_endpoint(request):
-        return {"type": "sync"}
+    def sync_endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"type": "sync"})
 
     api.add_router("/", router)
     client = TestAsyncClient(api)
@@ -181,9 +182,9 @@ async def test_mixed_sync_async_endpoints_same_router():
             @wraps(func)
             async def async_wrapper(request, *args, **kwargs):
                 result = await func(request, *args, **kwargs)
-                if isinstance(result, dict):
-                    result["universal_decorated"] = True
-                    result["func_type"] = "async"
+                if isinstance(result, Response) and isinstance(result.value, dict):
+                    result.value["universal_decorated"] = True
+                    result.value["func_type"] = "async"
                 return result
 
             return async_wrapper
@@ -192,9 +193,9 @@ async def test_mixed_sync_async_endpoints_same_router():
             @wraps(func)
             def sync_wrapper(request, *args, **kwargs):
                 result = func(request, *args, **kwargs)
-                if isinstance(result, dict):
-                    result["universal_decorated"] = True
-                    result["func_type"] = "sync"
+                if isinstance(result, Response) and isinstance(result.value, dict):
+                    result.value["universal_decorated"] = True
+                    result.value["func_type"] = "sync"
                 return result
 
             return sync_wrapper
@@ -202,13 +203,13 @@ async def test_mixed_sync_async_endpoints_same_router():
     router.add_decorator(universal_decorator, mode="operation")
 
     @router.get("/async")
-    async def async_endpoint(request):
+    async def async_endpoint(request) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"endpoint": "async"}
+        return Response(200, {"endpoint": "async"})
 
     @router.get("/sync")
-    def sync_endpoint(request):
-        return {"endpoint": "sync"}
+    def sync_endpoint(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"endpoint": "sync"})
 
     api.add_router("/", router)
 

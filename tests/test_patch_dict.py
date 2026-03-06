@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import Annotated, Any, List, Optional
 
 import pytest
 
-from hattori import Field, NinjaAPI, Schema
+from hattori import Field, NinjaAPI, Response, Schema
 from hattori.patch_dict import PatchDict
 from hattori.testing import TestClient
 
@@ -25,8 +25,8 @@ constrained_client = TestClient(constrained_api)
 
 
 @constrained_api.patch("/patch-constrained")
-def patch_constrained(request, payload: PatchDict[ConstrainedSchema]):
-    return {"payload": payload}
+def patch_constrained(request, payload: PatchDict[ConstrainedSchema]) -> Annotated[Response[Any], 200]:
+    return Response(200, {"payload": payload})
 
 
 class SomeSchema(Schema):
@@ -41,13 +41,13 @@ class OtherSchema(SomeSchema):
 
 
 @api.patch("/patch")
-def patch(request, payload: PatchDict[SomeSchema]):
-    return {"payload": payload, "type": str(type(payload))}
+def patch(request, payload: PatchDict[SomeSchema]) -> Annotated[Response[Any], 200]:
+    return Response(200, {"payload": payload, "type": str(type(payload))})
 
 
 @api.patch("/patch-inherited")
-def patch_inherited(request, payload: PatchDict[OtherSchema]):
-    return {"payload": payload, "type": str(type(payload))}
+def patch_inherited(request, payload: PatchDict[OtherSchema]) -> Annotated[Response[Any], 200]:
+    return Response(200, {"payload": payload, "type": str(type(payload))})
 
 
 @pytest.mark.parametrize(

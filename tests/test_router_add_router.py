@@ -1,12 +1,14 @@
-from hattori import NinjaAPI, Router
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Response, Router
 from hattori.testing import TestClient
 
 router = Router()
 
 
 @router.get("/")
-def op(request):
-    return True
+def op(request) -> Annotated[Response[Any], 200]:
+    return Response(200, True)
 
 
 def test_add_router_with_string_path():

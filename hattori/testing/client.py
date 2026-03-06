@@ -7,7 +7,7 @@ from django.http import QueryDict, StreamingHttpResponse
 from django.http.request import HttpHeaders, HttpRequest
 
 from hattori import NinjaAPI, Router
-from hattori.responses import Response as HttpResponse
+from hattori.responses import JsonResponse as HttpResponse
 from hattori.responses import json_dumps, json_loads
 
 

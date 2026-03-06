@@ -1,4 +1,6 @@
-from hattori import NinjaAPI, Form
+from typing import Annotated, Any
+
+from hattori import NinjaAPI, Form, Response
 from hattori.security import HttpBearer
 
 
@@ -17,6 +19,6 @@ api = NinjaAPI(auth=GlobalAuth())
 
 
 @api.post("/token", auth=None)  # < overriding global auth
-def get_token(request, username: str = Form(...), password: str = Form(...)):
+def get_token(request, username: str = Form(...), password: str = Form(...)) -> Annotated[Response[Any], 200]:
     if username == "admin" and password == "giraffethinnknslong":
-        return {"token": "supersecret"}
+        return Response(200, {"token": "supersecret"})

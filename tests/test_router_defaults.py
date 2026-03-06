@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Annotated, Any, Optional
 
 import pytest
 from pydantic import Field
 
-from hattori import NinjaAPI, Router, Schema
+from hattori import NinjaAPI, Response, Router, Schema
 from hattori.testing import TestClient
 
 
@@ -48,10 +48,16 @@ def test_router_defaults(oparg, retdict, assertone, asserttwo):
     router = Router(**{oparg: True})
     api.add_router("/", router)
 
-    func1 = router.get("/test1", response=SomeResponse)(lambda request: retdict)
-    func2 = router.get("/test2", response=SomeResponse, **{oparg: False})(
-        lambda request: retdict
-    )
+    @router.get("/test1")
+    def test1_endpoint(request) -> Annotated[Response[SomeResponse], 200]:
+        return Response(200, retdict)
+
+    @router.get("/test2", **{oparg: False})
+    def test2_endpoint(request) -> Annotated[Response[SomeResponse], 200]:
+        return Response(200, retdict)
+
+    func1 = test1_endpoint
+    func2 = test2_endpoint
 
     client = TestClient(api)
 

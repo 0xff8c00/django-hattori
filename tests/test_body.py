@@ -1,9 +1,9 @@
-from typing import Any, Dict, List
+from typing import Annotated, Any, Dict, List
 
 import pytest
 from pydantic import field_validator
 
-from hattori import Body, Form, NinjaAPI, Schema
+from hattori import Body, Form, NinjaAPI, Response, Schema
 from hattori.errors import ConfigError, ValidationError, ValidationErrorContext
 from hattori.testing import TestClient
 
@@ -13,13 +13,13 @@ api = NinjaAPI()
 
 
 @api.post("/task")
-def create_task(request, start: int = Body(...), end: int = Body(...)):
-    return [start, end]
+def create_task(request, start: int = Body(...), end: int = Body(...)) -> Annotated[Response[Any], 200]:
+    return Response(200, [start, end])
 
 
 @api.post("/task2")
-def create_task2(request, start: int = Body(2), end: int = Form(1)):
-    return [start, end]
+def create_task2(request, start: int = Body(2), end: int = Form(1)) -> Annotated[Response[Any], 200]:
+    return Response(200, [start, end])
 
 
 class UserIn(Schema):
@@ -35,8 +35,8 @@ class UserIn(Schema):
 
 
 @api.post("/users")
-def create_user(request, payload: UserIn):
-    return payload.dict()
+def create_user(request, payload: UserIn) -> Annotated[Response[Any], 200]:
+    return Response(200, payload.dict())
 
 
 client = TestClient(api)
@@ -81,9 +81,9 @@ def test_incorrect_annotation():
     with pytest.raises(ConfigError):
 
         @api.post("/some")
-        def some(request, payload=Some):
+        def some(request, payload=Some) -> Annotated[Response[Any], 200]:
             #  ................. ^------ invalid usage assigning class instead of annotation
-            return 42
+            return Response(200, 42)
 
 
 class CustomErrorAPI(NinjaAPI):
@@ -108,8 +108,8 @@ custom_error_api = CustomErrorAPI()
 
 
 @custom_error_api.post("/users")
-def create_user2(request, payload: UserIn):
-    return payload.dict()
+def create_user2(request, payload: UserIn) -> Annotated[Response[Any], 200]:
+    return Response(200, payload.dict())
 
 
 custom_error_client = TestClient(custom_error_api)

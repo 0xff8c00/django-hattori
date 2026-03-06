@@ -1,8 +1,9 @@
 import asyncio
+from typing import Annotated, Any
 
 import pytest
 
-from hattori import NinjaAPI
+from hattori import NinjaAPI, Response
 from hattori.security import APIKeyQuery
 from hattori.testing import TestAsyncClient
 
@@ -17,13 +18,13 @@ async def test_asyncio_operations():
                 return key
 
     @api.get("/async", auth=KeyQuery())
-    async def async_view(request, payload: int):
+    async def async_view(request, payload: int) -> Annotated[Response[Any], 200]:
         await asyncio.sleep(0)
-        return {"async": True}
+        return Response(200, {"async": True})
 
     @api.post("/async")
-    def sync_post_to_async_view(request):
-        return {"sync": True}
+    def sync_post_to_async_view(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"sync": True})
 
     client = TestAsyncClient(api)
 

@@ -1,6 +1,8 @@
+from typing import Annotated, Any
+
 import pytest
 
-from hattori import NinjaAPI, Query
+from hattori import NinjaAPI, Query, Response
 from hattori.utils import contribute_operation_args, replace_path_param_notation
 
 
@@ -20,8 +22,8 @@ def test_replace_path_param_notation(input, expected_output):
 
 
 def test_contribute_operation_args():
-    def some_func():
-        pass
+    def some_func() -> Annotated[Response[Any], 200]:
+        return Response(200, None)
 
     contribute_operation_args(some_func, "arg1", str, Query(...))
     contribute_operation_args(some_func, "arg2", int, Query(...))

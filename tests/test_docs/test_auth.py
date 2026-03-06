@@ -1,8 +1,9 @@
+from typing import Annotated, Any
 from unittest.mock import Mock, patch
 
 import pytest
 
-from hattori import NinjaAPI
+from hattori import NinjaAPI, Response
 from hattori.testing import TestClient
 
 
@@ -93,8 +94,8 @@ def test_global():
     from docs.src.tutorial.authentication.global01 import api
 
     @api.get("/somemethod")
-    def mustbeauthed(request):
-        return {"auth": request.auth}
+    def mustbeauthed(request) -> Annotated[Response[Any], 200]:
+        return Response(200, {"auth": request.auth})
 
     client = TestClient(api)
 

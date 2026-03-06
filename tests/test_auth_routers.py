@@ -1,6 +1,8 @@
+from typing import Annotated, Any
+
 import pytest
 
-from hattori import NinjaAPI, Router
+from hattori import NinjaAPI, Response, Router
 from hattori.security import APIKeyQuery
 from hattori.testing import TestClient
 
@@ -23,18 +25,18 @@ r2_1 = Router()
 
 
 @r1.get("/test")
-def operation1(request):
-    return request.auth
+def operation1(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r2.get("/test")
-def operation2(request):
-    return request.auth
+def operation2(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 @r2_1.get("/test")
-def operation3(request):
-    return request.auth
+def operation3(request) -> Annotated[Response[Any], 200]:
+    return Response(200, request.auth)
 
 
 r2.add_router("/child", r2_1, auth=Auth("two-child"))

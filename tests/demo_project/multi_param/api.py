@@ -1,5 +1,7 @@
 """Test App to use with Swagger UI and in unit tests"""
 
+from typing import Annotated
+
 from pydantic import ConfigDict
 
 from hattori import (
@@ -11,6 +13,7 @@ from hattori import (
     Header,
     Path,
     Query,
+    Response,
     Router,
     Schema,
     UploadedFile,
@@ -60,20 +63,19 @@ class ResponseData(Schema):
 test_data4_extra = dict(title="Data4 Title", description="Data4 Desc")
 
 
-@router.post("/test-multi-query", response=ResponseData, by_alias=True)
+@router.post("/test-multi-query", by_alias=True)
 def test_multi_query(
     request,
     i: int = Query(...),
     s: str = Query("a-str"),
     data: TestData4 = Query(..., **test_data4_extra),
     nested_data: TestData = Query(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
 @router.post(
     "/test-multi-path/{i}/{s}/{foo4}/{bar4}/{foo}/{bar}/{foo2}/{bar2}/{foo3}/{bar3}/",
-    response=ResponseData,
     by_alias=True,
 )
 def test_multi_path(
@@ -82,56 +84,56 @@ def test_multi_path(
     s: str = Path("a-str"),
     data: TestData4 = Path(..., **test_data4_extra),
     nested_data: TestData = Path(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-header", response=ResponseData, by_alias=True)
+@router.post("/test-multi-header", by_alias=True)
 def test_multi_header(
     request,
     i: int = Header(...),
     s: str = Header("a-str"),
     data: TestData4 = Header(..., **test_data4_extra),
     nested_data: TestData = Header(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-cookie", response=ResponseData, by_alias=True)
+@router.post("/test-multi-cookie", by_alias=True)
 def test_multi_cookie(
     request,
     i: int = Cookie(...),
     s: str = Cookie("a-str"),
     data: TestData4 = Cookie(..., **test_data4_extra),
     nested_data: TestData = Cookie(..., alias="nested-data"),
-):
+) -> Annotated[Response[ResponseData], 200]:
     """Testing w/ Cookies requires setting the cookies by hand in the browser inspector"""
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-form", response=ResponseData, by_alias=True)
+@router.post("/test-multi-form", by_alias=True)
 def test_multi_form(
     request,
     i: int = Form(...),
     s: str = Form("a-str"),
     data: TestData4 = Form(..., **test_data4_extra),
     nested_data: TestData = Form(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-body", response=ResponseData, by_alias=True)
+@router.post("/test-multi-body", by_alias=True)
 def test_multi_body(
     request,
     i: int = Body(...),
     s: str = Body("a-str"),
     data: TestData4 = Body(..., **test_data4_extra),
     nested_data: TestData = Body(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-body-file", response=ResponseData, by_alias=True)
+@router.post("/test-multi-body-file", by_alias=True)
 def test_multi_body_file(
     request,
     file: UploadedFile,
@@ -139,11 +141,11 @@ def test_multi_body_file(
     s: str = Body("a-str"),
     data: TestData4 = Body(..., **test_data4_extra),
     nested_data: TestData = Body(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-form-file", response=ResponseData, by_alias=True)
+@router.post("/test-multi-form-file", by_alias=True)
 def test_multi_form_file(
     request,
     file: UploadedFile,
@@ -151,33 +153,33 @@ def test_multi_form_file(
     s: str = Form("a-str"),
     data: TestData4 = Form(..., **test_data4_extra),
     nested_data: TestData = Form(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-body-form", response=ResponseData, by_alias=True)
+@router.post("/test-multi-body-form", by_alias=True)
 def test_multi_body_form(
     request,
     i: int = Body(...),
     s: str = Form("a-str"),
     data: TestData4 = Body(..., **test_data4_extra),
     nested_data: TestData = Form(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-form-body", response=ResponseData, by_alias=True)
+@router.post("/test-multi-form-body", by_alias=True)
 def test_multi_form_body(
     request,
     i: int = Form(...),
     s: str = Body("a-str"),
     data: TestData4 = Form(..., **test_data4_extra),
     nested_data: TestData = Body(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-body-form-file", response=ResponseData, by_alias=True)
+@router.post("/test-multi-body-form-file", by_alias=True)
 def test_multi_body_form_file(
     request,
     file: File[UploadedFile],
@@ -185,11 +187,11 @@ def test_multi_body_form_file(
     s: str = Form("a-str"),
     data: TestData4 = Body(..., **test_data4_extra),
     nested_data: TestData = Form(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))
 
 
-@router.post("/test-multi-form-body-file", response=ResponseData, by_alias=True)
+@router.post("/test-multi-form-body-file", by_alias=True)
 def test_multi_form_body_file(
     request,
     file: File[UploadedFile],
@@ -197,5 +199,5 @@ def test_multi_form_body_file(
     s: str = Body("a-str"),
     data: TestData4 = Form(..., **test_data4_extra),
     nested_data: TestData = Body(..., alias="nested-data"),
-):
-    return dict(s=s, i=i, data=data, nested_data=nested_data)
+) -> Annotated[Response[ResponseData], 200]:
+    return Response(200, dict(s=s, i=i, data=data, nested_data=nested_data))

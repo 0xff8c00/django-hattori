@@ -1,14 +1,9 @@
+from typing import Annotated
+
 from pydantic import model_serializer
 
-from hattori import Router, Schema
+from hattori import Response, Router, Schema
 from hattori.testing import TestClient
-
-
-def api_endpoint_test(request):
-    return {
-        "test1": "foo",
-        "test2": "bar",
-    }
 
 
 def test_request_is_passed_in_context_when_supported():
@@ -24,9 +19,15 @@ def test_request_is_passed_in_context_when_supported():
 
             return handler(self)
 
+    def api_endpoint_test(request) -> Annotated[Response[SchemaWithCustomSerializer], 200]:
+        return Response(200, {
+            "test1": "foo",
+            "test2": "bar",
+        })
+
     router = Router()
     router.add_api_operation(
-        "/test", ["GET"], api_endpoint_test, response=SchemaWithCustomSerializer
+        "/test", ["GET"], api_endpoint_test
     )
 
     TestClient(router).get("/test")

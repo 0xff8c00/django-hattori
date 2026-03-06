@@ -1,9 +1,10 @@
 from functools import wraps
+from typing import Annotated, Any
 from unittest import mock
 
 import pytest
 
-from hattori import Router
+from hattori import Response, Router
 from hattori.testing import TestClient
 
 router = Router()
@@ -21,11 +22,17 @@ def a_good_test_wrapper(f):
 
 
 def a_bad_test_wrapper(f):
-    """Validate that decorators failing to using functools.wraps(), fail"""
+    """Validate that decorators failing to use functools.wraps(), fail.
+
+    We copy __annotations__ so the router can parse the return type,
+    but we intentionally do NOT use @wraps(f), so the signature is lost
+    and parameter resolution fails at request time.
+    """
 
     def wrapper(*args, **kwargs):
         return f(*args, **kwargs)
 
+    wrapper.__annotations__ = f.__annotations__
     return wrapper
 
 
@@ -33,54 +40,54 @@ def a_bad_test_wrapper(f):
 @a_good_test_wrapper
 def get_text(
     request,
-):
-    return "Hello World"
+) -> Annotated[Response[Any], 200]:
+    return Response(200, "Hello World")
 
 
 @router.get("/path/{item_id}")
 @a_good_test_wrapper
-def get_id(request, item_id):
-    return item_id
+def get_id(request, item_id) -> Annotated[Response[Any], 200]:
+    return Response(200, item_id)
 
 
 @router.get("/query")
 @a_good_test_wrapper
-def get_query_type(request, query: int):
-    return f"foo bar {query}"
+def get_query_type(request, query: int) -> Annotated[Response[Any], 200]:
+    return Response(200, f"foo bar {query}")
 
 
 @router.get("/path-query/{item_id}")
 @a_good_test_wrapper
-def get_query_id(request, item_id, query: int):
-    return f"foo bar {item_id} {query}"
+def get_query_id(request, item_id, query: int) -> Annotated[Response[Any], 200]:
+    return Response(200, f"foo bar {item_id} {query}")
 
 
 @router.get("/text-bad")
 @a_bad_test_wrapper
-def get_text_bad(request):
-    return "Hello World"
+def get_text_bad(request) -> Annotated[Response[Any], 200]:
+    return Response(200, "Hello World")
 
 
 with mock.patch("hattori.signature.details.warnings.warn_explicit"):
 
     @router.get("/path-bad/{item_id}")
     @a_bad_test_wrapper
-    def get_id_bad(request, item_id):
-        return item_id
+    def get_id_bad(request, item_id) -> Annotated[Response[Any], 200]:
+        return Response(200, item_id)
 
 
 @router.get("/query-bad")
 @a_bad_test_wrapper
-def get_query_type_bad(request, query: int):
-    return f"foo bar {query}"
+def get_query_type_bad(request, query: int) -> Annotated[Response[Any], 200]:
+    return Response(200, f"foo bar {query}")
 
 
 with mock.patch("hattori.signature.details.warnings.warn_explicit"):
 
     @router.get("/path-query-bad/{item_id}")
     @a_bad_test_wrapper
-    def get_query_id_bad(request, item_id, query: int):
-        return f"foo bar {item_id} {query}"
+    def get_query_id_bad(request, item_id, query: int) -> Annotated[Response[Any], 200]:
+        return Response(200, f"foo bar {item_id} {query}")
 
 
 @pytest.mark.parametrize(
