@@ -1,6 +1,6 @@
-site_name: Django Ninja
-site_description: Django Ninja - Django REST framework with high performance, easy to learn, fast to code.
-site_url: https://django-ninja.dev
+site_name: Django Hattori
+site_description: Django Hattori - Django REST framework with high performance, easy to learn, fast to code.
+site_url: https://0xff8c00.github.io/django-hattori/
 repo_name: 0xff8c00/django-hattori
 repo_url: https://github.com/0xff8c00/django-hattori
 edit_uri: ""
@@ -85,7 +85,8 @@ nav:
       - releases.md
   - help.md
 markdown_extensions:
-  - markdown_include.include
+  - markdown_include.include:
+      base_path: docs
   - markdown.extensions.codehilite:
       guess_lang: false
   # Uncomment these 2 lines during development to more easily add highlights

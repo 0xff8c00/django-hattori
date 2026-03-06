@@ -39,7 +39,7 @@ Now, run it as usual:
 ./manage.py runserver
 ```
 
-Note: You don't have to add Django Ninja to your installed apps for it to work.
+Note: You don't have to add Django Hattori to your installed apps for it to work.
 
 ## Check it
 
