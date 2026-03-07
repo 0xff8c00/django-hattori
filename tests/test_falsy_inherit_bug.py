@@ -35,9 +35,9 @@ def test_set_auth_empty_list():
     op = object.__new__(Operation)
     op.auth_callbacks = []
     op._set_auth([])
-    assert op.auth_callbacks == [], (
-        f"Expected empty auth_callbacks but got {op.auth_callbacks!r}"
-    )
+    assert (
+        op.auth_callbacks == []
+    ), f"Expected empty auth_callbacks but got {op.auth_callbacks!r}"
 
 
 def test_set_auth_single_callable():

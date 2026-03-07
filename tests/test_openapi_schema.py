@@ -84,12 +84,16 @@ def method_alias(request, data: Payload) -> Annotated[ApiResponse[Response], 200
 
 
 @api.post("/test_list")
-def method_list_response(request, data: List[Payload]) -> Annotated[ApiResponse[List[Response]], 200]:
+def method_list_response(
+    request, data: List[Payload]
+) -> Annotated[ApiResponse[List[Response]], 200]:
     return ApiResponse(200, [])
 
 
 @api.post("/test-body")
-def method_body(request, i: int = Body(...), f: float = Body(...)) -> Annotated[ApiResponse[Response], 200]:
+def method_body(
+    request, i: int = Body(...), f: float = Body(...)
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=i, f=f))
 
 
@@ -119,22 +123,30 @@ def method_pathex(
 
 
 @api.post("/test-form")
-def method_form(request, data: Payload = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+def method_form(
+    request, data: Payload = Form(...)
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
 @api.post("/test-form-single")
-def method_form_single(request, data: float = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+def method_form_single(
+    request, data: float = Form(...)
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=int(data), f=data))
 
 
 @api.post("/test-form-body")
-def method_form_body(request, i: int = Form(10), s: str = Body("10")) -> Annotated[ApiResponse[Response], 200]:
+def method_form_body(
+    request, i: int = Form(10), s: str = Body("10")
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=i, s=s))
 
 
 @api.post("/test-form-file")
-def method_form_file(request, files: List[UploadedFile], data: Payload = Form(...)) -> Annotated[ApiResponse[Response], 200]:
+def method_form_file(
+    request, files: List[UploadedFile], data: Payload = Form(...)
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
@@ -148,17 +160,23 @@ def method_body_file(
 
 
 @api.post("/test-union-type")
-def method_union_payload(request, data: Union[TypeA, TypeB]) -> Annotated[ApiResponse[Response], 200]:
+def method_union_payload(
+    request, data: Union[TypeA, TypeB]
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
 @api.post("/test-union-type-with-simple")
-def method_union_payload_and_simple(request, data: Union[int, TypeB]) -> Annotated[ApiResponse[Response], 200]:
+def method_union_payload_and_simple(
+    request, data: Union[int, TypeB]
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, data.dict())
 
 
 @api.post("/test-new-union-type")
-def method_new_union_payload(request, data: "TypeA | TypeB") -> Annotated[ApiResponse[Response], 200]:
+def method_new_union_payload(
+    request, data: "TypeA | TypeB"
+) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=data.i, f=data.f))
 
 
@@ -284,9 +302,7 @@ def test_schema(schema):
         "ValidationErrorDetail": {
             "properties": {
                 "loc": {
-                    "items": {
-                        "anyOf": [{"type": "string"}, {"type": "integer"}]
-                    },
+                    "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
                     "title": "Loc",
                     "type": "array",
                 },
@@ -300,9 +316,7 @@ def test_schema(schema):
         "ValidationErrorResponse": {
             "properties": {
                 "detail": {
-                    "items": {
-                        "$ref": "#/components/schemas/ValidationErrorDetail"
-                    },
+                    "items": {"$ref": "#/components/schemas/ValidationErrorDetail"},
                     "title": "Detail",
                     "type": "array",
                 }
@@ -428,9 +442,7 @@ def test_schema_list(schema):
         "ValidationErrorDetail": {
             "properties": {
                 "loc": {
-                    "items": {
-                        "anyOf": [{"type": "string"}, {"type": "integer"}]
-                    },
+                    "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
                     "title": "Loc",
                     "type": "array",
                 },
@@ -444,9 +456,7 @@ def test_schema_list(schema):
         "ValidationErrorResponse": {
             "properties": {
                 "detail": {
-                    "items": {
-                        "$ref": "#/components/schemas/ValidationErrorDetail"
-                    },
+                    "items": {"$ref": "#/components/schemas/ValidationErrorDetail"},
                     "title": "Detail",
                     "type": "array",
                 }
@@ -1183,7 +1193,9 @@ def test_422_not_overwritten():
         error: str
 
     @api.get("/items")
-    def get_items(request, q: str = Query(...)) -> Annotated[ApiResponse[TypeA], 200] | Annotated[ApiResponse[CustomError], 422]:
+    def get_items(
+        request, q: str = Query(...)
+    ) -> Annotated[ApiResponse[TypeA], 200] | Annotated[ApiResponse[CustomError], 422]:
         return ApiResponse(200, {"a": q})
 
     schema = api.get_openapi_schema()

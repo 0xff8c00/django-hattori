@@ -9,7 +9,9 @@ router = Router()
 
 
 @router.post("/empty-body-str")
-def empty_body_str(request, name: str = Body(...), tag: str = Form("")) -> Annotated[Response[Any], 200]:
+def empty_body_str(
+    request, name: str = Body(...), tag: str = Form("")
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"name": name, "tag": tag})
 
 

@@ -149,7 +149,7 @@ class NinjaClientBase:
         request.FILES = request_params.pop("FILES", {})
 
         request.META.update({
-            f"HTTP_{k.replace('-', '_')}": v
+            f"HTTP_{k.replace("-", "_")}": v
             for k, v in request_params.pop("headers", {}).items()
         })
 

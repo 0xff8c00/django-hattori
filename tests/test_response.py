@@ -85,7 +85,9 @@ def check_set_header(request, response: HttpResponse) -> Annotated[Response[Any]
 
 
 @router.get("/check_set_cookie")
-def check_set_cookie(request, set: bool, response: HttpResponse) -> Annotated[Response[Any], 200]:
+def check_set_cookie(
+    request, set: bool, response: HttpResponse
+) -> Annotated[Response[Any], 200]:
     if set:
         response.set_cookie("test", "me")
     return Response(200, 1)

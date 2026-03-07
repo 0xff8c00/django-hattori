@@ -93,7 +93,7 @@ def test_validate_test_data():
 
     fixture_dir = Path(__file__).parent / "schema_fixtures"
     fixture_files = {
-        path: (fixture_dir / f"{path.split('/', 2)[1]}.json") for path in ops
+        path: (fixture_dir / f"{path.split("/", 2)[1]}.json") for path in ops
     }
 
     # verify that the currently generated schema matches the fixtures.  Since the generated

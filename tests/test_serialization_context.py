@@ -19,15 +19,18 @@ def test_request_is_passed_in_context_when_supported():
 
             return handler(self)
 
-    def api_endpoint_test(request) -> Annotated[Response[SchemaWithCustomSerializer], 200]:
-        return Response(200, {
-            "test1": "foo",
-            "test2": "bar",
-        })
+    def api_endpoint_test(
+        request,
+    ) -> Annotated[Response[SchemaWithCustomSerializer], 200]:
+        return Response(
+            200,
+            {
+                "test1": "foo",
+                "test2": "bar",
+            },
+        )
 
     router = Router()
-    router.add_api_operation(
-        "/test", ["GET"], api_endpoint_test
-    )
+    router.add_api_operation("/test", ["GET"], api_endpoint_test)
 
     TestClient(router).get("/test")

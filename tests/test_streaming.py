@@ -37,12 +37,16 @@ def jsonl_echo(request) -> Annotated[Response[JSONL[Item]], 200]:
 
 
 @api.get("/jsonl/with-params/{item_id}")
-def jsonl_with_params(request, item_id: int, q: str = "default") -> Annotated[Response[JSONL[Item]], 200]:
+def jsonl_with_params(
+    request, item_id: int, q: str = "default"
+) -> Annotated[Response[JSONL[Item]], 200]:
     yield {"name": f"item-{item_id}-{q}", "price": 0.0}
 
 
 @api.get("/jsonl/with-headers")
-def jsonl_with_headers(request, response: HttpResponse) -> Annotated[Response[JSONL[Item]], 200]:
+def jsonl_with_headers(
+    request, response: HttpResponse
+) -> Annotated[Response[JSONL[Item]], 200]:
     response["X-Custom"] = "hello"
     response.set_cookie("session", "abc123")
     yield {"name": "with-headers", "price": 0.0}
@@ -135,7 +139,9 @@ async def async_sse_items(request) -> Annotated[Response[SSE[Item]], 200]:
 
 
 @async_api.get("/jsonl/with-headers")
-async def async_jsonl_with_headers(request, response: HttpResponse) -> Annotated[Response[JSONL[Item]], 200]:
+async def async_jsonl_with_headers(
+    request, response: HttpResponse
+) -> Annotated[Response[JSONL[Item]], 200]:
     response["X-Custom"] = "async-hello"
     response.set_cookie("token", "xyz")
     yield {"name": "async-headers", "price": 0.0}

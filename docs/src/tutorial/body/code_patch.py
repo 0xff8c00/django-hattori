@@ -11,7 +11,9 @@ class ItemUpdate(Schema):
 
 
 @api.patch("/items/{item_id}")
-def update_item(request, item_id: int, payload: PatchDict[ItemUpdate]) -> Annotated[Response[Any], 200]:
+def update_item(
+    request, item_id: int, payload: PatchDict[ItemUpdate]
+) -> Annotated[Response[Any], 200]:
     # payload is a dict containing only the fields the client sent
     # e.g. {"price": 9.99} — other fields are excluded
     item = get_item(item_id)

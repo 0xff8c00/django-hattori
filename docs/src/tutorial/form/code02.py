@@ -11,5 +11,7 @@ class Item(Schema):
 
 
 @api.post("/items/{item_id}")
-def update(request, item_id: int, q: str, item: Form[Item]) -> Annotated[Response[Any], 200]:
+def update(
+    request, item_id: int, q: str, item: Form[Item]
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"item_id": item_id, "item": item.dict(), "q": q})

@@ -128,7 +128,9 @@ async def test_mixed_sync_async_decorators():
 
                 async def async_wrapper():
                     actual_result = await result
-                    if isinstance(actual_result, Response) and isinstance(actual_result.value, dict):
+                    if isinstance(actual_result, Response) and isinstance(
+                        actual_result.value, dict
+                    ):
                         actual_result.value["sync_decorated"] = True
                     return actual_result
 

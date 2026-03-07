@@ -345,17 +345,20 @@ class OpenAPISchema(dict):
                     auth_refs.append({"$ref": REF_TEMPLATE.format(model=auth_title)})
 
                 if status not in result:
-                    schema = auth_refs[0] if len(auth_refs) == 1 else {"oneOf": auth_refs}
+                    schema = (
+                        auth_refs[0] if len(auth_refs) == 1 else {"oneOf": auth_refs}
+                    )
                     result[status] = {
                         "description": responses.get(status, "Unknown Status Code"),
-                        "content": {
-                            self.api.renderer.media_type: {"schema": schema}
-                        },
+                        "content": {self.api.renderer.media_type: {"schema": schema}},
                     }
                 else:
-                    existing = result[status].get("content", {}).get(
-                        self.api.renderer.media_type, {}
-                    ).get("schema")
+                    existing = (
+                        result[status]
+                        .get("content", {})
+                        .get(self.api.renderer.media_type, {})
+                        .get("schema")
+                    )
                     if existing:
                         all_schemas = []
                         if "oneOf" in existing:
@@ -366,11 +369,13 @@ class OpenAPISchema(dict):
                             if ref not in all_schemas:
                                 all_schemas.append(ref)
                         if len(all_schemas) > 1:
-                            result[status]["content"][self.api.renderer.media_type]["schema"] = {
-                                "oneOf": all_schemas
-                            }
+                            result[status]["content"][self.api.renderer.media_type][
+                                "schema"
+                            ] = {"oneOf": all_schemas}
                         else:
-                            result[status]["content"][self.api.renderer.media_type]["schema"] = all_schemas[0]
+                            result[status]["content"][self.api.renderer.media_type][
+                                "schema"
+                            ] = all_schemas[0]
 
         return result
 

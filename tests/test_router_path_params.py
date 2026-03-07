@@ -12,22 +12,30 @@ router_with_multiple = Router()
 
 
 @router_with_path_type.get("/metadata")
-def get_item_metadata(request, item_id: int = Path(None)) -> Annotated[Response[int], 200]:
+def get_item_metadata(
+    request, item_id: int = Path(None)
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router_without_path_type.get("/")
-def get_item_metadata_2(request, item_id: str = Path(None)) -> Annotated[Response[str], 200]:
+def get_item_metadata_2(
+    request, item_id: str = Path(None)
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router_without_path_type.get("/metadata")
-def get_item_metadata_3(request, item_id: str = Path(None)) -> Annotated[Response[str], 200]:
+def get_item_metadata_3(
+    request, item_id: str = Path(None)
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router_without_path_type.get("/")
-def get_item_metadata_4(request, item_id: str = Path(None)) -> Annotated[Response[str], 200]:
+def get_item_metadata_4(
+    request, item_id: str = Path(None)
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 

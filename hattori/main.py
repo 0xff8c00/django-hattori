@@ -54,7 +54,10 @@ class NinjaAPI:
         docs_decorator: Callable[[TCallable], TCallable] | None = None,
         servers: list[dict[str, Any]] | None = None,
         urls_namespace: str | None = None,
-        auth: collections.abc.Sequence[Callable] | Callable | NOT_SET_TYPE | None = NOT_SET,
+        auth: collections.abc.Sequence[Callable]
+        | Callable
+        | NOT_SET_TYPE
+        | None = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
         renderer: BaseRenderer | None = None,
         default_router: Router | None = None,
@@ -83,7 +86,9 @@ class NinjaAPI:
         self.servers = servers or []
         self.urls_namespace = urls_namespace or f"api-{self.version}"
         self.renderer = renderer or JSONRenderer()
-        self._content_type = f"{self.renderer.media_type}; charset={self.renderer.charset}"
+        self._content_type = (
+            f"{self.renderer.media_type}; charset={self.renderer.charset}"
+        )
         self.openapi_extra = openapi_extra or {}
 
         self._exception_handlers: dict[Exc, ExcHandler] = {}
@@ -117,7 +122,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -139,7 +143,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -160,7 +163,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -182,7 +184,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -203,7 +204,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -225,7 +225,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -246,7 +245,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -268,7 +266,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -289,7 +286,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -311,7 +307,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -333,7 +328,6 @@ class NinjaAPI:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -352,7 +346,6 @@ class NinjaAPI:
             path,
             auth=self.auth if auth is NOT_SET else auth,
             throttle=self.throttle if throttle is NOT_SET else throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -634,4 +627,3 @@ class NinjaAPI:
                 return self._exception_handlers[cls]
 
         return None
-

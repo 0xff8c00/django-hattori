@@ -42,5 +42,3 @@ def test_decorator_after():
     response = client.get("/after")
     assert response.status_code == 200
     assert response["X-Decorator"] == "some_decorator"
-
-

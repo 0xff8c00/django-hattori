@@ -17,12 +17,16 @@ api = NinjaAPI()
 
 
 @api.post("/old_way")
-def old_way(request: HttpRequest, data: Payload = Body()) -> Annotated[Response[Any], 200]:
+def old_way(
+    request: HttpRequest, data: Payload = Body()
+) -> Annotated[Response[Any], 200]:
     data.s.capitalize()
 
 
 @api.post("/annotated_way")
-def annotated_way(request: HttpRequest, data: Annotated[Payload, Body()]) -> Annotated[Response[Any], 200]:
+def annotated_way(
+    request: HttpRequest, data: Annotated[Payload, Body()]
+) -> Annotated[Response[Any], 200]:
     data.s.capitalize()
 
 
@@ -32,5 +36,7 @@ def new_way(request: HttpRequest, data: Body[Payload]) -> Annotated[Response[Any
 
 
 @api.post("/new_way_ex")
-def new_way_ex(request: HttpRequest, data: BodyEx[Payload, P(title="A title")]) -> Annotated[Response[Any], 200]:
+def new_way_ex(
+    request: HttpRequest, data: BodyEx[Payload, P(title="A title")]
+) -> Annotated[Response[Any], 200]:
     data.s.find("")

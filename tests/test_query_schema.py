@@ -35,7 +35,9 @@ api = NinjaAPI()
 
 
 @api.get("/test")
-def query_params_schema(request, filters: Filter = Query(...)) -> Annotated[Response[Any], 200]:
+def query_params_schema(
+    request, filters: Filter = Query(...)
+) -> Annotated[Response[Any], 200]:
     return Response(200, filters.model_dump())
 
 
@@ -47,12 +49,15 @@ def query_params_mixed_schema(
     filters: Filter = Query(...),
     data: Data = Query(...),
 ) -> Annotated[Response[Any], 200]:
-    return Response(200, dict(
-        query1=query1,
-        query2=query2,
-        filters=filters.model_dump(),
-        data=data.model_dump(),
-    ))
+    return Response(
+        200,
+        dict(
+            query1=query1,
+            query2=query2,
+            filters=filters.model_dump(),
+            data=data.model_dump(),
+        ),
+    )
 
 
 def test_request():
@@ -191,7 +196,9 @@ def test_optional_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/opt")
-    def view(request, f: Optional[MyFilter] = Query(None)) -> Annotated[Response[Any], 200]:
+    def view(
+        request, f: Optional[MyFilter] = Query(None)
+    ) -> Annotated[Response[Any], 200]:
         if f:
             return Response(200, f.model_dump())
         return Response(200, {})
@@ -216,7 +223,9 @@ def test_union_pipe_syntax_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/pipe")
-    def view(request, f: MyFilter | None = Query(None)) -> Annotated[Response[Any], 200]:
+    def view(
+        request, f: MyFilter | None = Query(None)
+    ) -> Annotated[Response[Any], 200]:
         if f:
             return Response(200, f.model_dump())
         return Response(200, {})

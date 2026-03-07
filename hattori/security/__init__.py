@@ -1,6 +1,10 @@
 from hattori.security.apikey import APIKeyCookie, APIKeyHeader, APIKeyQuery
 from hattori.security.http import HttpBasicAuth, HttpBearer
-from hattori.security.session import SessionAuth, SessionAuthIsStaff, SessionAuthSuperUser
+from hattori.security.session import (
+    SessionAuth,
+    SessionAuthIsStaff,
+    SessionAuthSuperUser,
+)
 
 __all__ = [
     "APIKeyCookie",

@@ -55,7 +55,9 @@ def router1_op1(request) -> Annotated[Response[Any], 200]:
 @second_router_one.get("endpoint_3")
 # router2->router1, router1->api, view->router2
 def router21_op3(request, path_param: int = None) -> Annotated[Response[Any], 200]:
-    return Response(200, "second 3" if path_param is None else f"second 3: {path_param}")
+    return Response(
+        200, "second 3" if path_param is None else f"second 3: {path_param}"
+    )
 
 
 second_router_three = Router()
@@ -64,7 +66,9 @@ second_router_three = Router()
 @second_router_three.get("endpoint_4")
 # router1->api, view->router2, router2->router1
 def router_op3(request, path_param: int = None) -> Annotated[Response[Any], 200]:
-    return Response(200, "second 4" if path_param is None else f"second 4: {path_param}")
+    return Response(
+        200, "second 4" if path_param is None else f"second 4: {path_param}"
+    )
 
 
 first_router.add_router("/second", second_router_three, tags=["three"])

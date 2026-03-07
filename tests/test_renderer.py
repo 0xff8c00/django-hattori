@@ -55,10 +55,13 @@ class CSVRenderer(BaseRenderer):
 
 
 def operation(request) -> Annotated[Response[Any], 200]:
-    return Response(200, [
-        {"name": "Jonathan", "lastname": "Doe"},
-        {"name": "Sarah", "lastname": "Calvin"},
-    ])
+    return Response(
+        200,
+        [
+            {"name": "Jonathan", "lastname": "Doe"},
+            {"name": "Sarah", "lastname": "Calvin"},
+        ],
+    )
 
 
 api_xml = NinjaAPI(renderer=XMLRenderer())

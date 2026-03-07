@@ -15,7 +15,9 @@ from hattori.testing import TestClient
 
 
 def test_validation_error_detail_accepts_str_and_int_loc():
-    detail = ValidationErrorDetail(loc=["body", "items", 0, "name"], msg="required", type="missing")
+    detail = ValidationErrorDetail(
+        loc=["body", "items", 0, "name"], msg="required", type="missing"
+    )
     assert detail.loc == ["body", "items", 0, "name"]
 
 
@@ -25,10 +27,16 @@ def test_validation_error_detail_rejects_invalid_loc():
 
 
 def test_validation_error_response_structure():
-    resp = ValidationErrorResponse(detail=[
-        ValidationErrorDetail(loc=["query", "q"], msg="Field required", type="missing"),
-        ValidationErrorDetail(loc=["body", "items", 0], msg="Invalid", type="value_error"),
-    ])
+    resp = ValidationErrorResponse(
+        detail=[
+            ValidationErrorDetail(
+                loc=["query", "q"], msg="Field required", type="missing"
+            ),
+            ValidationErrorDetail(
+                loc=["body", "items", 0], msg="Invalid", type="value_error"
+            ),
+        ]
+    )
     assert len(resp.detail) == 2
     assert resp.detail[0].loc == ["query", "q"]
     assert resp.detail[1].loc == ["body", "items", 0]

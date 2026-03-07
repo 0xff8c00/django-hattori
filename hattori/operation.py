@@ -131,7 +131,10 @@ class Operation:
         methods: list[str],
         view_func: Callable,
         *,
-        auth: collections.abc.Sequence[Callable] | Callable | NOT_SET_TYPE | None = NOT_SET,
+        auth: collections.abc.Sequence[Callable]
+        | Callable
+        | NOT_SET_TYPE
+        | None = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
         operation_id: str | None = None,
         summary: str | None = None,
@@ -155,7 +158,9 @@ class Operation:
         if url_name is not None:
             self.url_name = url_name
 
-        self.auth_param: collections.abc.Sequence[Callable] | Callable | object | None = auth
+        self.auth_param: (
+            collections.abc.Sequence[Callable] | Callable | object | None
+        ) = auth
         self.auth_callbacks: collections.abc.Sequence[Callable] = []
         self._set_auth(auth)
 
@@ -186,7 +191,9 @@ class Operation:
             if schema_type is type(None):
                 self.response_models[status_code] = None
             else:
-                self.response_models[status_code] = self._create_response_model(schema_type)
+                self.response_models[status_code] = self._create_response_model(
+                    schema_type
+                )
         if self.stream_format and self.response_models:
             first_model = next(iter(self.response_models.values()))
             self.stream_item_model = first_model
@@ -363,7 +370,9 @@ class Operation:
         self, auth: collections.abc.Sequence[Callable] | Callable | object | None
     ) -> None:
         if auth is not None and auth is not NOT_SET:
-            self.auth_callbacks = auth if isinstance(auth, collections.abc.Sequence) else [auth]
+            self.auth_callbacks = (
+                auth if isinstance(auth, collections.abc.Sequence) else [auth]
+            )
 
     def _run_checks(self, request: HttpRequest) -> HttpResponse | None:
         "Runs security/throttle checks for each operation"
@@ -637,7 +646,10 @@ class PathView:
         methods: list[str],
         view_func: Callable,
         *,
-        auth: collections.abc.Sequence[Callable] | Callable | NOT_SET_TYPE | None = NOT_SET,
+        auth: collections.abc.Sequence[Callable]
+        | Callable
+        | NOT_SET_TYPE
+        | None = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
         operation_id: str | None = None,
         summary: str | None = None,
@@ -699,9 +711,7 @@ class PathView:
         cloned.url_name = self.url_name
         cloned.operations = [op.clone() for op in self.operations]
         cloned._method_map = {
-            method: op
-            for op in cloned.operations
-            for method in op.methods
+            method: op for op in cloned.operations for method in op.methods
         }
         return cloned
 
@@ -753,6 +763,6 @@ class PathView:
         return self._method_map.get(request.method)
 
     def _not_allowed(self) -> HttpResponse:
-        return HttpResponseNotAllowed(self._method_map.keys(), content=b"Method not allowed")
-
-
+        return HttpResponseNotAllowed(
+            self._method_map.keys(), content=b"Method not allowed"
+        )

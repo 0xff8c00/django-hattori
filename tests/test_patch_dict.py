@@ -25,7 +25,9 @@ constrained_client = TestClient(constrained_api)
 
 
 @constrained_api.patch("/patch-constrained")
-def patch_constrained(request, payload: PatchDict[ConstrainedSchema]) -> Annotated[Response[Any], 200]:
+def patch_constrained(
+    request, payload: PatchDict[ConstrainedSchema]
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"payload": payload})
 
 
@@ -46,7 +48,9 @@ def patch(request, payload: PatchDict[SomeSchema]) -> Annotated[Response[Any], 2
 
 
 @api.patch("/patch-inherited")
-def patch_inherited(request, payload: PatchDict[OtherSchema]) -> Annotated[Response[Any], 200]:
+def patch_inherited(
+    request, payload: PatchDict[OtherSchema]
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"payload": payload, "type": str(type(payload))})
 
 
@@ -133,9 +137,7 @@ def test_inherited_schema():
 
 def test_patch_preserves_max_length():
     """PatchDict should enforce max_length from Field constraints."""
-    response = constrained_client.patch(
-        "/patch-constrained", json={"name": "ok"}
-    )
+    response = constrained_client.patch("/patch-constrained", json={"name": "ok"})
     assert response.status_code == 200
 
     response = constrained_client.patch(
@@ -146,22 +148,16 @@ def test_patch_preserves_max_length():
 
 def test_patch_preserves_ge():
     """PatchDict should enforce ge=0 from Field constraints."""
-    response = constrained_client.patch(
-        "/patch-constrained", json={"price": 10}
-    )
+    response = constrained_client.patch("/patch-constrained", json={"price": 10})
     assert response.status_code == 200
 
-    response = constrained_client.patch(
-        "/patch-constrained", json={"price": -1}
-    )
+    response = constrained_client.patch("/patch-constrained", json={"price": -1})
     assert response.status_code == 422
 
 
 def test_patch_constrained_partial_update():
     """PatchDict with constraints should still allow partial updates."""
-    response = constrained_client.patch(
-        "/patch-constrained", json={"name": "hi"}
-    )
+    response = constrained_client.patch("/patch-constrained", json={"name": "hi"})
     assert response.status_code == 200
     assert response.json() == {"payload": {"name": "hi"}}
 

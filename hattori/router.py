@@ -229,7 +229,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -248,7 +247,6 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -269,7 +267,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -288,7 +285,6 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -309,7 +305,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -328,7 +323,6 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -349,7 +343,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -368,7 +361,6 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -389,7 +381,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -408,7 +399,6 @@ class Router:
             path,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,
@@ -430,7 +420,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -451,7 +440,6 @@ class Router:
                 view_func,
                 auth=auth,
                 throttle=throttle,
-    
                 operation_id=operation_id,
                 summary=summary,
                 description=description,
@@ -477,7 +465,6 @@ class Router:
         *,
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
-
         operation_id: str | None = None,
         summary: str | None = None,
         description: str | None = None,
@@ -519,7 +506,6 @@ class Router:
             view_func=view_func,
             auth=auth,
             throttle=throttle,
-
             operation_id=operation_id,
             summary=summary,
             description=description,

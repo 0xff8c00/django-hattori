@@ -51,7 +51,6 @@ class Response(Generic[T]):
         self.value = value
 
 
-
 def json_default(obj: Any) -> Any:
     if isinstance(obj, BaseModel):
         return obj.model_dump()

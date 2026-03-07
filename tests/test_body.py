@@ -13,12 +13,16 @@ api = NinjaAPI()
 
 
 @api.post("/task")
-def create_task(request, start: int = Body(...), end: int = Body(...)) -> Annotated[Response[Any], 200]:
+def create_task(
+    request, start: int = Body(...), end: int = Body(...)
+) -> Annotated[Response[Any], 200]:
     return Response(200, [start, end])
 
 
 @api.post("/task2")
-def create_task2(request, start: int = Body(2), end: int = Form(1)) -> Annotated[Response[Any], 200]:
+def create_task2(
+    request, start: int = Body(2), end: int = Form(1)
+) -> Annotated[Response[Any], 200]:
     return Response(200, [start, end])
 
 

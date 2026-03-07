@@ -31,12 +31,16 @@ api = NinjaAPI()
 
 
 @api.get("/status_dict")
-def status_dict(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+def status_dict(
+    request,
+) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
     return Response(200, {"id": 1, "name": "John"})
 
 
 @api.get("/status_error")
-def status_error(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+def status_error(
+    request,
+) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
     return Response(400, {"detail": "bad request"})
 
 
@@ -46,14 +50,18 @@ def status_none(request) -> Annotated[Response[None], 204]:
 
 
 @api.get("/status_ellipsis")
-def status_ellipsis(request, code: int) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 500]:
+def status_ellipsis(
+    request, code: int
+) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 500]:
     if code == 200:
         return Response(200, {"id": 1, "name": "John"})
     return Response(code, {"detail": "fallback"})
 
 
 @api.get("/status_code_groups")
-def status_code_groups(request, code: int) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 300]:
+def status_code_groups(
+    request, code: int
+) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 300]:
     if code < 300:
         return Response(code, {"id": 1, "name": "John"})
     return Response(code, {"detail": "redirect"})
@@ -68,7 +76,9 @@ def status_model_instance(request) -> Annotated[Response[UserOut], 200]:
 
 
 @api.get("/tuple_return")
-def tuple_return(request) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
+def tuple_return(
+    request,
+) -> Annotated[Response[UserOut], 200] | Annotated[Response[ErrorOut], 400]:
     return Response(200, {"id": 1, "name": "John"})
 
 
@@ -91,7 +101,9 @@ def dict_result(request) -> Annotated[Response[UserOut], 200]:
 
 
 @api.get("/union_response")
-def union_response(request, q: int) -> Annotated[Response[Union[int, UserOut]], 200] | Annotated[Response[ErrorOut], 400]:
+def union_response(
+    request, q: int
+) -> Annotated[Response[Union[int, UserOut]], 200] | Annotated[Response[ErrorOut], 400]:
     if q == 0:
         return Response(200, 1)
     return Response(200, UserOut(id=1, name="John"))

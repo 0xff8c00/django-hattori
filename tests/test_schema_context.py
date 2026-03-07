@@ -37,7 +37,9 @@ api = NinjaAPI()
 
 
 @api.post("/resolve_ctx")
-def resolve_ctx(request, data: DataWithRequestContext) -> Annotated[Response[DataWithRequestContext], 200]:
+def resolve_ctx(
+    request, data: DataWithRequestContext
+) -> Annotated[Response[DataWithRequestContext], 200]:
     return Response(200, {"other": data.dict()})
 
 

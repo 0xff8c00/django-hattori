@@ -43,7 +43,12 @@ def check_no_content(request, return_code: bool) -> Annotated[Response[None], 20
 @api.get("/check_multiple_codes")
 def check_multiple_codes(
     request, code: int
-) -> Annotated[Response[int], 200] | Annotated[Response[str], 300] | Annotated[Response[float], 400] | Annotated[Response[float], 500]:
+) -> (
+    Annotated[Response[int], 200]
+    | Annotated[Response[str], 300]
+    | Annotated[Response[float], 400]
+    | Annotated[Response[float], 500]
+):
     return Response(code, "1")
 
 
@@ -65,7 +70,9 @@ class ErrorModel(Schema):
 
 
 @api.get("/check_model")
-def check_model(request) -> Annotated[Response[UserModel], 200] | Annotated[Response[UserModel], 202]:
+def check_model(
+    request,
+) -> Annotated[Response[UserModel], 200] | Annotated[Response[UserModel], 202]:
     return Response(202, User(1, "John", "Password"))
 
 
@@ -75,7 +82,12 @@ def check_list_model(request) -> Annotated[Response[List[UserModel]], 200]:
 
 
 @api.get("/check_union")
-def check_union(request, q: int) -> Annotated[Response[Union[int, UserModel]], 200] | Annotated[Response[ErrorModel], 400]:
+def check_union(
+    request, q: int
+) -> (
+    Annotated[Response[Union[int, UserModel]], 200]
+    | Annotated[Response[ErrorModel], 400]
+):
     if q == 0:
         return Response(200, 1)
     if q == 1:

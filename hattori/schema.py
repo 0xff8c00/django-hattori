@@ -141,9 +141,8 @@ class ResolverMetaclass(ModelMetaclass):
         for attr, resolve_func in namespace.items():
             if not attr.startswith("resolve_"):
                 continue
-            if (
-                not callable(resolve_func)
-                and not isinstance(resolve_func, staticmethod)
+            if not callable(resolve_func) and not isinstance(
+                resolve_func, staticmethod
             ):
                 continue  # pragma: no cover
             resolvers[attr[8:]] = Resolver(resolve_func)

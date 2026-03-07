@@ -27,17 +27,23 @@ def headers1(request, user_agent: str = Header(...)) -> Annotated[Response[Any],
 
 
 @router.get("/headers2")
-def headers2(request, ua: str = Header(..., alias="User-Agent")) -> Annotated[Response[Any], 200]:
+def headers2(
+    request, ua: str = Header(..., alias="User-Agent")
+) -> Annotated[Response[Any], 200]:
     return Response(200, ua)
 
 
 @router.get("/headers3")
-def headers3(request, content_length: int = Header(...)) -> Annotated[Response[Any], 200]:
+def headers3(
+    request, content_length: int = Header(...)
+) -> Annotated[Response[Any], 200]:
     return Response(200, content_length)
 
 
 @router.get("/headers4")
-def headers4(request, c_len: int = Header(..., alias="Content-length")) -> Annotated[Response[Any], 200]:
+def headers4(
+    request, c_len: int = Header(..., alias="Content-length")
+) -> Annotated[Response[Any], 200]:
     return Response(200, c_len)
 
 
@@ -52,12 +58,16 @@ def cookies1(request, weapon: str = Cookie(...)) -> Annotated[Response[Any], 200
 
 
 @router.get("/cookies2")
-def cookies2(request, wpn: str = Cookie(..., alias="weapon")) -> Annotated[Response[Any], 200]:
+def cookies2(
+    request, wpn: str = Cookie(..., alias="weapon")
+) -> Annotated[Response[Any], 200]:
     return Response(200, wpn)
 
 
 @router.post("/test-schema")
-def schema(request, payload: ExtraForbidSchema = Body(...)) -> Annotated[Response[Any], 200]:
+def schema(
+    request, payload: ExtraForbidSchema = Body(...)
+) -> Annotated[Response[Any], 200]:
     return Response(200, "ok")
 
 

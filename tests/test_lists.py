@@ -16,10 +16,13 @@ def listview1(
     query: List[int] = Query(...),
     form: List[int] = Form(...),
 ) -> Annotated[Response[Any], 200]:
-    return Response(200, {
-        "query": query,
-        "form": form,
-    })
+    return Response(
+        200,
+        {
+            "query": query,
+            "form": form,
+        },
+    )
 
 
 @router.post("/list2")
@@ -28,10 +31,13 @@ def listview2(
     body: List[int],
     query: List[int] = Query(...),
 ) -> Annotated[Response[Any], 200]:
-    return Response(200, {
-        "query": query,
-        "body": body,
-    })
+    return Response(
+        200,
+        {
+            "query": query,
+            "body": body,
+        },
+    )
 
 
 class BodyModel(BaseModel):
@@ -41,17 +47,23 @@ class BodyModel(BaseModel):
 
 @router.post("/list3")
 def listview3(request, body: List[BodyModel]) -> Annotated[Response[Any], 200]:
-    return Response(200, {
-        "body": body,
-    })
+    return Response(
+        200,
+        {
+            "body": body,
+        },
+    )
 
 
 @router.post("/list-default")
 def listviewdefault(request, body: List[int] = [1]) -> Annotated[Response[Any], 200]:  # noqa: B006
     # By default List[anything] is treated for body
-    return Response(200, {
-        "body": body,
-    })
+    return Response(
+        200,
+        {
+            "body": body,
+        },
+    )
 
 
 class Filters(Schema):
@@ -64,9 +76,12 @@ def listview4(
     request,
     filters: Filters = Query(...),
 ) -> Annotated[Response[Any], 200]:
-    return Response(200, {
-        "filters": filters,
-    })
+    return Response(
+        200,
+        {
+            "filters": filters,
+        },
+    )
 
 
 class ConListSchema(Schema):
@@ -83,10 +98,13 @@ def listview5(
     body: conlist(int, min_length=1) = Body(...),
     a_query: Data = Query(...),
 ) -> Annotated[Response[Any], 200]:
-    return Response(200, {
-        "query": a_query.data.query,
-        "body": body,
-    })
+    return Response(
+        200,
+        {
+            "query": a_query.data.query,
+            "body": body,
+        },
+    )
 
 
 @router.post("/list6")

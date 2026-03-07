@@ -23,7 +23,9 @@ class Payload(Schema):
 
 
 @api.post("/error/{code}")
-def err_thrower(request, code: str, payload: Payload = None) -> Annotated[Response[Any], 200]:
+def err_thrower(
+    request, code: str, payload: Payload = None
+) -> Annotated[Response[Any], 200]:
     if code == "base":
         raise RuntimeError("test")
     if code == "404":

@@ -37,5 +37,3 @@ def test_deprecated_schema():
     with warnings.catch_warnings(record=True) as w:
         OptSchema.schema()
     assert w[0].message.args == (".schema() is deprecated, use .json_schema() instead",)
-
-

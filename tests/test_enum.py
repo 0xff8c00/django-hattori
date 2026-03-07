@@ -46,12 +46,16 @@ def enum_optional(
 
 
 @api.get("/optional2")
-def enum_optional2(request, extra: Optional[ExtraEnum] = None) -> Annotated[Response[Any], 200]:
+def enum_optional2(
+    request, extra: Optional[ExtraEnum] = None
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"extra": extra})
 
 
 @api.get("/list")
-def enum_list(request, rooms: List[RoomEnum] = Query(None, description="description")) -> Annotated[Response[Any], 200]:
+def enum_list(
+    request, rooms: List[RoomEnum] = Query(None, description="description")
+) -> Annotated[Response[Any], 200]:
     return Response(200, {"rooms": rooms})
 
 

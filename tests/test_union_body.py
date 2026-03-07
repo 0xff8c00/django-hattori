@@ -15,7 +15,9 @@ api = NinjaAPI()
 
 
 @api.post("/union-dict-model")
-def union_endpoint(request, payload: Union[Dict[str, int], ItemSchema]) -> Annotated[Response[Any], 200]:
+def union_endpoint(
+    request, payload: Union[Dict[str, int], ItemSchema]
+) -> Annotated[Response[Any], 200]:
     """Dict is generic but not a collection — only is_pydantic_model catches this."""
     if isinstance(payload, dict):
         return Response(200, {"type": "dict", "data": payload})

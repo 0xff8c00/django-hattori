@@ -28,13 +28,21 @@ api = NinjaAPI()
 
 
 @api.post("/descr-union")
-def create_example(request, payload: UnionDiscriminator) -> Annotated[Response[Any], 200]:
-    return Response(200, {"data": payload.model_dump(), "type": payload.__class__.__name__})
+def create_example(
+    request, payload: UnionDiscriminator
+) -> Annotated[Response[Any], 200]:
+    return Response(
+        200, {"data": payload.model_dump(), "type": payload.__class__.__name__}
+    )
 
 
 @api.post("/regular-union")
-def create_example_regular(request, payload: RegularUnion) -> Annotated[Response[Any], 200]:
-    return Response(200, {"data": payload.model_dump(), "type": payload.__class__.__name__})
+def create_example_regular(
+    request, payload: RegularUnion
+) -> Annotated[Response[Any], 200]:
+    return Response(
+        200, {"data": payload.model_dump(), "type": payload.__class__.__name__}
+    )
 
 
 client = TestClient(api)

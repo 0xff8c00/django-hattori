@@ -73,7 +73,9 @@ def view6(request, obj: OtherModel = None) -> Annotated[Response[Any], 200]:
 
 
 @router.post("/model-default2")
-def view7(request, obj: OtherModel = OtherModel(x=1, y=1)) -> Annotated[Response[Any], 200]:
+def view7(
+    request, obj: OtherModel = OtherModel(x=1, y=1)
+) -> Annotated[Response[Any], 200]:
     assert isinstance(obj, OtherModel)
     return Response(200, obj)
 

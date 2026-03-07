@@ -24,7 +24,9 @@ def list_items(request) -> Annotated[Response[list[Item]], 200]:
 
 
 @api.get("/items/{item_id}")
-def get_item(request, item_id: int) -> Annotated[Response[Item], 200] | Annotated[Response[Error], 404]:
+def get_item(
+    request, item_id: int
+) -> Annotated[Response[Item], 200] | Annotated[Response[Error], 404]:
     if item_id == 0:
         return Response(404, Error(message="not found"))
     return Response(200, Item(name="Sword", price=9.99))
