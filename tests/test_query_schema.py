@@ -191,10 +191,10 @@ def test_optional_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/opt")
-    def view(request, f: Optional[MyFilter] = Query(None)):
+    def view(request, f: Optional[MyFilter] = Query(None)) -> Annotated[Response[Any], 200]:
         if f:
-            return f.model_dump()
-        return {}
+            return Response(200, f.model_dump())
+        return Response(200, {})
 
     client = TestClient(temp_api)
 
@@ -216,10 +216,10 @@ def test_union_pipe_syntax_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/pipe")
-    def view(request, f: MyFilter | None = Query(None)):
+    def view(request, f: MyFilter | None = Query(None)) -> Annotated[Response[Any], 200]:
         if f:
-            return f.model_dump()
-        return {}
+            return Response(200, f.model_dump())
+        return Response(200, {})
 
     client = TestClient(temp_api)
 
@@ -246,8 +246,8 @@ def test_nested_optional_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/nested")
-    def view(request, f: Outer = Query(...)):
-        return f.model_dump()
+    def view(request, f: Outer = Query(...)) -> Annotated[Response[Any], 200]:
+        return Response(200, f.model_dump())
 
     client = TestClient(temp_api)
 
