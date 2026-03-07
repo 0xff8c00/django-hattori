@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import orjson
 from django.core.management.base import BaseCommand, CommandError, CommandParser
@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     help = "Exports Open API schema"
 
-    def _get_api_instance(self, api_path: Optional[str] = None) -> NinjaAPI:
+    def _get_api_instance(self, api_path: str | None = None) -> NinjaAPI:
         if not api_path:
             try:
                 return resolve("/api/").func.keywords["api"]  # type: ignore

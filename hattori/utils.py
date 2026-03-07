@@ -1,5 +1,6 @@
 import inspect
-from typing import Any, Callable, Optional, Type
+import re
+from typing import Any, Callable
 
 from django.http import HttpRequest, HttpResponseForbidden
 from django.middleware.csrf import CsrfViewMiddleware
@@ -16,9 +17,7 @@ def replace_path_param_notation(path: str) -> str:
 
 
 def normalize_path(path: str) -> str:
-    while "//" in path:
-        path = path.replace("//", "/")
-    return path
+    return re.sub(r"/+", "/", path)
 
 
 def _no_view() -> None:
@@ -27,7 +26,7 @@ def _no_view() -> None:
 
 def check_csrf(
     request: HttpRequest, callback: Callable = _no_view
-) -> Optional[HttpResponseForbidden]:
+) -> HttpResponseForbidden | None:
     mware = CsrfViewMiddleware(lambda x: HttpResponseForbidden())  # pragma: no cover
     request.csrf_processing_done = False  # type: ignore
     mware.process_request(request)
@@ -40,7 +39,7 @@ def is_async_callable(f: Callable[..., Any]) -> bool:
     )
 
 
-def is_optional_type(t: Type[Any]) -> bool:
+def is_optional_type(t: type[Any]) -> bool:
     try:
         return type(None) in t.__args__
     except AttributeError:
@@ -56,7 +55,7 @@ def contribute_operation_callback(
 
 
 def contribute_operation_args(
-    func: Callable[..., Any], arg_name: str, arg_type: Type, arg_source: Any
+    func: Callable[..., Any], arg_name: str, arg_type: type, arg_source: Any
 ) -> None:
     if not hasattr(func, "_ninja_contribute_args"):
         func._ninja_contribute_args = []  # type: ignore

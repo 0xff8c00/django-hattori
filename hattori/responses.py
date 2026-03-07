@@ -1,7 +1,7 @@
 from datetime import timedelta
 from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
-from typing import Any, FrozenSet, Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 import orjson
 from django.http import HttpResponse
@@ -13,7 +13,6 @@ from pydantic_core import Url
 __all__ = [
     "Response",
     "JsonResponse",
-    "Status",
     "json_default",
     "json_dumps",
     "json_loads",
@@ -52,20 +51,6 @@ class Response(Generic[T]):
         self.value = value
 
 
-class Status:
-    """Return a response with an explicit HTTP status code.
-
-    Usage:
-        return Status(200, {"key": "value"})
-        return Status(204, None)
-    """
-
-    __slots__ = ("status_code", "value")
-
-    def __init__(self, status_code: int, value: Any):
-        self.status_code = status_code
-        self.value = value
-
 
 def json_default(obj: Any) -> Any:
     if isinstance(obj, BaseModel):
@@ -97,7 +82,7 @@ class JsonResponse(HttpResponse):
         super().__init__(content=json_dumps(data), **kwargs)
 
 
-def resp_codes(from_code: int, to_code: int) -> FrozenSet[int]:
+def resp_codes(from_code: int, to_code: int) -> frozenset[int]:
     return frozenset(range(from_code, to_code + 1))
 
 

@@ -1,7 +1,7 @@
 from typing import Annotated, List, Union
 import pytest
 
-from hattori import Field, NinjaAPI, Response, Schema, Status
+from hattori import Field, NinjaAPI, Response, Schema
 from hattori.responses import codes_2xx, codes_3xx
 from hattori.testing import TestClient
 

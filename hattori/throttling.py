@@ -1,6 +1,5 @@
 import hashlib
 import time
-from typing import List, Optional, Tuple
 
 from django.core.cache import cache as default_cache
 from django.core.exceptions import ImproperlyConfigured
@@ -18,7 +17,7 @@ class BaseThrottle:
         """
         raise NotImplementedError(".allow_request() must be overridden")
 
-    def get_ident(self, request: HttpRequest) -> Optional[str]:
+    def get_ident(self, request: HttpRequest) -> str | None:
         """
         Identify the machine making the request by parsing HTTP_X_FORWARDED_FOR
         if present and number of proxies is > 0. If not use all of
@@ -33,13 +32,13 @@ class BaseThrottle:
         if num_proxies is not None:
             if num_proxies == 0 or xff is None:
                 return remote_addr
-            addrs: List[str] = xff.split(",")
+            addrs: list[str] = xff.split(",")
             client_addr = addrs[-min(num_proxies, len(addrs))]
             return client_addr.strip()
 
         return "".join(xff.split()) if xff else remote_addr
 
-    def wait(self) -> Optional[float]:
+    def wait(self) -> float | None:
         """
         Optionally, return a recommended number of seconds to wait before
         the next request.
@@ -63,7 +62,7 @@ class SimpleRateThrottle(BaseThrottle):
     cache = default_cache
     timer = time.time
     cache_format = "throttle_%(scope)s_%(ident)s"
-    scope: Optional[str] = None
+    scope: str | None = None
     _PERIODS = {
         "s": 1,
         "m": 60,
@@ -75,15 +74,15 @@ class SimpleRateThrottle(BaseThrottle):
         "day": 60 * 60 * 24,
     }
 
-    def __init__(self, rate: Optional[str] = None):
-        self.rate: Optional[str]
+    def __init__(self, rate: str | None = None):
+        self.rate: str | None
         if rate:
             self.rate = rate
         else:
             self.rate = self.get_rate()
         self.num_requests, self.duration = self.parse_rate(self.rate)
 
-    def get_cache_key(self, request: HttpRequest) -> Optional[str]:
+    def get_cache_key(self, request: HttpRequest) -> str | None:
         """
         Should return a unique cache-key which can be used for throttling.
         Must be overridden.
@@ -92,7 +91,7 @@ class SimpleRateThrottle(BaseThrottle):
         """
         raise NotImplementedError(".get_cache_key() must be overridden")
 
-    def get_rate(self) -> Optional[str]:
+    def get_rate(self) -> str | None:
         """
         Determine the string representation of the allowed request rate.
         """
@@ -108,7 +107,7 @@ class SimpleRateThrottle(BaseThrottle):
             msg = f"No default throttle rate set for '{self.scope}' scope"
             raise ImproperlyConfigured(msg) from None
 
-    def parse_rate(self, rate: Optional[str]) -> Tuple[Optional[int], Optional[int]]:
+    def parse_rate(self, rate: str | None) -> tuple[int | None, int | None]:
         """
         Given the request rate string, return a two tuple of:
         <allowed number of requests>, <period of time in seconds>
@@ -172,7 +171,7 @@ class SimpleRateThrottle(BaseThrottle):
         """
         return False
 
-    def wait(self) -> Optional[float]:
+    def wait(self) -> float | None:
         """
         Returns the recommended next request time in seconds.
         """
@@ -197,7 +196,7 @@ class AnonRateThrottle(SimpleRateThrottle):
 
     scope = "anon"
 
-    def get_cache_key(self, request: HttpRequest) -> Optional[str]:
+    def get_cache_key(self, request: HttpRequest) -> str | None:
         if getattr(request, "auth", None) is not None:
             return None  # Only throttle unauthenticated requests.
 

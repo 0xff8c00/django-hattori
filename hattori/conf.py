@@ -1,5 +1,3 @@
-from typing import Dict, Optional, Set
-
 from django.conf import settings as django_settings
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -8,8 +6,8 @@ class Settings(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     # Throttling
-    NUM_PROXIES: Optional[int] = Field(None, alias="NINJA_NUM_PROXIES")
-    DEFAULT_THROTTLE_RATES: Dict[str, Optional[str]] = Field(
+    NUM_PROXIES: int | None = Field(None, alias="NINJA_NUM_PROXIES")
+    DEFAULT_THROTTLE_RATES: dict[str, str | None] = Field(
         {
             "auth": "10000/day",
             "user": "10000/day",
@@ -18,7 +16,7 @@ class Settings(BaseModel):
         alias="NINJA_DEFAULT_THROTTLE_RATES",
     )
 
-    FIX_REQUEST_FILES_METHODS: Set[str] = Field(
+    FIX_REQUEST_FILES_METHODS: set[str] = Field(
         {"PUT", "PATCH", "DELETE"}, alias="NINJA_FIX_REQUEST_FILES_METHODS"
     )
 

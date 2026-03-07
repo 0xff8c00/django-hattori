@@ -1,13 +1,11 @@
 import logging
 import traceback
 from functools import partial
-from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import pydantic
 from django.conf import settings
 from django.http import Http404, HttpRequest, HttpResponse
-
-from hattori.types import DictStrAny
 
 if TYPE_CHECKING:
     from hattori import NinjaAPI  # pragma: no cover
@@ -56,7 +54,7 @@ class ValidationError(Exception):
     the errors attribute as well holds the location of the error(body, form, query, etc.)
     """
 
-    def __init__(self, errors: List[DictStrAny]) -> None:
+    def __init__(self, errors: list[dict[str, Any]]) -> None:
         self.errors = errors
         super().__init__(errors)
 
@@ -82,7 +80,7 @@ class AuthorizationError(HttpError):
 
 
 class Throttled(HttpError):
-    def __init__(self, wait: Optional[int]) -> None:
+    def __init__(self, wait: int | None) -> None:
         self.wait = wait
         super().__init__(status_code=429, message="Too many requests.")
 
@@ -92,13 +90,13 @@ class AuthErrorResponse(pydantic.BaseModel):
 
 
 class ValidationErrorDetail(pydantic.BaseModel):
-    loc: List[Union[str, int]]
+    loc: list[str | int]
     msg: str
     type: str
 
 
 class ValidationErrorResponse(pydantic.BaseModel):
-    detail: List[ValidationErrorDetail]
+    detail: list[ValidationErrorDetail]
 
 
 def set_default_exc_handlers(api: "NinjaAPI") -> None:

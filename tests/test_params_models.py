@@ -1,11 +1,11 @@
-from typing import Optional
+from typing import Any
 
-from hattori.params.models import DictStrAny, ParamModel
+from hattori.params.models import ParamModel
 
 
 class _NestedParamModel(ParamModel):
-    outer: DictStrAny
-    leaf: Optional[int]
+    outer: dict[str, Any]
+    leaf: int | None
 
     __ninja_flatten_map__ = {
         "foo": ("outer", "foo"),

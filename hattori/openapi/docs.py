@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
@@ -9,7 +9,6 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from hattori.constants import NOT_SET
-from hattori.types import DictStrAny
 
 if TYPE_CHECKING:
     # if anyone knows a cleaner way to make mypy happy - welcome
@@ -25,7 +24,7 @@ class DocsBase(ABC):
     ) -> HttpResponse:
         pass  # pragma: no cover
 
-    def get_openapi_url(self, api: "NinjaAPI", path_params: DictStrAny) -> str:
+    def get_openapi_url(self, api: "NinjaAPI", path_params: dict[str, Any]) -> str:
         return reverse(f"{api.urls_namespace}:openapi-json", kwargs=path_params)
 
 
@@ -37,7 +36,7 @@ class Swagger(DocsBase):
         "deepLinking": True,
     }
 
-    def __init__(self, settings: Optional[DictStrAny] = None):
+    def __init__(self, settings: dict[str, Any] | None = None):
         self.settings = {}
         self.settings.update(self.default_settings)
         if settings:
@@ -58,9 +57,9 @@ class Swagger(DocsBase):
 class Redoc(DocsBase):
     template = "ninja/redoc.html"
     template_cdn = str(ABS_TPL_PATH / "redoc_cdn.html")
-    default_settings: DictStrAny = {}
+    default_settings: dict[str, Any] = {}
 
-    def __init__(self, settings: Optional[DictStrAny] = None):
+    def __init__(self, settings: dict[str, Any] | None = None):
         self.settings = {}
         self.settings.update(self.default_settings)
         if settings:
@@ -78,7 +77,7 @@ class Redoc(DocsBase):
 
 
 def render_template(
-    request: HttpRequest, template: str, template_cdn: str, context: DictStrAny
+    request: HttpRequest, template: str, template_cdn: str, context: dict[str, Any]
 ) -> HttpResponse:
     """
     I do not really want hattori to be required in INSTALLED_APPS to ease installation
@@ -92,7 +91,7 @@ def render_template(
 
 
 def _render_cdn_template(
-    request: HttpRequest, template_path: str, context: Optional[DictStrAny] = None
+    request: HttpRequest, template_path: str, context: dict[str, Any] | None = None
 ) -> HttpResponse:
     "this is helper to find and render html template when hattori is not in INSTALLED_APPS"
     from django.template import RequestContext, Template

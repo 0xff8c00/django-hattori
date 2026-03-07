@@ -2,13 +2,11 @@ import asyncio
 import inspect
 import re
 from sys import version_info
-from typing import Any, Callable, ForwardRef, List, Set
+from typing import Any, Callable, ForwardRef
 
 from django.urls import register_converter
 from django.urls.converters import UUIDConverter
 from pydantic._internal._typing_extra import eval_type_lenient as evaluate_forwardref
-
-from hattori.types import DictStrAny
 
 __all__ = [
     "get_typed_signature",
@@ -36,14 +34,14 @@ def get_typed_signature(call: Callable[..., Any]) -> inspect.Signature:
     return typed_signature
 
 
-def get_typed_annotation(param: inspect.Parameter, globalns: DictStrAny) -> Any:
+def get_typed_annotation(param: inspect.Parameter, globalns: dict[str, Any]) -> Any:
     annotation = param.annotation
     if isinstance(annotation, str):
         annotation = make_forwardref(annotation, globalns)
     return annotation
 
 
-def make_forwardref(annotation: str, globalns: DictStrAny) -> Any:
+def make_forwardref(annotation: str, globalns: dict[str, Any]) -> Any:
     # NOTE: in future versions of pydantic, the import may be changed to:
     # from pydantic._internal._typing_extra import try_eval_type
     # usage:
@@ -52,7 +50,7 @@ def make_forwardref(annotation: str, globalns: DictStrAny) -> Any:
     return evaluate_forwardref(forward_ref, globalns, globalns)
 
 
-def get_path_param_names(path: str) -> Set[str]:
+def get_path_param_names(path: str) -> set[str]:
     """turns path string like /foo/{var}/path/{int:another}/end to set {'var', 'another'}"""
     return {item.strip("{}").split(":")[-1] for item in re.findall("{[^}]*}", path)}
 
@@ -72,7 +70,7 @@ def has_kwargs(func: Callable[..., Any]) -> bool:
     return False
 
 
-def get_args_names(func: Callable[..., Any]) -> List[str]:
+def get_args_names(func: Callable[..., Any]) -> list[str]:
     "returns list of function argument names"
     return list(inspect.signature(func).parameters.keys())
 

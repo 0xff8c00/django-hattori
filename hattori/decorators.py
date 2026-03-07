@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, Callable, Tuple
+from typing import Any, Callable
 
 from typing_extensions import Literal
 
@@ -41,7 +41,7 @@ def decorate_view(*decorators: Callable[..., Any]) -> Callable[[TCallable], TCal
 
 
 def _apply_decorators(
-    decorators: Tuple[Callable[..., Any]], operation: Operation
+    decorators: tuple[Callable[..., Any]], operation: Operation
 ) -> None:
     # Track decorators for cloning support
     if not hasattr(operation, "_run_decorators"):

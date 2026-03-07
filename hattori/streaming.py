@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from hattori.responses import json_dumps
 
@@ -36,7 +36,7 @@ class StreamFormat:
         return {cls.media_type: {"schema": item_schema}}
 
     @classmethod
-    def response_headers(cls) -> Dict[str, str]:
+    def response_headers(cls) -> dict[str, str]:
         """Extra headers for the streaming response."""
         return {}
 
@@ -57,7 +57,7 @@ class SSE(StreamFormat):
         return f"data: {data}\n\n"
 
     @classmethod
-    def response_headers(cls) -> Dict[str, str]:
+    def response_headers(cls) -> dict[str, str]:
         return {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
 
     @classmethod

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -13,7 +13,7 @@ class SessionAuth(APIKeyCookie):
 
     param_name: str = settings.SESSION_COOKIE_NAME
 
-    def authenticate(self, request: HttpRequest, key: Optional[str]) -> Optional[Any]:
+    def authenticate(self, request: HttpRequest, key: str | None) -> Any | None:
         if request.user.is_authenticated:
             return request.user
 
@@ -25,7 +25,7 @@ class SessionAuthSuperUser(APIKeyCookie):
 
     param_name: str = settings.SESSION_COOKIE_NAME
 
-    def authenticate(self, request: HttpRequest, key: Optional[str]) -> Optional[Any]:
+    def authenticate(self, request: HttpRequest, key: str | None) -> Any | None:
         is_superuser = getattr(request.user, "is_superuser", None)
         if request.user.is_authenticated and is_superuser:
             return request.user
@@ -34,7 +34,7 @@ class SessionAuthSuperUser(APIKeyCookie):
 
 
 class SessionAuthIsStaff(SessionAuthSuperUser):
-    def authenticate(self, request: HttpRequest, key: Optional[str]) -> Optional[Any]:
+    def authenticate(self, request: HttpRequest, key: str | None) -> Any | None:
         result = super().authenticate(request, key)
         if result is not None:
             return result

@@ -22,10 +22,7 @@ import warnings
 from typing import (
     Any,
     Callable,
-    Dict,
-    Type,
     TypeVar,
-    Union,
     no_type_check,
 )
 
@@ -40,7 +37,6 @@ from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 from typing_extensions import dataclass_transform
 
 from hattori.signature.utils import get_args_names, has_kwargs
-from hattori.types import DictStrAny
 
 pydantic_version = list(map(int, pydantic.VERSION.split(".")[:2]))
 
@@ -52,7 +48,7 @@ S = TypeVar("S", bound="Schema")
 class DjangoGetter:
     __slots__ = ("_obj", "_schema_cls", "_context", "__dict__")
 
-    def __init__(self, obj: Any, schema_cls: Type[S], context: Any = None):
+    def __init__(self, obj: Any, schema_cls: type[S], context: Any = None):
         self._obj = obj
         self._schema_cls = schema_cls
         self._context = context
@@ -107,7 +103,7 @@ class Resolver:
     _func: Any
     _takes_context: bool
 
-    def __init__(self, func: Union[Callable, staticmethod]):
+    def __init__(self, func: Callable | staticmethod):
         if isinstance(func, staticmethod):
             self._static = True
             self._func = func.__func__
@@ -132,7 +128,7 @@ class Resolver:
 
 @dataclass_transform(kw_only_default=True, field_specifiers=(Field,))
 class ResolverMetaclass(ModelMetaclass):
-    _ninja_resolvers: Dict[str, Resolver]
+    _ninja_resolvers: dict[str, Resolver]
 
     @no_type_check
     def __new__(cls, name, bases, namespace, **kwargs):
@@ -201,19 +197,19 @@ class Schema(BaseModel, metaclass=ResolverMetaclass):
         return handler(values)
 
     @classmethod
-    def from_orm(cls: Type[S], obj: Any, **kw: Any) -> S:
+    def from_orm(cls: type[S], obj: Any, **kw: Any) -> S:
         return cls.model_validate(obj, **kw)
 
-    def dict(self, *a: Any, **kw: Any) -> DictStrAny:
+    def dict(self, *a: Any, **kw: Any) -> dict[str, Any]:
         "Backward compatibility with pydantic 1.x"
         return self.model_dump(*a, **kw)
 
     @classmethod
-    def json_schema(cls) -> DictStrAny:
+    def json_schema(cls) -> dict[str, Any]:
         return cls.model_json_schema(schema_generator=NinjaGenerateJsonSchema)
 
     @classmethod
-    def schema(cls) -> DictStrAny:  # type: ignore
+    def schema(cls) -> dict[str, Any]:  # type: ignore
         warnings.warn(
             ".schema() is deprecated, use .json_schema() instead",
             DeprecationWarning,

@@ -1,15 +1,9 @@
+import collections.abc
 import inspect
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Type,
-    Union,
     cast,
     get_args,
     get_origin,
@@ -42,7 +36,6 @@ from hattori.schema import Schema
 from hattori.signature import ViewSignature, is_async
 from hattori.streaming import StreamFormat, _StreamAlias, _serialize_item
 from hattori.throttling import BaseThrottle
-from hattori.types import DictStrAny
 from hattori.utils import is_async_callable
 
 if TYPE_CHECKING:
@@ -55,8 +48,8 @@ class _ParsedAnnotation:
     __slots__ = ("response_models", "stream_alias")
 
     def __init__(self) -> None:
-        self.response_models: Dict[int, Any] = {}
-        self.stream_alias: Optional[_StreamAlias] = None
+        self.response_models: dict[int, Any] = {}
+        self.stream_alias: _StreamAlias | None = None
 
 
 def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
@@ -135,41 +128,41 @@ class Operation:
     def __init__(
         self,
         path: str,
-        methods: List[str],
+        methods: list[str],
         view_func: Callable,
         *,
-        auth: Optional[Union[Sequence[Callable], Callable, NOT_SET_TYPE]] = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
+        auth: collections.abc.Sequence[Callable] | Callable | NOT_SET_TYPE | None = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
         include_in_schema: bool = True,
-        url_name: Optional[str] = None,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        url_name: str | None = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> None:
         self.is_async = False
         self.path: str = path
-        self.methods: List[str] = methods
+        self.methods: list[str] = methods
         self.view_func: Callable = view_func
         self.api: NinjaAPI = cast("NinjaAPI", None)
         self.csrf_exempt: bool = getattr(view_func, "csrf_exempt", False)
         if url_name is not None:
             self.url_name = url_name
 
-        self.auth_param: Optional[Union[Sequence[Callable], Callable, object]] = auth
-        self.auth_callbacks: Sequence[Callable] = []
+        self.auth_param: collections.abc.Sequence[Callable] | Callable | object | None = auth
+        self.auth_callbacks: collections.abc.Sequence[Callable] = []
         self._set_auth(auth)
 
         if isinstance(throttle, BaseThrottle):
             throttle = [throttle]
         self.throttle_param = throttle
-        self.throttle_objects: List[BaseThrottle] = []
+        self.throttle_objects: list[BaseThrottle] = []
         if throttle is not NOT_SET:
             for th in throttle:  # type: ignore
                 assert isinstance(
@@ -180,9 +173,9 @@ class Operation:
         self.signature = ViewSignature(self.path, self.view_func)
         self.models: TModels = self.signature.models
 
-        self.stream_format: Optional[Type[StreamFormat]] = None
-        self.stream_item_model: Optional[Type[Schema]] = None
-        self.response_models: Dict[Any, Any]
+        self.stream_format: type[StreamFormat] | None = None
+        self.stream_item_model: type[Schema] | None = None
+        self.response_models: dict[Any, Any]
 
         # Parse response schema from return type annotation
         parsed = _parse_return_annotation(view_func)
@@ -198,7 +191,7 @@ class Operation:
             first_model = next(iter(self.response_models.values()))
             self.stream_item_model = first_model
 
-        self._resp_annotations: Dict[int, Any] = {
+        self._resp_annotations: dict[int, Any] = {
             id(model): model.model_fields["response"].annotation
             for model in self.response_models.values()
             if model is not None
@@ -226,7 +219,7 @@ class Operation:
 
         if hasattr(view_func, "_ninja_contribute_to_operation"):
             # Allow 3rd party code to contribute to the operation behavior
-            callbacks: List[Callable] = view_func._ninja_contribute_to_operation
+            callbacks: list[Callable] = view_func._ninja_contribute_to_operation
             for callback in callbacks:
                 callback(self)
 
@@ -316,7 +309,7 @@ class Operation:
             return self.api.on_exception(request, e)
 
     def _validate_stream_item(
-        self, item: Any, request: HttpRequest, ctx: Dict[str, Any]
+        self, item: Any, request: HttpRequest, ctx: dict[str, Any]
     ) -> str:
         """Validate a single stream item and return serialized JSON string."""
         assert self.stream_item_model is not None
@@ -367,12 +360,12 @@ class Operation:
         return response
 
     def _set_auth(
-        self, auth: Optional[Union[Sequence[Callable], Callable, object]]
+        self, auth: collections.abc.Sequence[Callable] | Callable | object | None
     ) -> None:
         if auth is not None and auth is not NOT_SET:
-            self.auth_callbacks = auth if isinstance(auth, Sequence) else [auth]
+            self.auth_callbacks = auth if isinstance(auth, collections.abc.Sequence) else [auth]
 
-    def _run_checks(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def _run_checks(self, request: HttpRequest) -> HttpResponse | None:
         "Runs security/throttle checks for each operation"
         # NOTE: if you change anything in this function - do this also in AsyncOperation
 
@@ -395,7 +388,7 @@ class Operation:
 
         return None
 
-    def _run_authentication(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def _run_authentication(self, request: HttpRequest) -> HttpResponse | None:
         for callback in self.auth_callbacks:
             try:
                 result = callback(request)
@@ -409,7 +402,7 @@ class Operation:
                 return None
         return self.api.on_exception(request, AuthenticationError())
 
-    def _check_throttles(self, request: HttpRequest) -> Optional[HttpResponse]:
+    def _check_throttles(self, request: HttpRequest) -> HttpResponse | None:
         throttle_durations = []
         for throttle in self.throttle_objects:
             if not throttle.allow_request(request):
@@ -504,9 +497,9 @@ class Operation:
 
     def _get_values(
         self, request: HttpRequest, path_params: Any, temporal_response: HttpResponse
-    ) -> DictStrAny:
+    ) -> dict[str, Any]:
         values = {}
-        error_contexts: List[ValidationErrorContext] = []
+        error_contexts: list[ValidationErrorContext] = []
         for model in self.models:
             try:
                 data = model.resolve(request, self.api, path_params)
@@ -524,7 +517,7 @@ class Operation:
             values[self.signature.response_arg] = temporal_response
         return values
 
-    def _create_response_model(self, response_param: Any) -> Optional[Type[Schema]]:
+    def _create_response_model(self, response_param: Any) -> type[Schema] | None:
         if response_param is None:
             return None
         attrs = {"__annotations__": {"response": response_param}}
@@ -589,7 +582,7 @@ class AsyncOperation(Operation):
             response[key] = value
         return response
 
-    async def _run_checks(self, request: HttpRequest) -> Optional[HttpResponse]:  # type: ignore
+    async def _run_checks(self, request: HttpRequest) -> HttpResponse | None:  # type: ignore
         "Runs security/throttle checks for each operation"
         # NOTE: if you change anything in this function - do this also in Sync Operation
 
@@ -611,11 +604,11 @@ class AsyncOperation(Operation):
 
         return None
 
-    async def _run_authentication(self, request: HttpRequest) -> Optional[HttpResponse]:  # type: ignore
+    async def _run_authentication(self, request: HttpRequest) -> HttpResponse | None:  # type: ignore
         for callback in self.auth_callbacks:
             try:
                 if is_async_callable(callback) or getattr(callback, "is_async", False):
-                    cor: Optional[Coroutine] = callback(request)
+                    cor: collections.abc.Coroutine | None = callback(request)
                     if cor is None:
                         result = None
                     else:
@@ -633,31 +626,31 @@ class AsyncOperation(Operation):
 
 class PathView:
     def __init__(self) -> None:
-        self.operations: List[Operation] = []
-        self._method_map: Dict[str, Operation] = {}
+        self.operations: list[Operation] = []
+        self._method_map: dict[str, Operation] = {}
         self.is_async = False  # if at least one operation is async - will become True
-        self.url_name: Optional[str] = None
+        self.url_name: str | None = None
 
     def add_operation(
         self,
         path: str,
-        methods: List[str],
+        methods: list[str],
         view_func: Callable,
         *,
-        auth: Optional[Union[Sequence[Callable], Callable, NOT_SET_TYPE]] = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        auth: collections.abc.Sequence[Callable] | Callable | NOT_SET_TYPE | None = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Operation:
         if url_name:
             self.url_name = url_name
@@ -756,7 +749,7 @@ class PathView:
             return await cast(AsyncOperation, operation).run(request, *a, **kw)
         return await sync_to_async(operation.run)(request, *a, **kw)
 
-    def _find_operation(self, request: HttpRequest) -> Optional[Operation]:
+    def _find_operation(self, request: HttpRequest) -> Operation | None:
         return self._method_map.get(request.method)
 
     def _not_allowed(self) -> HttpResponse:

@@ -121,3 +121,20 @@ The function parameters will be recognized as follows:
 * If the parameter is also declared in the **path**, it will be used as a path parameter.
 * If the parameter is of a **singular type** (like `int`, `float`, `str`, `bool`, etc.), it will be interpreted as a **query** parameter.
 * If the parameter is declared to be of the type of **Schema** (or Pydantic `BaseModel`), it will be interpreted as a request **body**.
+
+## Partial updates with PatchDict
+
+When handling PATCH requests, you typically want to update only the fields the client actually sent — and ignore the rest. The challenge is distinguishing between "field was omitted" (don't touch it) and "field was set to null" (clear it).
+
+**Django Ninja** provides `PatchDict` to solve this. It takes your schema, makes all fields optional, and returns a `dict` containing **only** the fields that were present in the request body:
+
+```python hl_lines="1 14"
+{!./src/tutorial/body/code_patch.py!}
+```
+
+If the client sends `{"price": 9.99}`, `payload` will be `{"price": 9.99}` — the other fields won't appear in the dict at all.
+
+This works by combining two Pydantic features under the hood:
+
+- All fields are made optional so partial payloads pass validation.
+- `exclude_unset=True` is applied so only explicitly sent fields are included in the result.

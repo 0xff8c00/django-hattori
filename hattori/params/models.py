@@ -1,15 +1,9 @@
+import re
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    List,
-    Optional,
-    Pattern,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
 )
 
 from django.conf import settings
@@ -19,7 +13,6 @@ from pydantic.fields import FieldInfo
 
 from hattori.errors import HttpError
 from hattori.responses import json_loads
-from hattori.types import DictStrAny
 
 if TYPE_CHECKING:
     from hattori import NinjaAPI  # pragma: no cover
@@ -36,7 +29,7 @@ __all__ = [
 ]
 
 TModel = TypeVar("TModel", bound="ParamModel")
-TModels = List[TModel]
+TModels = list[TModel]
 
 
 class ParamModel(BaseModel, ABC):
@@ -45,16 +38,16 @@ class ParamModel(BaseModel, ABC):
     @classmethod
     @abstractmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         pass  # pragma: no cover
 
     @classmethod
     def resolve(
-        cls: Type[TModel],
+        cls: type[TModel],
         request: HttpRequest,
         api: "NinjaAPI",
-        path_params: DictStrAny,
+        path_params: dict[str, Any],
     ) -> TModel:
         data = cls.get_request_data(request, api, path_params)
         if data is None:
@@ -64,19 +57,19 @@ class ParamModel(BaseModel, ABC):
         return cls.model_validate(data, context={"request": request})
 
     @classmethod
-    def _map_data_paths(cls, data: DictStrAny) -> DictStrAny:
+    def _map_data_paths(cls, data: dict[str, Any]) -> dict[str, Any]:
         flatten_map = getattr(cls, "__ninja_flatten_map__", None)
         if not flatten_map:
             return data
 
-        mapped_data: DictStrAny = {}
+        mapped_data: dict[str, Any] = {}
         for key, path in flatten_map.items():
             cls._map_data_path(mapped_data, data.get(key), path)
         return mapped_data
 
     @classmethod
     def _map_data_path(
-        cls, data: DictStrAny, value: Any, path: Tuple[str, ...]
+        cls, data: dict[str, Any], value: Any, path: tuple[str, ...]
     ) -> None:
         current = data
         for key in path[:-1]:
@@ -85,8 +78,8 @@ class ParamModel(BaseModel, ABC):
             current[path[-1]] = value
 
 
-def _parse_querydict(data: Any, list_fields: List[str]) -> DictStrAny:
-    result: DictStrAny = {}
+def _parse_querydict(data: Any, list_fields: list[str]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
     for key in data.keys():
         if key in list_fields:
             result[key] = data.getlist(key)
@@ -98,8 +91,8 @@ def _parse_querydict(data: Any, list_fields: List[str]) -> DictStrAny:
 class QueryModel(ParamModel):
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
         return _parse_querydict(request.GET, list_fields)
 
@@ -107,18 +100,18 @@ class QueryModel(ParamModel):
 class PathModel(ParamModel):
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         return path_params
 
 
 class HeaderModel(ParamModel):
-    __ninja_flatten_map__: DictStrAny
+    __ninja_flatten_map__: dict[str, Any]
 
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         data = {}
         headers = request.headers
         for name in cls.__ninja_flatten_map__:
@@ -130,8 +123,8 @@ class HeaderModel(ParamModel):
 class CookieModel(ParamModel):
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         return request.COOKIES
 
 
@@ -140,8 +133,8 @@ class BodyModel(ParamModel):
 
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if request.body:
             try:
                 data = json_loads(request.body)
@@ -162,8 +155,8 @@ class BodyModel(ParamModel):
 class FormModel(ParamModel):
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
         return _parse_querydict(request.POST, list_fields)
 
@@ -171,8 +164,8 @@ class FormModel(ParamModel):
 class FileModel(ParamModel):
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
         return _parse_querydict(request.FILES, list_fields)
 
@@ -182,15 +175,15 @@ class _HttpRequest(HttpRequest):
 
 
 class _MultiPartBodyModel(BodyModel):
-    __ninja_body_params__: DictStrAny
+    __ninja_body_params__: dict[str, Any]
 
     @classmethod
     def get_request_data(
-        cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
-    ) -> Optional[DictStrAny]:
+        cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
+    ) -> dict[str, Any] | None:
         req = _HttpRequest()
         get_request_data = super().get_request_data
-        results: DictStrAny = {}
+        results: dict[str, Any] = {}
         for name, annotation in cls.__ninja_body_params__.items():
             if name in request.POST:
                 data = request.POST[name]
@@ -206,20 +199,20 @@ class Param(FieldInfo):  # type: ignore[misc]
         self,
         default: Any,
         *,
-        alias: Optional[str] = None,
-        title: Optional[str] = None,
-        description: Optional[str] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        example: Optional[Any] = None,
-        examples: Optional[Dict[str, Any]] = None,
-        deprecated: Optional[bool] = None,
-        include_in_schema: Optional[bool] = True,
-        pattern: Union[str, Pattern[str], None] = None,
+        alias: str | None = None,
+        title: str | None = None,
+        description: str | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        example: Any | None = None,
+        examples: dict[str, Any] | None = None,
+        deprecated: bool | None = None,
+        include_in_schema: bool | None = True,
+        pattern: str | re.Pattern[str] | None = None,
         # param_name: str = None,
         # param_type: Any = None,
         **extra: Any,
@@ -227,7 +220,7 @@ class Param(FieldInfo):  # type: ignore[misc]
         self.deprecated = deprecated
         # self.param_name: str = None
         # self.param_type: Any = None
-        self.model_field: Optional[FieldInfo] = None
+        self.model_field: FieldInfo | None = None
         json_schema_extra = {}
         if example is not None:
             json_schema_extra["example"] = example

@@ -1,7 +1,8 @@
 import inspect
 import warnings
 from collections import defaultdict, namedtuple
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple
+from collections.abc import Generator
+from typing import Any, Callable
 
 import pydantic
 from django.http import HttpResponse
@@ -42,7 +43,7 @@ class ViewSignature:
     FLATTEN_PATH_SEP = (
         "\x1e"  # ASCII Record Separator.  IE: not generally used in query names
     )
-    response_arg: Optional[str] = None
+    response_arg: str | None = None
 
     def __init__(self, path: str, view_func: Callable[..., Any]) -> None:
         self.view_func = view_func
@@ -123,7 +124,7 @@ class ViewSignature:
                 )
 
     def _create_models(self) -> TModels:
-        params_by_source_cls: Dict[Any, List[FuncParam]] = defaultdict(list)
+        params_by_source_cls: dict[Any, list[FuncParam]] = defaultdict(list)
         for param in self.params:
             param_source_cls = type(param.source)
             params_by_source_cls[param_source_cls].append(param)
@@ -183,7 +184,7 @@ class ViewSignature:
             result.append(model_cls)
         return result
 
-    def _args_flatten_map(self, args: List[FuncParam]) -> Dict[str, Tuple[str, ...]]:
+    def _args_flatten_map(self, args: list[FuncParam]) -> dict[str, tuple[str, ...]]:
         flatten_map = {}
         arg_names: Any = {}
         for arg in args:
@@ -287,7 +288,7 @@ class ViewSignature:
         # If default is None but annotation is not Optional,
         # wrap it in Optional to allow None values in Pydantic v2
         if default is None and not is_optional_type(annotation):
-            annotation = Optional[annotation]
+            annotation = annotation | None
 
         return FuncParam(
             name, param_source.alias or name, param_source, annotation, is_collection
@@ -329,7 +330,7 @@ def is_collection_type(annotation: Any) -> bool:
                 return True
         return False
 
-    collection_types = (List, list, set, tuple)
+    collection_types = (list, set, tuple)
     if origin is None:
         return (
             isinstance(annotation, collection_types)
@@ -341,8 +342,8 @@ def is_collection_type(annotation: Any) -> bool:
 
 
 def detect_collection_fields(
-    args: List[FuncParam], flatten_map: Dict[str, Tuple[str, ...]]
-) -> List[str]:
+    args: list[FuncParam], flatten_map: dict[str, tuple[str, ...]]
+) -> list[str]:
     """
     Django QueryDict has values that are always lists, so we need to help django ninja to understand
     better the input parameters if it's a list or a single value

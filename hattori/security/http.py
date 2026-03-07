@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from base64 import b64decode
-from typing import Any, Optional, Tuple
+from typing import Any
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -23,7 +23,7 @@ class HttpBearer(HttpAuthBase, ABC):
     openapi_scheme: str = "bearer"
     header: str = "Authorization"
 
-    def __call__(self, request: HttpRequest) -> Optional[Any]:
+    def __call__(self, request: HttpRequest) -> Any | None:
         headers = request.headers
         auth_value = headers.get(self.header)
         if not auth_value:
@@ -40,7 +40,7 @@ class HttpBearer(HttpAuthBase, ABC):
         return self.authenticate(request, token)
 
     @abstractmethod
-    def authenticate(self, request: HttpRequest, token: str) -> Optional[Any]:
+    def authenticate(self, request: HttpRequest, token: str) -> Any | None:
         pass  # pragma: no cover
 
 
@@ -52,7 +52,7 @@ class HttpBasicAuth(HttpAuthBase, ABC):  # TODO: maybe HttpBasicAuthBase
     openapi_scheme = "basic"
     header = "Authorization"
 
-    def __call__(self, request: HttpRequest) -> Optional[Any]:
+    def __call__(self, request: HttpRequest) -> Any | None:
         headers = request.headers
         auth_value = headers.get(self.header)
         if not auth_value:
@@ -69,10 +69,10 @@ class HttpBasicAuth(HttpAuthBase, ABC):  # TODO: maybe HttpBasicAuthBase
     @abstractmethod
     def authenticate(
         self, request: HttpRequest, username: str, password: str
-    ) -> Optional[Any]:
+    ) -> Any | None:
         pass  # pragma: no cover
 
-    def decode_authorization(self, value: str) -> Tuple[str, str]:
+    def decode_authorization(self, value: str) -> tuple[str, str]:
         parts = value.split(" ")
         if len(parts) == 1:
             user_pass_encoded = parts[0]

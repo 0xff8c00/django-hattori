@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable
 from unittest.mock import Mock
 from urllib.parse import urljoin
 
@@ -11,7 +11,7 @@ from hattori.responses import JsonResponse as HttpResponse
 from hattori.responses import json_dumps, json_loads
 
 
-def build_absolute_uri(location: Optional[str] = None) -> str:
+def build_absolute_uri(location: str | None = None) -> str:
     base = "http://testlocation/"
 
     if location:
@@ -27,23 +27,23 @@ class NinjaClientBase:
 
     def __init__(
         self,
-        router_or_app: Union[NinjaAPI, Router],
-        headers: Optional[Dict[str, str]] = None,
-        COOKIES: Optional[Dict[str, str]] = None,
+        router_or_app: NinjaAPI | Router,
+        headers: dict[str, str] | None = None,
+        COOKIES: dict[str, str] | None = None,
     ) -> None:
         self.headers = headers or {}
         self.cookies = COOKIES or {}
         self.router_or_app = router_or_app
 
     def get(
-        self, path: str, data: Optional[Dict] = None, **request_params: Any
+        self, path: str, data: dict | None = None, **request_params: Any
     ) -> "NinjaResponse":
         return self.request("GET", path, data, **request_params)
 
     def post(
         self,
         path: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         json: Any = None,
         **request_params: Any,
     ) -> "NinjaResponse":
@@ -52,7 +52,7 @@ class NinjaClientBase:
     def patch(
         self,
         path: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         json: Any = None,
         **request_params: Any,
     ) -> "NinjaResponse":
@@ -61,7 +61,7 @@ class NinjaClientBase:
     def put(
         self,
         path: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         json: Any = None,
         **request_params: Any,
     ) -> "NinjaResponse":
@@ -70,7 +70,7 @@ class NinjaClientBase:
     def delete(
         self,
         path: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         json: Any = None,
         **request_params: Any,
     ) -> "NinjaResponse":
@@ -80,7 +80,7 @@ class NinjaClientBase:
         self,
         method: str,
         path: str,
-        data: Optional[Dict] = None,
+        data: dict | None = None,
         json: Any = None,
         **request_params: Any,
     ) -> "NinjaResponse":
@@ -102,9 +102,9 @@ class NinjaClientBase:
         return self._call(func, request, kwargs)  # type: ignore
 
     @property
-    def urls(self) -> List:
+    def urls(self) -> list:
         if not hasattr(self, "_urls_cache"):
-            self._urls_cache: List
+            self._urls_cache: list
             if isinstance(self.router_or_app, NinjaAPI):
                 self._urls_cache = self.router_or_app.urls[0]
             else:
@@ -116,8 +116,8 @@ class NinjaClientBase:
         return self._urls_cache
 
     def _resolve(
-        self, method: str, path: str, data: Dict, request_params: Any
-    ) -> Tuple[Callable, Mock, Dict]:
+        self, method: str, path: str, data: dict, request_params: Any
+    ) -> tuple[Callable, Mock, dict]:
         url_path = path.split("?")[0].lstrip("/")
         for url in self.urls:
             match = url.resolve(url_path)
@@ -127,7 +127,7 @@ class NinjaClientBase:
         raise Exception(f'Cannot resolve "{path}"')
 
     def _build_request(
-        self, method: str, path: str, data: Dict, request_params: Any
+        self, method: str, path: str, data: dict, request_params: Any
     ) -> Mock:
         request = Mock(spec=HttpRequest)
         request.method = method
@@ -188,13 +188,13 @@ class NinjaClientBase:
 
 
 class TestClient(NinjaClientBase):
-    def _call(self, func: Callable, request: Mock, kwargs: Dict) -> "NinjaResponse":
+    def _call(self, func: Callable, request: Mock, kwargs: dict) -> "NinjaResponse":
         return NinjaResponse(func(request, **kwargs))
 
 
 class TestAsyncClient(NinjaClientBase):
     async def _call(
-        self, func: Callable, request: Mock, kwargs: Dict
+        self, func: Callable, request: Mock, kwargs: dict
     ) -> "NinjaResponse":
         http_response = await func(request, **kwargs)
         if http_response.streaming and inspect.isasyncgen(
@@ -212,7 +212,7 @@ class TestAsyncClient(NinjaClientBase):
 
 
 class NinjaResponse:
-    def __init__(self, http_response: Union[HttpResponse, StreamingHttpResponse]):
+    def __init__(self, http_response: HttpResponse | StreamingHttpResponse):
         self._response = http_response
         self.status_code = http_response.status_code
         self.streaming = http_response.streaming

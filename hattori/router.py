@@ -1,15 +1,10 @@
+import collections.abc
 import re
 from dataclasses import dataclass, field
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Union,
 )
 
 from django.urls import URLPattern
@@ -43,17 +38,17 @@ class RouterMount:
 
     template: "Router"
     prefix: str
-    url_name_prefix: Optional[str] = None
+    url_name_prefix: str | None = None
     auth: Any = NOT_SET
     throttle: Any = NOT_SET
-    tags: Optional[List[str]] = None
-    inherited_decorators: List[Tuple[Callable, DecoratorMode]] = field(
+    tags: list[str] | None = None
+    inherited_decorators: list[tuple[Callable, DecoratorMode]] = field(
         default_factory=list
     )
     # Inherited auth/throttle/tags from parent routers (for nested router inheritance)
     inherited_auth: Any = NOT_SET
     inherited_throttle: Any = NOT_SET
-    inherited_tags: Optional[List[str]] = None
+    inherited_tags: list[str] | None = None
 
 
 class BoundRouter:
@@ -96,13 +91,13 @@ class BoundRouter:
         # Tags handling (issue #794):
         # - mount.tags (from add_router call) = explicit override, use as-is
         # - Otherwise, accumulate: inherited tags + template's own tags
-        self.tags: Optional[List[str]]
+        self.tags: list[str] | None
         if mount.tags is not None:
             # Explicit tags from add_router() call - use as override
             self.tags = mount.tags
         else:
             # Accumulate inherited tags with template's own tags
-            accumulated_tags: List[str] = []
+            accumulated_tags: list[str] = []
             if mount.inherited_tags is not None:
                 accumulated_tags.extend(mount.inherited_tags)
             if mount.template.tags is not None:
@@ -110,7 +105,7 @@ class BoundRouter:
             self.tags = accumulated_tags or None
 
         # Clone operations and apply decorators
-        self.path_operations: Dict[str, PathView] = {}
+        self.path_operations: dict[str, PathView] = {}
         self._bind_operations()
 
     def _bind_operations(self) -> None:
@@ -167,7 +162,7 @@ class BoundRouter:
 
             self.path_operations[path] = cloned_view
 
-    def urls_paths(self, prefix: str) -> Iterator[URLPattern]:
+    def urls_paths(self, prefix: str) -> collections.abc.Iterator[URLPattern]:
         """Generate URL patterns for this bound router."""
         prefix = replace_path_param_notation(prefix)
         for path, path_view in self.path_operations.items():
@@ -194,12 +189,12 @@ class Router:
         self,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        tags: Optional[List[str]] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
+        tags: list[str] | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
     ) -> None:
         self._frozen = False
         self.auth = auth
@@ -210,9 +205,9 @@ class Router:
         self.exclude_defaults = exclude_defaults
         self.exclude_none = exclude_none
 
-        self.path_operations: Dict[str, PathView] = {}
-        self._routers: List[Tuple[str, Router, Optional[List[str]]]] = []
-        self._decorators: List[Tuple[Callable, DecoratorMode]] = []
+        self.path_operations: dict[str, PathView] = {}
+        self._routers: list[tuple[str, Router, list[str] | None]] = []
+        self._decorators: list[tuple[Callable, DecoratorMode]] = []
 
     def _freeze(self) -> None:
         """Mark router as frozen - no more modifications allowed."""
@@ -233,20 +228,20 @@ class Router:
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         return self.api_operation(
             ["GET"],
@@ -273,20 +268,20 @@ class Router:
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         return self.api_operation(
             ["POST"],
@@ -313,20 +308,20 @@ class Router:
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         return self.api_operation(
             ["DELETE"],
@@ -353,20 +348,20 @@ class Router:
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         return self.api_operation(
             ["PATCH"],
@@ -393,20 +388,20 @@ class Router:
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         return self.api_operation(
             ["PUT"],
@@ -430,24 +425,24 @@ class Router:
 
     def api_operation(
         self,
-        methods: List[str],
+        methods: list[str],
         path: str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> Callable[[TCallable], TCallable]:
         def decorator(view_func: TCallable) -> TCallable:
             self.add_api_operation(
@@ -477,24 +472,24 @@ class Router:
     def add_api_operation(
         self,
         path: str,
-        methods: List[str],
+        methods: list[str],
         view_func: Callable,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
 
-        operation_id: Optional[str] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        deprecated: Optional[bool] = None,
-        by_alias: Optional[bool] = None,
-        exclude_unset: Optional[bool] = None,
-        exclude_defaults: Optional[bool] = None,
-        exclude_none: Optional[bool] = None,
-        url_name: Optional[str] = None,
+        operation_id: str | None = None,
+        summary: str | None = None,
+        description: str | None = None,
+        tags: list[str] | None = None,
+        deprecated: bool | None = None,
+        by_alias: bool | None = None,
+        exclude_unset: bool | None = None,
+        exclude_defaults: bool | None = None,
+        exclude_none: bool | None = None,
+        url_name: str | None = None,
         include_in_schema: bool = True,
-        openapi_extra: Optional[Dict[str, Any]] = None,
+        openapi_extra: dict[str, Any] | None = None,
     ) -> None:
         self._check_not_frozen()
         path = re.sub(r"\{uuid:(\w+)\}", r"{uuidstr:\1}", path, flags=re.IGNORECASE)
@@ -543,8 +538,8 @@ class Router:
         return None
 
     def urls_paths(
-        self, prefix: str, api: Optional["NinjaAPI"] = None
-    ) -> Iterator[URLPattern]:
+        self, prefix: str, api: "NinjaAPI | None" = None
+    ) -> collections.abc.Iterator[URLPattern]:
         """
         Generate URL patterns for this router.
 
@@ -576,11 +571,11 @@ class Router:
     def add_router(
         self,
         prefix: str,
-        router: Union["Router", str],
+        router: "Router" | str,
         *,
         auth: Any = NOT_SET,
-        throttle: Union[BaseThrottle, List[BaseThrottle], NOT_SET_TYPE] = NOT_SET,
-        tags: Optional[List[str]] = None,
+        throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
+        tags: list[str] | None = None,
     ) -> None:
         self._check_not_frozen()
 
@@ -619,11 +614,11 @@ class Router:
     def build_routers(
         self,
         prefix: str,
-        inherited_decorators: Optional[List[Tuple[Callable, DecoratorMode]]] = None,
+        inherited_decorators: list[tuple[Callable, DecoratorMode]] | None = None,
         inherited_auth: Any = NOT_SET,
         inherited_throttle: Any = NOT_SET,
-        inherited_tags: Optional[List[str]] = None,
-    ) -> List[RouterMount]:
+        inherited_tags: list[str] | None = None,
+    ) -> list[RouterMount]:
         """
         Build mount configurations for this router and all child routers.
 
@@ -665,7 +660,7 @@ class Router:
         child_tags = self.tags if self.tags is not None else inherited_tags
 
         # Build mounts for child routers
-        child_mounts: List[RouterMount] = []
+        child_mounts: list[RouterMount] = []
         for child_prefix, child_router, child_mount_tags in self._routers:
             child_path = normalize_path("/".join((prefix, child_prefix))).lstrip("/")
             mounts = child_router.build_routers(

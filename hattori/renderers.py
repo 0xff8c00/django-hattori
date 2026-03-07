@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.http import HttpRequest
 
@@ -8,7 +8,7 @@ __all__ = ["BaseRenderer", "JSONRenderer"]
 
 
 class BaseRenderer:
-    media_type: Optional[str] = None
+    media_type: str | None = None
     charset: str = "utf-8"
 
     def render(self, request: HttpRequest, data: Any, *, response_status: int) -> Any:

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Type
+from typing import Any
 
 from django.http import HttpRequest
 
@@ -15,7 +15,7 @@ class SecuritySchema(dict):
 
 
 class AuthBase(ABC):
-    openapi_responses: Dict[int, Type] = {401: AuthErrorResponse}
+    openapi_responses: dict[int, type] = {401: AuthErrorResponse}
 
     def __init__(self) -> None:
         if not hasattr(self, "openapi_type"):
@@ -33,5 +33,5 @@ class AuthBase(ABC):
             self.is_async = is_async_callable(self.authenticate)
 
     @abstractmethod
-    def __call__(self, request: HttpRequest) -> Optional[Any]:
+    def __call__(self, request: HttpRequest) -> Any | None:
         pass  # pragma: no cover

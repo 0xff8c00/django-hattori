@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, List, Optional, TypeVar, Union, cast
+from typing import Any, TypeVar, cast
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q, QuerySet
@@ -29,7 +29,7 @@ class FilterLookup:
 
     def __init__(
         self,
-        q: Union[str, List[str], None],
+        q: str | list[str] | None,
         *,
         expression_connector: ExpressionConnector = DEFAULT_FIELD_LEVEL_EXPRESSION_CONNECTOR,
         ignore_none: bool = DEFAULT_IGNORE_NONE,
@@ -82,7 +82,7 @@ class FilterSchema(Schema):
 
     def _get_filter_lookup(
         self, field_name: str, field_info: FieldInfo
-    ) -> Optional[FilterLookup]:
+    ) -> FilterLookup | None:
         if not hasattr(field_info, "metadata") or not field_info.metadata:
             return None
 
@@ -108,14 +108,14 @@ class FilterSchema(Schema):
         self,
         field_name: str,
         field_info: FieldInfo,
-    ) -> Union[str, List[str], None]:
+    ) -> str | list[str] | None:
         filter_lookup = self._get_filter_lookup(field_name, field_info)
         if filter_lookup:
             return filter_lookup.q
 
         # Legacy approach, consider removing in future versions
         return cast(
-            Union[str, List[str], None],
+            str | list[str] | None,
             self._get_from_deprecated_field_extra(field_name, field_info, "q"),
         )
 
@@ -123,14 +123,14 @@ class FilterSchema(Schema):
         self,
         field_name: str,
         field_info: FieldInfo,
-    ) -> Union[ExpressionConnector, None]:
+    ) -> ExpressionConnector | None:
         filter_lookup = self._get_filter_lookup(field_name, field_info)
         if filter_lookup:
             return filter_lookup.expression_connector
 
         # Legacy approach, consider removing in future versions
         return cast(
-            Union[ExpressionConnector, None],
+            ExpressionConnector | None,
             self._get_from_deprecated_field_extra(
                 field_name, field_info, "expression_connector"
             ),
@@ -138,14 +138,14 @@ class FilterSchema(Schema):
 
     def _get_field_ignore_none(
         self, field_name: str, field_info: FieldInfo
-    ) -> Union[bool, None]:
+    ) -> bool | None:
         filter_lookup = self._get_filter_lookup(field_name, field_info)
         if filter_lookup:
             return filter_lookup.ignore_none
 
         # Legacy approach, consider removing in future versions
         return cast(
-            Union[bool, None],
+            bool | None,
             self._get_from_deprecated_field_extra(
                 field_name, field_info, "ignore_none"
             ),
@@ -221,7 +221,7 @@ class FilterSchema(Schema):
 
     def _get_from_deprecated_field_extra(
         self, field_name: str, field_info: FieldInfo, attr: str
-    ) -> Union[Any, None]:
+    ) -> Any | None:
         """
         Backward-compatible shim which looks up filtering parameters in the Field's **extra kwargs.
         Consider removing this method in favor of FilterLookup annotation class.

@@ -1,8 +1,6 @@
-from typing import Any, Callable, Dict, TypeVar
+from typing import Any, Callable, TypeVar
 
-__all__ = ["DictStrAny", "TCallable"]
-
-DictStrAny = Dict[str, Any]
+__all__ = ["TCallable"]
 
 TCallable = TypeVar("TCallable", bound=Callable[..., Any])
 

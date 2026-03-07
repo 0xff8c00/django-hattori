@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Pattern, TypeVar, Union
+import re
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from typing_extensions import Annotated
 
@@ -76,22 +77,22 @@ else:
 
 def P(
     *,
-    alias: Optional[str] = None,
-    title: Optional[str] = None,
-    description: Optional[str] = None,
-    gt: Optional[float] = None,
-    ge: Optional[float] = None,
-    lt: Optional[float] = None,
-    le: Optional[float] = None,
-    min_length: Optional[int] = None,
-    max_length: Optional[int] = None,
-    pattern: Union[str, Pattern[str], None] = None,
+    alias: str | None = None,
+    title: str | None = None,
+    description: str | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    pattern: str | re.Pattern[str] | None = None,
     example: Any = None,
-    examples: Optional[Dict[str, Any]] = None,
-    deprecated: Optional[bool] = None,
+    examples: dict[str, Any] | None = None,
+    deprecated: bool | None = None,
     include_in_schema: bool = True,
     **extra: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     "Arguments for BodyEx, QueryEx, etc."
     return dict(
         alias=alias,

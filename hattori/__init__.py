@@ -27,7 +27,7 @@ from hattori.params import (
     QueryEx,
 )
 from hattori.patch_dict import PatchDict
-from hattori.responses import Response, Status
+from hattori.responses import Response
 from hattori.router import Router
 from hattori.schema import Schema
 from hattori.streaming import JSONL, SSE
@@ -62,5 +62,4 @@ __all__ = [
     "SSE",
     "JSONL",
     "Response",
-    "Status",
 ]
