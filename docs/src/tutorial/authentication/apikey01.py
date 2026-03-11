@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import Response
 from hattori.security import APIKeyQuery
@@ -19,6 +19,6 @@ api_key = ApiKey()
 
 
 @api.get("/apikey", auth=api_key)
-def apikey(request) -> Annotated[Response[Any], 200]:
+def apikey(request) -> Annotated[Response[str], 200]:
     assert isinstance(request.auth, Client)
     return Response(200, f"Hello {request.auth}")

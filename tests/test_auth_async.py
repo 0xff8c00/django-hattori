@@ -1,11 +1,19 @@
 import asyncio
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
-from hattori import NinjaAPI, Response
+from hattori import NinjaAPI, Response, Schema
 from hattori.security import APIKeyQuery, HttpBearer
 from hattori.testing import TestAsyncClient, TestClient
+
+
+class KeyResult(Schema):
+    key: str
+
+
+class AuthResult(Schema):
+    auth: str
 
 
 @pytest.mark.asyncio
@@ -18,7 +26,7 @@ async def test_async_view_handles_async_auth_func():
             return key
 
     @api.get("/async", auth=auth)
-    async def view(request) -> Annotated[Response[Any], 200]:
+    async def view(request) -> Annotated[Response[KeyResult], 200]:
         await asyncio.sleep(0)
         return Response(200, {"key": request.auth})
 
@@ -46,7 +54,7 @@ async def test_async_view_handles_async_auth_cls():
                 return key
 
     @api.get("/async", auth=Auth())
-    async def view(request) -> Annotated[Response[Any], 200]:
+    async def view(request) -> Annotated[Response[KeyResult], 200]:
         await asyncio.sleep(0)
         return Response(200, {"key": request.auth})
 
@@ -79,7 +87,7 @@ async def test_async_view_handles_multi_auth():
             return key
 
     @api.get("/async", auth=[auth_1, auth_2, auth_3])
-    async def view(request) -> Annotated[Response[Any], 200]:
+    async def view(request) -> Annotated[Response[KeyResult], 200]:
         await asyncio.sleep(0)
         return Response(200, {"key": request.auth})
 
@@ -97,7 +105,7 @@ async def test_async_view_handles_auth_errors():
         raise Exception("boom")
 
     @api.get("/async", auth=auth)
-    async def view(request) -> Annotated[Response[Any], 200]:
+    async def view(request) -> Annotated[Response[KeyResult], 200]:
         await asyncio.sleep(0)
         return Response(200, {"key": request.auth})
 
@@ -122,7 +130,7 @@ async def test_sync_authenticate_method():
     api = NinjaAPI(auth=KeyAuth())
 
     @api.get("/async")
-    async def async_view(request) -> Annotated[Response[Any], 200]:
+    async def async_view(request) -> Annotated[Response[AuthResult], 200]:
         return Response(200, {"auth": request.auth})
 
     client = TestAsyncClient(api)
@@ -144,7 +152,7 @@ def test_async_authenticate_method_in_sync_context():
     api = NinjaAPI(auth=KeyAuth())
 
     @api.get("/sync")
-    def sync_view(request) -> Annotated[Response[Any], 200]:
+    def sync_view(request) -> Annotated[Response[AuthResult], 200]:
         return Response(200, {"auth": request.auth})
 
     client = TestClient(api)
@@ -167,7 +175,7 @@ async def test_async_with_bearer():
     api = NinjaAPI(auth=BearerAuth())
 
     @api.get("/async")
-    async def async_view(request) -> Annotated[Response[Any], 200]:
+    async def async_view(request) -> Annotated[Response[AuthResult], 200]:
         return Response(200, {"auth": request.auth})
 
     client = TestAsyncClient(api)

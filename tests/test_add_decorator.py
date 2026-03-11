@@ -1,10 +1,37 @@
 from functools import wraps
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
-from hattori import NinjaAPI, Response, Router
+from hattori import NinjaAPI, Response, Router, Schema
 from hattori.testing import TestClient
+
+
+class MessageResult(Schema):
+    message: str
+
+
+class MessageDecoratedResult(Schema):
+    message: str
+    operation_decorated: bool = False
+
+
+class MessageFullDecoratedResult(Schema):
+    message: str
+    operation_decorated: bool = False
+    call_count: int = 0
+
+
+class MessageCascadeResult(Schema):
+    message: str
+    api: bool = False
+    parent: bool = False
+    child: bool = False
+
+
+class ItemIdDecoratedResult(Schema):
+    item_id: int
+    decorated: bool = False
 
 
 # Test decorators
@@ -56,7 +83,7 @@ def test_router_add_decorator_operation_mode():
     router.add_decorator(operation_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageDecoratedResult], 200]:
         return Response(200, {"message": "test"})
 
     api.add_router("/", router)
@@ -76,7 +103,7 @@ def test_router_add_decorator_view_mode():
     router.add_decorator(view_decorator, mode="view")
 
     @router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageResult], 200]:
         return Response(200, {"message": "test"})
 
     api.add_router("/", router)
@@ -96,11 +123,11 @@ def test_api_add_decorator_operation_mode():
     api.add_decorator(operation_decorator, mode="operation")
 
     @api.get("/test1")
-    def endpoint1(request) -> Annotated[Response[Any], 200]:
+    def endpoint1(request) -> Annotated[Response[MessageDecoratedResult], 200]:
         return Response(200, {"message": "test1"})
 
     @api.get("/test2")
-    def endpoint2(request) -> Annotated[Response[Any], 200]:
+    def endpoint2(request) -> Annotated[Response[MessageDecoratedResult], 200]:
         return Response(200, {"message": "test2"})
 
     client = TestClient(api)
@@ -123,7 +150,7 @@ def test_api_add_decorator_view_mode():
     api.add_decorator(view_decorator, mode="view")
 
     @api.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageResult], 200]:
         return Response(200, {"message": "test"})
 
     client = TestClient(api)
@@ -143,7 +170,7 @@ def test_multiple_decorators():
     router.add_decorator(counter_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageFullDecoratedResult], 200]:
         return Response(200, {"message": "test"})
 
     api.add_router("/", router)
@@ -192,7 +219,7 @@ def test_decorator_cascading():
     )
 
     @child_router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageCascadeResult], 200]:
         return Response(200, {"message": "test"})
 
     parent_router.add_router("/child", child_router)
@@ -221,7 +248,7 @@ def test_api_decorator_applies_to_new_routers():
     router = Router()
 
     @router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageDecoratedResult], 200]:
         return Response(200, {"message": "test"})
 
     api.add_router("/", router)
@@ -242,7 +269,7 @@ def test_mix_view_and_operation_decorators():
     router.add_decorator(operation_decorator, mode="operation")
 
     @router.get("/test")
-    def endpoint(request) -> Annotated[Response[Any], 200]:
+    def endpoint(request) -> Annotated[Response[MessageDecoratedResult], 200]:
         return Response(200, {"message": "test"})
 
     api.add_router("/", router)
@@ -272,7 +299,7 @@ def test_decorator_with_path_params():
     router.add_decorator(param_decorator, mode="operation")
 
     @router.get("/test/{item_id}")
-    def endpoint(request, item_id: int) -> Annotated[Response[Any], 200]:
+    def endpoint(request, item_id: int) -> Annotated[Response[ItemIdDecoratedResult], 200]:
         return Response(200, {"item_id": item_id})
 
     api.add_router("/", router)

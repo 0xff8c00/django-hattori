@@ -4,7 +4,7 @@ import uuid
 import pytest
 from pydantic import BaseModel
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import NinjaAPI, Response
 from hattori.constants import NOT_SET
@@ -33,7 +33,7 @@ def test_kwargs():
     api = NinjaAPI()
 
     @api.get("/")
-    def operation(request, a: str, *args, **kwargs) -> Annotated[Response[Any], 200]:
+    def operation(request, a: str, *args, **kwargs) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     schema = api.get_openapi_schema()

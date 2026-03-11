@@ -1,51 +1,69 @@
-from typing import Annotated, Any, List
+from typing import Annotated
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.datastructures import MultiValueDict
 
-from hattori import File, NinjaAPI, Response, UploadedFile
+from hattori import File, NinjaAPI, Response, Schema, UploadedFile
 from hattori.errors import ConfigError
 from hattori.testing import TestClient
+
+
+class FileNameDataResponse(Schema):
+    name: str
+    data: str
+
+
+class FileDataResponse(Schema):
+    data: str | None = None
+
+
+class FileResultResponse(Schema):
+    result: list[str]
+
+
+class FileNameResponse(Schema):
+    name: str
+
 
 api = NinjaAPI()
 
 
 @api.post("/file1")
-def file1(request, file: UploadedFile = File(...)) -> Annotated[Response[Any], 200]:
+def file1(request, file: UploadedFile = File(...)) -> Annotated[Response[FileNameDataResponse], 200]:
     return Response(200, {"name": file.name, "data": file.read().decode()})
 
 
 @api.post("/file2")
-def file_no_marker(request, file: UploadedFile) -> Annotated[Response[Any], 200]:
+def file_no_marker(request, file: UploadedFile) -> Annotated[Response[FileNameDataResponse], 200]:
     return Response(200, {"name": file.name, "data": file.read().decode()})
 
 
 @api.post("/file3")
 def file_no_marker2(
     request, file: UploadedFile = None
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[FileDataResponse], 200]:
     return Response(200, {"data": file and file.read().decode() or None})
 
 
 @api.post("/file4")
 def file_no_marker4(
-    request, files: List[UploadedFile]
-) -> Annotated[Response[Any], 200]:
+    request, files: list[UploadedFile]
+) -> Annotated[Response[FileResultResponse], 200]:
     return Response(200, {"result": [f.read().decode() for f in files]})
 
 
 @api.post("/file5")
 def file_no_marker5(
     request, file1: UploadedFile, file2: UploadedFile
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[FileResultResponse], 200]:
     return Response(200, {"result": [f.read().decode() for f in (file1, file2)]})
 
 
 @api.post("/file6")
 def file_no_marker6(
-    request, file: UploadedFile, files: List[UploadedFile]
-) -> Annotated[Response[Any], 200]:
+    request, file: UploadedFile, files: list[UploadedFile]
+) -> Annotated[Response[FileResultResponse], 200]:
     return Response(200, {"result": [f.read().decode() for f in [file] + files]})
 
 
@@ -152,5 +170,5 @@ def test_files_fix_middleware():
         @api.patch("/file1")
         def patch_with_file(
             request, file: UploadedFile
-        ) -> Annotated[Response[Any], 200]:
+        ) -> Annotated[Response[FileNameResponse], 200]:
             return Response(200, {"name": file.name})

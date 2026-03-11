@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 from django.core.cache import cache
@@ -27,7 +27,7 @@ def test_global_throttling():
     api = NinjaAPI(throttle=[th])
 
     @api.get("/check")
-    def check(request) -> Annotated[Response[Any], 200]:
+    def check(request) -> Annotated[Response[str], 200]:
         return Response(200, "OK")
 
     client = TestClient(api)
@@ -54,7 +54,7 @@ def test_router_throttling():
     router = Router()
 
     @router.get("/check")
-    def check(request) -> Annotated[Response[Any], 200]:
+    def check(request) -> Annotated[Response[str], 200]:
         return Response(200, "OK")
 
     api.add_router("/router", router, throttle=th)
@@ -79,7 +79,7 @@ def test_router2_throttling():
     router = Router()
 
     @router.get("/check")
-    def check(request) -> Annotated[Response[Any], 200]:
+    def check(request) -> Annotated[Response[str], 200]:
         return Response(200, "OK")
 
     api.add_router("/router", router)
@@ -102,7 +102,7 @@ def test_operation_throttling():
     api = NinjaAPI()
 
     @api.get("/check1", throttle=th)
-    def check(request) -> Annotated[Response[Any], 200]:
+    def check(request) -> Annotated[Response[str], 200]:
         return Response(200, "OK")
 
     client = TestClient(api)
@@ -124,7 +124,7 @@ async def test_async_throttling():
     api = NinjaAPI(throttle=th)
 
     @api.get("/check-async")
-    async def check(request) -> Annotated[Response[Any], 200]:
+    async def check(request) -> Annotated[Response[str], 200]:
         return Response(200, "OK")
 
     client = TestAsyncClient(api)

@@ -1,5 +1,5 @@
 import pickle
-from typing import Annotated, Any
+from typing import Annotated
 
 import pydantic
 import pytest
@@ -47,7 +47,7 @@ def test_validation_error_response_matches_actual_422():
     api = NinjaAPI()
 
     @api.get("/items")
-    def get_items(request, count: int = Query(...)) -> Annotated[Response[Any], 200]:
+    def get_items(request, count: int = Query(...)) -> Annotated[Response[list[int]], 200]:
         return Response(200, [])
 
     client = TestClient(api)
@@ -78,8 +78,8 @@ def test_422_with_combined_param_types():
         q: int = Query(...),
         x_tag: int = Header(...),
         body: Payload = Body(...),
-    ) -> Annotated[Response[Any], 200]:
-        return Response(200, {})
+    ) -> Annotated[Response[None], 200]:
+        return Response(200, None)
 
     client = TestClient(api)
 

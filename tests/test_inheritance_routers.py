@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -10,7 +10,7 @@ api = NinjaAPI()
 
 @api.get("/endpoint")
 # view->api
-def global_op(request) -> Annotated[Response[Any], 200]:
+def global_op(request) -> Annotated[Response[str], 200]:
     return Response(200, "global")
 
 
@@ -19,7 +19,7 @@ first_router = Router()
 
 @first_router.get("/endpoint_1")
 # view->router, router->api
-def router_op1(request) -> Annotated[Response[Any], 200]:
+def router_op1(request) -> Annotated[Response[str], 200]:
     return Response(200, "first 1")
 
 
@@ -28,7 +28,7 @@ second_router_one = Router()
 
 @second_router_one.get("endpoint_1")
 # view->router2, router2->router1, router1->api
-def router_op2(request) -> Annotated[Response[Any], 200]:
+def router_op2(request) -> Annotated[Response[str], 200]:
     return Response(200, "second 1")
 
 
@@ -37,7 +37,7 @@ second_router_two = Router()
 
 @second_router_two.get("endpoint_2")
 # view->router2, router2->router1, router1->api
-def router2_op3(request) -> Annotated[Response[Any], 200]:
+def router2_op3(request) -> Annotated[Response[str], 200]:
     return Response(200, "second 2")
 
 
@@ -48,13 +48,13 @@ api.add_router("/first", first_router, tags=["global"])
 
 @first_router.get("endpoint_2")
 # router->api, view->router
-def router1_op1(request) -> Annotated[Response[Any], 200]:
+def router1_op1(request) -> Annotated[Response[str], 200]:
     return Response(200, "first 2")
 
 
 @second_router_one.get("endpoint_3")
 # router2->router1, router1->api, view->router2
-def router21_op3(request, path_param: int = None) -> Annotated[Response[Any], 200]:
+def router21_op3(request, path_param: int = None) -> Annotated[Response[str], 200]:
     return Response(
         200, "second 3" if path_param is None else f"second 3: {path_param}"
     )
@@ -65,7 +65,7 @@ second_router_three = Router()
 
 @second_router_three.get("endpoint_4")
 # router1->api, view->router2, router2->router1
-def router_op3(request, path_param: int = None) -> Annotated[Response[Any], 200]:
+def router_op3(request, path_param: int = None) -> Annotated[Response[str], 200]:
     return Response(
         200, "second 4" if path_param is None else f"second 4: {path_param}"
     )

@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Union
 
 from pydantic import Field
 from typing_extensions import Annotated, Literal
@@ -17,6 +17,11 @@ class Example2(Schema):
     value: int
 
 
+class ExampleResult(Schema):
+    data: dict
+    type: str
+
+
 # Annotated union with discriminator
 UnionDiscriminator = Annotated[Union[Example1, Example2], Field(discriminator="label")]
 
@@ -30,7 +35,7 @@ api = NinjaAPI()
 @api.post("/descr-union")
 def create_example(
     request, payload: UnionDiscriminator
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[ExampleResult], 200]:
     return Response(
         200, {"data": payload.model_dump(), "type": payload.__class__.__name__}
     )
@@ -39,7 +44,7 @@ def create_example(
 @api.post("/regular-union")
 def create_example_regular(
     request, payload: RegularUnion
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[ExampleResult], 200]:
     return Response(
         200, {"data": payload.model_dump(), "type": payload.__class__.__name__}
     )

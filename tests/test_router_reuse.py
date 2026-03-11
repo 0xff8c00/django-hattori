@@ -9,14 +9,34 @@ These tests verify that:
 5. Operation.clone() copies all attributes
 """
 
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
-from hattori import NinjaAPI, Response, Router
+from hattori import NinjaAPI, Response, Router, Schema
 from hattori.errors import ConfigError
 from hattori.operation import Operation, PathView
 from hattori.testing import TestClient
+
+
+class IdResult(Schema):
+    id: int
+
+
+class SourceResult(Schema):
+    source: str
+
+
+class OkResult(Schema):
+    ok: bool
+
+
+class BoolTestResult(Schema):
+    test: bool
+
+
+class MethodResult(Schema):
+    method: str
 
 
 class TestRouterReuse:
@@ -27,7 +47,7 @@ class TestRouterReuse:
         router = Router(tags=["shared"])
 
         @router.get("/items")
-        def list_items(request) -> Annotated[Response[Any], 200]:
+        def list_items(request) -> Annotated[Response[list[IdResult]], 200]:
             return Response(200, [{"id": 1}])
 
         api_v1 = NinjaAPI(version="1.0", urls_namespace="api-v1")
@@ -53,7 +73,7 @@ class TestRouterReuse:
         router = Router()
 
         @router.get("/items")
-        def list_items(request) -> Annotated[Response[Any], 200]:
+        def list_items(request) -> Annotated[Response[list[IdResult]], 200]:
             return Response(200, [])
 
         api = NinjaAPI()
@@ -67,7 +87,7 @@ class TestRouterReuse:
         router = Router()
 
         @router.get("/items")
-        def list_items(request) -> Annotated[Response[Any], 200]:
+        def list_items(request) -> Annotated[Response[list[SourceResult]], 200]:
             return Response(200, [{"source": "shared"}])
 
         api = NinjaAPI(urls_namespace="multi-mount")
@@ -92,7 +112,7 @@ class TestDecoratorIsolation:
         calls = {"api1": 0, "api2": 0}
 
         @router.get("/test")
-        def test_endpoint(request) -> Annotated[Response[Any], 200]:
+        def test_endpoint(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         def api1_decorator(func):
@@ -141,7 +161,7 @@ class TestFreezeBehavior:
         router = Router()
 
         @router.get("/items")
-        def list_items(request) -> Annotated[Response[Any], 200]:
+        def list_items(request) -> Annotated[Response[list[str]], 200]:
             return Response(200, [])
 
         api = NinjaAPI(urls_namespace="freeze-test")
@@ -154,7 +174,7 @@ class TestFreezeBehavior:
         with pytest.raises(ConfigError, match="frozen"):
 
             @router.get("/new")
-            def new_endpoint(request) -> Annotated[Response[Any], 200]:
+            def new_endpoint(request) -> Annotated[Response[list[str]], 200]:
                 return Response(200, [])
 
     def test_cannot_add_router_after_urls_accessed(self):
@@ -174,7 +194,7 @@ class TestFreezeBehavior:
         router = Router()
 
         @router.get("/items")
-        def list_items(request) -> Annotated[Response[Any], 200]:
+        def list_items(request) -> Annotated[Response[list[str]], 200]:
             return Response(200, [])
 
         api = NinjaAPI(urls_namespace="freeze-decorator")
@@ -196,7 +216,7 @@ class TestOperationClone:
     def test_clone_copies_all_attributes(self):
         """clone() should copy all essential attributes from original operation."""
 
-        def dummy_view(request) -> Annotated[Response[Any], 200]:
+        def dummy_view(request) -> Annotated[Response[BoolTestResult], 200]:
             return Response(200, {"test": True})
 
         original = Operation(
@@ -256,7 +276,7 @@ class TestOperationClone:
         def auth_callback(request):
             return True
 
-        def dummy_view(request) -> Annotated[Response[Any], 200]:
+        def dummy_view(request) -> Annotated[Response[BoolTestResult], 200]:
             return Response(200, {"test": True})
 
         original = Operation(
@@ -276,10 +296,10 @@ class TestOperationClone:
         """PathView.clone() should clone all contained operations."""
         pv = PathView()
 
-        def view1(request) -> Annotated[Response[Any], 200]:
+        def view1(request) -> Annotated[Response[MethodResult], 200]:
             return Response(200, {"method": "get"})
 
-        def view2(request, data: dict) -> Annotated[Response[Any], 200]:
+        def view2(request, data: dict) -> Annotated[Response[MethodResult], 200]:
             return Response(200, {"method": "post"})
 
         pv.add_operation("/test", ["GET"], view1)
@@ -304,10 +324,10 @@ class TestOperationClone:
         pv = PathView()
         factory = RequestFactory()
 
-        def get_view(request) -> Annotated[Response[Any], 200]:
+        def get_view(request) -> Annotated[Response[MethodResult], 200]:
             return Response(200, {"method": "get"})
 
-        def post_view(request) -> Annotated[Response[Any], 200]:
+        def post_view(request) -> Annotated[Response[MethodResult], 200]:
             return Response(200, {"method": "post"})
 
         pv.add_operation("/test", ["GET"], get_view)
@@ -331,7 +351,7 @@ class TestOperationClone:
         pv = PathView()
         factory = RequestFactory()
 
-        def get_view(request) -> Annotated[Response[Any], 200]:
+        def get_view(request) -> Annotated[Response[MethodResult], 200]:
             return Response(200, {"method": "get"})
 
         pv.add_operation("/test", ["GET", "HEAD"], get_view)
@@ -358,7 +378,7 @@ class TestCloneCompleteness:
         but clone() is not updated accordingly.
         """
 
-        def dummy_view(request) -> Annotated[Response[Any], 200]:
+        def dummy_view(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {})
 
         # Create operation with all parameters
@@ -417,7 +437,7 @@ class TestCloneCompleteness:
         then add it to the KNOWN_ATTRIBUTES set below.
         """
 
-        def dummy_view(request) -> Annotated[Response[Any], 200]:
+        def dummy_view(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {})
 
         op = Operation(
@@ -546,7 +566,7 @@ class TestThrottleAndTagsInheritance:
         router = Router(throttle=TestThrottle())
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         api = NinjaAPI(urls_namespace="throttle-template-test")
@@ -575,7 +595,7 @@ class TestThrottleAndTagsInheritance:
         child = Router()
 
         @child.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         parent.add_router("/child", child)
@@ -595,7 +615,7 @@ class TestThrottleAndTagsInheritance:
         child = Router()
 
         @child.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         parent.add_router("/child", child)
@@ -620,7 +640,7 @@ class TestThrottleAndTagsInheritance:
         child = Router(tags=["Child Tag"])
 
         @child.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         parent.add_router("/child", child)
@@ -646,7 +666,7 @@ class TestRouterUrlsPathsMethod:
         router = Router()
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         patterns = list(router.urls_paths("prefix"))
@@ -658,7 +678,7 @@ class TestRouterUrlsPathsMethod:
         router = Router()
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         api = NinjaAPI(urls_namespace="urls-paths-test")
@@ -691,7 +711,7 @@ class TestBuildRoutersEdgeCases:
         router = Router()
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         # Call build_routers directly without inherited_decorators
@@ -718,7 +738,7 @@ class TestApplyDecoratorsToOperations:
             return wrapper
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         router.add_decorator(view_decorator, mode="view")
@@ -746,7 +766,7 @@ class TestApplyDecoratorsToOperations:
             return wrapper
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         router.add_decorator(op_decorator, mode="operation")
@@ -774,7 +794,7 @@ class TestApplyDecoratorsToOperations:
             return wrapper
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         router.add_decorator(decorator, mode="view")
@@ -805,7 +825,7 @@ class TestBoundRouterOperationModeDecorator:
             return wrapper
 
         @router.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         router.add_decorator(op_decorator, mode="operation")
@@ -837,7 +857,7 @@ class TestRouterAddRouterWithThrottle:
         child = Router()
 
         @child.get("/test")
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         parent.add_router("/child", child, throttle=TestThrottle())
@@ -880,7 +900,7 @@ class TestDecorateViewMultipleCalls:
         @router.get("/test")
         @decorate_view(decorator1)
         @decorate_view(decorator2)
-        def test_op(request) -> Annotated[Response[Any], 200]:
+        def test_op(request) -> Annotated[Response[OkResult], 200]:
             return Response(200, {"ok": True})
 
         api = NinjaAPI(urls_namespace="multi-decorate-view-test")

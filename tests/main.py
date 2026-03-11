@@ -1,4 +1,3 @@
-from typing import Any, List, Optional
 from uuid import UUID
 
 import pydantic
@@ -11,32 +10,32 @@ router = Router()
 
 
 @router.get("/text")
-def get_text(request) -> Annotated[Response[Any], 200]:
+def get_text(request) -> Annotated[Response[str], 200]:
     return Response(200, "Hello World")
 
 
 @router.get("/path/{item_id}")
-def get_id(request, item_id) -> Annotated[Response[Any], 200]:
+def get_id(request, item_id) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/str/{item_id}")
-def get_str_id(request, item_id: str) -> Annotated[Response[Any], 200]:
+def get_str_id(request, item_id: str) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/int/{item_id}")
-def get_int_id(request, item_id: int) -> Annotated[Response[Any], 200]:
+def get_int_id(request, item_id: int) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/float/{item_id}")
-def get_float_id(request, item_id: float) -> Annotated[Response[Any], 200]:
+def get_float_id(request, item_id: float) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/bool/{item_id}")
-def get_bool_id(request, item_id: bool) -> Annotated[Response[Any], 200]:
+def get_bool_id(request, item_id: bool) -> Annotated[Response[bool], 200]:
     return Response(200, item_id)
 
 
@@ -60,163 +59,163 @@ CustomValidatedInt = Annotated[
 def get_path_param_ex_id(
     request,
     item_id: PathEx[CustomValidatedInt, P(description="path_ex description")],
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param/{item_id}")
 def get_path_param_id(
     request, item_id: str = Path(None)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-required/{item_id}")
 def get_path_param_required_id(
     request, item_id: str = Path(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-minlength/{item_id}")
 def get_path_param_min_length(
     request, item_id: str = Path(..., min_length=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-maxlength/{item_id}")
 def get_path_param_max_length(
     request, item_id: str = Path(..., max_length=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-min_maxlength/{item_id}")
 def get_path_param_min_max_length(
     request, item_id: str = Path(..., max_length=3, min_length=2)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-gt/{item_id}")
 def get_path_param_gt(
     request, item_id: float = Path(..., gt=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-gt0/{item_id}")
 def get_path_param_gt0(
     request, item_id: float = Path(..., gt=0)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-ge/{item_id}")
 def get_path_param_ge(
     request, item_id: float = Path(..., ge=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-lt/{item_id}")
 def get_path_param_lt(
     request, item_id: float = Path(..., lt=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-lt0/{item_id}")
 def get_path_param_lt0(
     request, item_id: float = Path(..., lt=0)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-le/{item_id}")
 def get_path_param_le(
     request, item_id: float = Path(..., le=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-lt-gt/{item_id}")
 def get_path_param_lt_gt(
     request, item_id: float = Path(..., lt=3, gt=1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-le-ge/{item_id}")
 def get_path_param_le_ge(
     request, item_id: float = Path(..., le=3, ge=1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-lt-int/{item_id}")
 def get_path_param_lt_int(
     request, item_id: int = Path(..., lt=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-gt-int/{item_id}")
 def get_path_param_gt_int(
     request, item_id: int = Path(..., gt=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-le-int/{item_id}")
 def get_path_param_le_int(
     request, item_id: int = Path(..., le=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-ge-int/{item_id}")
 def get_path_param_ge_int(
     request, item_id: int = Path(..., ge=3)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-lt-gt-int/{item_id}")
 def get_path_param_lt_gt_int(
     request, item_id: int = Path(..., lt=3, gt=1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-le-ge-int/{item_id}")
 def get_path_param_le_ge_int(
     request, item_id: int = Path(..., le=3, ge=1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-pattern/{item_id}")
 def get_path_param_pattern(
     request, item_id: str = Path(..., pattern="^foo")
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-str/{str:item_id}")
-def get_path_param_django_str(request, item_id) -> Annotated[Response[Any], 200]:
+def get_path_param_django_str(request, item_id) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-int/{int:item_id}")
-def get_path_param_django_int(request, item_id: int) -> Annotated[Response[Any], 200]:
+def get_path_param_django_int(request, item_id: int) -> Annotated[Response[int], 200]:
     assert isinstance(item_id, int)
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-int/not-an-int")
-def get_path_param_django_not_an_int(request) -> Annotated[Response[Any], 200]:
+def get_path_param_django_not_an_int(request) -> Annotated[Response[str], 200]:
     """Verify that url resolution for get_path_param_django_int passes non-ints forward"""
     return Response(200, "Found not-an-int")
 
@@ -224,18 +223,18 @@ def get_path_param_django_not_an_int(request) -> Annotated[Response[Any], 200]:
 @router.get("/path/param-django-int-str/{int:item_id}")
 def get_path_param_django_int_str(
     request, item_id: str
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     assert isinstance(item_id, str)
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-slug/{slug:item_id}")
-def get_path_param_django_slug(request, item_id) -> Annotated[Response[Any], 200]:
+def get_path_param_django_slug(request, item_id) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-uuid/{uuid:item_id}")
-def get_path_param_django_uuid(request, item_id: UUID) -> Annotated[Response[Any], 200]:
+def get_path_param_django_uuid(request, item_id: UUID) -> Annotated[Response[UUID], 200]:
     assert isinstance(item_id, UUID)
     return Response(200, item_id)
 
@@ -243,7 +242,7 @@ def get_path_param_django_uuid(request, item_id: UUID) -> Annotated[Response[Any
 @router.get("/path/param-django-uuid-notype/{uuid:item_id}")
 def get_path_param_django_uuid_notype(
     request, item_id
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     # no type annotation defaults to str..............^
     assert isinstance(item_id, str)
     return Response(200, item_id)
@@ -252,44 +251,44 @@ def get_path_param_django_uuid_notype(
 @router.get("/path/param-django-uuid-typestr/{uuid:item_id}")
 def get_path_param_django_uuid_typestr(
     request, item_id: str
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     assert isinstance(item_id, str)
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-path/{path:item_id}/after")
-def get_path_param_django_path(request, item_id) -> Annotated[Response[Any], 200]:
+def get_path_param_django_path(request, item_id) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/query")
-def get_query(request, query) -> Annotated[Response[Any], 200]:
+def get_query(request, query) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/optional")
-def get_query_optional(request, query=None) -> Annotated[Response[Any], 200]:
+def get_query_optional(request, query=None) -> Annotated[Response[str], 200]:
     if query is None:
         return Response(200, "foo bar")
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/int")
-def get_query_type(request, query: int) -> Annotated[Response[Any], 200]:
+def get_query_type(request, query: int) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/int/optional")
 def get_query_type_optional(
     request, query: int = None
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     if query is None:
         return Response(200, "foo bar")
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/str/optional")
-def get_query_str_optional(request, query: str = None) -> Annotated[Response[Any], 200]:
+def get_query_str_optional(request, query: str = None) -> Annotated[Response[str], 200]:
     """Test for issue #1607 - str type with None default should be optional."""
     if query is None:
         return Response(200, "foo bar")
@@ -299,28 +298,28 @@ def get_query_str_optional(request, query: str = None) -> Annotated[Response[Any
 @router.get("/query/int/default")
 def get_query_type_optional_10(
     request, query: int = 10
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/list")
 def get_query_list(
-    request, query: List[str] = Query(...)
-) -> Annotated[Response[Any], 200]:
+    request, query: list[str] = Query(...)
+) -> Annotated[Response[str], 200]:
     return Response(200, ",".join(query))
 
 
 @router.get("/query/list-optional")
 def get_query_optional_list(
-    request, query: Optional[List[str]] = Query(None)
-) -> Annotated[Response[Any], 200]:
+    request, query: list[str] | None = Query(None)
+) -> Annotated[Response[str | None], 200]:
     if query:
         return Response(200, ",".join(query))
     return Response(200, query)
 
 
 @router.get("/query/param")
-def get_query_param(request, query=Query(None)) -> Annotated[Response[Any], 200]:
+def get_query_param(request, query=Query(None)) -> Annotated[Response[str], 200]:
     if query is None:
         return Response(200, "foo bar")
     return Response(200, f"foo bar {query}")
@@ -329,14 +328,14 @@ def get_query_param(request, query=Query(None)) -> Annotated[Response[Any], 200]
 @router.get("/query/param-required")
 def get_query_param_required(
     request, query=Query(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/query/param-required/int")
 def get_query_param_required_type(
     request, query: int = Query(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
@@ -347,7 +346,7 @@ class AliasedSchema(Schema):
 @router.get("/query/aliased-name")
 def get_query_aliased_name(
     request, query: AliasedSchema = Query(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query.query}")
 
 
@@ -380,12 +379,12 @@ register_converter(CustomPathConverter2, "custom-float")
 @router.get("/path/param-django-custom-int/{custom-int:item_id}")
 def get_path_param_django_custom_int(
     request, item_id: int
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, item_id)
 
 
 @router.get("/path/param-django-custom-float/{custom-float:item_id}")
 def get_path_param_django_custom_float(
     request, item_id: float
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[float], 200]:
     return Response(200, item_id)

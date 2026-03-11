@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from django.utils import timezone
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import Response, Router
 from hattori.schema import Schema
@@ -15,27 +15,27 @@ router = Router()
 
 
 @router.get("/request/build_absolute_uri")
-def request_build_absolute_uri(request) -> Annotated[Response[Any], 200]:
+def request_build_absolute_uri(request) -> Annotated[Response[str], 200]:
     return Response(200, request.build_absolute_uri())
 
 
 @router.get("/request/build_absolute_uri/location")
-def request_build_absolute_uri_location(request) -> Annotated[Response[Any], 200]:
+def request_build_absolute_uri_location(request) -> Annotated[Response[str], 200]:
     return Response(200, request.build_absolute_uri("location"))
 
 
 @router.get("/test")
-def simple_get(request) -> Annotated[Response[Any], 200]:
+def simple_get(request) -> Annotated[Response[str], 200]:
     return Response(200, "test")
 
 
 @router.get("/test-headers")
-def get_headers(request) -> Annotated[Response[Any], 200]:
+def get_headers(request) -> Annotated[Response[dict[str, str]], 200]:
     return Response(200, dict(request.headers))
 
 
 @router.get("/test-cookies")
-def get_cookies(request) -> Annotated[Response[Any], 200]:
+def get_cookies(request) -> Annotated[Response[dict[str, str]], 200]:
     return Response(200, dict(request.COOKIES))
 
 

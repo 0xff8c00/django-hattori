@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import Response
 from hattori.security import APIKeyHeader
@@ -16,5 +16,5 @@ header_key = ApiKey()
 
 
 @api.get("/headerkey", auth=header_key)
-def apikey(request) -> Annotated[Response[Any], 200]:
+def apikey(request) -> Annotated[Response[str], 200]:
     return Response(200, f"Token = {request.auth}")

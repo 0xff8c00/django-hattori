@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 from django.http import Http404
@@ -25,7 +25,7 @@ class Payload(Schema):
 @api.post("/error/{code}")
 def err_thrower(
     request, code: str, payload: Payload = None
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[None], 200]:
     if code == "base":
         raise RuntimeError("test")
     if code == "404":
@@ -81,7 +81,7 @@ async def test_asyncio_exceptions():
     api = NinjaAPI()
 
     @api.get("/error")
-    async def thrower(request) -> Annotated[Response[Any], 200]:
+    async def thrower(request) -> Annotated[Response[None], 200]:
         raise Http404("test")
 
     client = TestAsyncClient(api)
@@ -94,7 +94,7 @@ def test_no_handlers():
     api._exception_handlers = {}
 
     @api.get("/error")
-    def thrower(request) -> Annotated[Response[Any], 200]:
+    def thrower(request) -> Annotated[Response[None], 200]:
         raise RuntimeError("test")
 
     client = TestClient(api)

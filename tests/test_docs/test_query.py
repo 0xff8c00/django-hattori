@@ -67,7 +67,7 @@ def test_examples():
                 "limit": 100,
                 "offset": None,
                 "query": None,
-                "category__in": None,
+                "categories": None,
             }
         }
         assert client.get("/filter?limit=10").json() == {
@@ -75,18 +75,18 @@ def test_examples():
                 "limit": 10,
                 "offset": None,
                 "query": None,
-                "category__in": None,
+                "categories": None,
             }
         }
         assert client.get("/filter?offset=10").json() == {
-            "filters": {"limit": 100, "offset": 10, "query": None, "category__in": None}
+            "filters": {"limit": 100, "offset": 10, "query": None, "categories": None}
         }
         assert client.get("/filter?query=10").json() == {
             "filters": {
                 "limit": 100,
                 "offset": None,
                 "query": "10",
-                "category__in": None,
+                "categories": None,
             }
         }
         assert client.get("/filter?categories=a&categories=b").json() == {
@@ -94,7 +94,7 @@ def test_examples():
                 "limit": 100,
                 "offset": None,
                 "query": None,
-                "category__in": ["a", "b"],
+                "categories": ["a", "b"],
             }
         }
 
@@ -111,22 +111,30 @@ def test_examples():
             {
                 "in": "query",
                 "name": "offset",
-                "schema": {"title": "Offset", "type": "integer"},
+                "schema": {
+                    "anyOf": [{"type": "integer"}, {"type": "null"}],
+                    "title": "Offset",
+                },
                 "required": False,
             },
             {
                 "in": "query",
                 "name": "query",
-                "schema": {"title": "Query", "type": "string"},
+                "schema": {
+                    "anyOf": [{"type": "string"}, {"type": "null"}],
+                    "title": "Query",
+                },
                 "required": False,
             },
             {
                 "in": "query",
                 "name": "categories",
                 "schema": {
-                    "items": {"type": "string"},
+                    "anyOf": [
+                        {"items": {"type": "string"}, "type": "array"},
+                        {"type": "null"},
+                    ],
                     "title": "Categories",
-                    "type": "array",
                 },
                 "required": False,
             },

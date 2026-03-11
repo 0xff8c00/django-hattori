@@ -1,7 +1,11 @@
-from typing import Annotated, Any
+from typing import Annotated
 
-from hattori import Response
+from hattori import Response, Schema
 from hattori.security import HttpBasicAuth
+
+
+class AuthUser(Schema):
+    httpuser: str
 
 
 class BasicAuth(HttpBasicAuth):
@@ -11,5 +15,5 @@ class BasicAuth(HttpBasicAuth):
 
 
 @api.get("/basic", auth=BasicAuth())
-def basic(request) -> Annotated[Response[Any], 200]:
+def basic(request) -> Annotated[Response[AuthUser], 200]:
     return Response(200, {"httpuser": request.auth})

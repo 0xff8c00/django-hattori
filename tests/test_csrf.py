@@ -1,13 +1,21 @@
 import re
-from typing import Annotated, Any
+from typing import Annotated
 
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
-from hattori import NinjaAPI, Response
+from hattori import NinjaAPI, Response, Schema
 from hattori.security import APIKeyCookie, APIKeyHeader, django_auth
 from hattori.testing import TestClient as BaseTestClient
+
+
+class SuccessResult(Schema):
+    success: bool
+
+
+class StatusResult(Schema):
+    status: str
 
 
 class AnyCookieAuth(APIKeyCookie):
@@ -37,18 +45,18 @@ csrf_ON_with_django_auth = NinjaAPI(urls_namespace="csrf_ON_django", auth=django
 
 
 @csrf_OFF.post("/post")
-def post_off(request) -> Annotated[Response[Any], 200]:
+def post_off(request) -> Annotated[Response[SuccessResult], 200]:
     return Response(200, {"success": True})
 
 
 @csrf_ON.post("/post")
-def post_on(request) -> Annotated[Response[Any], 200]:
+def post_on(request) -> Annotated[Response[SuccessResult], 200]:
     return Response(200, {"success": True})
 
 
 @csrf_ON.post("/post/csrf_exempt")
 @csrf_exempt
-def post_on_with_exempt(request) -> Annotated[Response[Any], 200]:
+def post_on_with_exempt(request) -> Annotated[Response[SuccessResult], 200]:
     return Response(200, {"success": True})
 
 
@@ -56,27 +64,27 @@ def post_on_with_exempt(request) -> Annotated[Response[Any], 200]:
 # to avoid frozen router issues
 @csrf_ON.get("/obtain_csrf_token_get")
 @ensure_csrf_cookie
-def obtain_csrf_token_get(request) -> Annotated[Response[Any], 200]:
+def obtain_csrf_token_get(request) -> Annotated[Response[SuccessResult], 200]:
     return JsonResponse(data={"success": True})
 
 
 @csrf_ON.post("/obtain_csrf_token_post")
 @ensure_csrf_cookie
 @csrf_exempt
-def obtain_csrf_token_post(request) -> Annotated[Response[Any], 200]:
+def obtain_csrf_token_post(request) -> Annotated[Response[SuccessResult], 200]:
     return JsonResponse(data={"success": True})
 
 
 @csrf_ON_with_django_auth.get("/obtain_csrf_token_get", auth=None)
 @ensure_csrf_cookie
-def obtain_csrf_token_get_no_auth_route(request) -> Annotated[Response[Any], 200]:
+def obtain_csrf_token_get_no_auth_route(request) -> Annotated[Response[SuccessResult], 200]:
     return JsonResponse(data={"success": True})
 
 
 @csrf_ON_with_django_auth.post("/obtain_csrf_token_post", auth=None)
 @ensure_csrf_cookie
 @csrf_exempt
-def obtain_csrf_token_post_no_auth_route(request) -> Annotated[Response[Any], 200]:
+def obtain_csrf_token_post_no_auth_route(request) -> Annotated[Response[SuccessResult], 200]:
     return JsonResponse(data={"success": True})
 
 
@@ -117,7 +125,7 @@ def test_csrf_cookie_auth():
     api = NinjaAPI(auth=cookie_auth)
 
     @api.post("/test")
-    def test_view(request) -> Annotated[Response[Any], 200]:
+    def test_view(request) -> Annotated[Response[SuccessResult], 200]:
         return Response(200, {"success": True})
 
     client = TestClient(api)
@@ -186,7 +194,7 @@ def test_no_auth_csrf_exempt():
     api = NinjaAPI(urls_namespace="test_no_auth_csrf")
 
     @api.post("/create")
-    def create_item(request) -> Annotated[Response[Any], 200]:
+    def create_item(request) -> Annotated[Response[StatusResult], 200]:
         return Response(200, {"status": "created"})
 
     # Get the actual view function that Django will use

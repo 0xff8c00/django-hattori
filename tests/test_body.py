@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any
 
 import pytest
 from pydantic import field_validator
@@ -15,14 +15,14 @@ api = NinjaAPI()
 @api.post("/task")
 def create_task(
     request, start: int = Body(...), end: int = Body(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[list[int]], 200]:
     return Response(200, [start, end])
 
 
 @api.post("/task2")
 def create_task2(
     request, start: int = Body(2), end: int = Form(1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[list[int]], 200]:
     return Response(200, [start, end])
 
 
@@ -39,7 +39,7 @@ class UserIn(Schema):
 
 
 @api.post("/users")
-def create_user(request, payload: UserIn) -> Annotated[Response[Any], 200]:
+def create_user(request, payload: UserIn) -> Annotated[Response[UserIn], 200]:
     return Response(200, payload.dict())
 
 
@@ -85,7 +85,7 @@ def test_incorrect_annotation():
     with pytest.raises(ConfigError):
 
         @api.post("/some")
-        def some(request, payload=Some) -> Annotated[Response[Any], 200]:
+        def some(request, payload=Some) -> Annotated[Response[int], 200]:
             #  ................. ^------ invalid usage assigning class instead of annotation
             return Response(200, 42)
 
@@ -93,9 +93,9 @@ def test_incorrect_annotation():
 class CustomErrorAPI(NinjaAPI):
     def validation_error_from_error_contexts(
         self,
-        error_contexts: List[ValidationErrorContext],
+        error_contexts: list[ValidationErrorContext],
     ) -> ValidationError:
-        errors: List[Dict[str, Any]] = []
+        errors: list[dict[str, Any]] = []
         for context in error_contexts:
             model = context.model
             for e in context.pydantic_validation_error.errors(
@@ -112,7 +112,7 @@ custom_error_api = CustomErrorAPI()
 
 
 @custom_error_api.post("/users")
-def create_user2(request, payload: UserIn) -> Annotated[Response[Any], 200]:
+def create_user2(request, payload: UserIn) -> Annotated[Response[UserIn], 200]:
     return Response(200, payload.dict())
 
 

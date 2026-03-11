@@ -1,12 +1,35 @@
-from typing import Annotated, Any
+from typing import Annotated
 
-from hattori import NinjaAPI, Response
+from hattori import NinjaAPI, Response, Schema
+
+
+class DocstringsResult(Schema):
+    docstrings: bool
+
+
+class DescriptionResult(Schema):
+    description: bool
+    deprecated: bool
+
+
+class SummaryResult(Schema):
+    summary: bool
+    description: str
+
+
+class TagsResult(Schema):
+    tags: bool
+
+
+class OpenApiExtraResult(Schema):
+    openapi_extra: bool
+
 
 api = NinjaAPI()
 
 
 @api.get("/operation1", operation_id="my_id")
-def operation_1(request) -> Annotated[Response[Any], 200]:
+def operation_1(request) -> Annotated[Response[DocstringsResult], 200]:
     """
     This will be in description
     """
@@ -14,18 +37,18 @@ def operation_1(request) -> Annotated[Response[Any], 200]:
 
 
 @api.get("/operation2", description="description from argument", deprecated=True)
-def operation2(request) -> Annotated[Response[Any], 200]:
+def operation2(request) -> Annotated[Response[DescriptionResult], 200]:
     return Response(200, {"description": True, "deprecated": True})
 
 
 @api.get("/operation3", summary="Summary from argument", description="description arg")
-def operation3(request) -> Annotated[Response[Any], 200]:
+def operation3(request) -> Annotated[Response[SummaryResult], 200]:
     "This one also has docstring description"
     return Response(200, {"summary": True, "description": "multiple"})
 
 
 @api.get("/operation4", tags=["tag1", "tag2"])
-def operation4(request) -> Annotated[Response[Any], 200]:
+def operation4(request) -> Annotated[Response[TagsResult], 200]:
     return Response(200, {"tags": True})
 
 
@@ -50,12 +73,12 @@ def operation4(request) -> Annotated[Response[Any], 200]:
         },
     },
 )
-def operation5(request) -> Annotated[Response[Any], 200]:
+def operation5(request) -> Annotated[Response[OpenApiExtraResult], 200]:
     return Response(200, {"openapi_extra": True})
 
 
 @api.get("/not-included", include_in_schema=False)
-def not_included(request) -> Annotated[Response[Any], 200]:
+def not_included(request) -> Annotated[Response[bool], 200]:
     return Response(200, True)
 
 

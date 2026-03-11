@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -25,17 +25,17 @@ r2_1 = Router()
 
 
 @r1.get("/test")
-def operation1(request) -> Annotated[Response[Any], 200]:
+def operation1(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r2.get("/test")
-def operation2(request) -> Annotated[Response[Any], 200]:
+def operation2(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r2_1.get("/test")
-def operation3(request) -> Annotated[Response[Any], 200]:
+def operation3(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 

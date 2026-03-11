@@ -1,11 +1,19 @@
 import asyncio
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
-from hattori import NinjaAPI, Response
+from hattori import NinjaAPI, Response, Schema
 from hattori.security import APIKeyQuery
 from hattori.testing import TestAsyncClient
+
+
+class AsyncResult(Schema):
+    is_async: bool
+
+
+class SyncResult(Schema):
+    sync: bool
 
 
 @pytest.mark.asyncio
@@ -18,12 +26,14 @@ async def test_asyncio_operations():
                 return key
 
     @api.get("/async", auth=KeyQuery())
-    async def async_view(request, payload: int) -> Annotated[Response[Any], 200]:
+    async def async_view(
+        request, payload: int
+    ) -> Annotated[Response[AsyncResult], 200]:
         await asyncio.sleep(0)
-        return Response(200, {"async": True})
+        return Response(200, {"is_async": True})
 
     @api.post("/async")
-    def sync_post_to_async_view(request) -> Annotated[Response[Any], 200]:
+    def sync_post_to_async_view(request) -> Annotated[Response[SyncResult], 200]:
         return Response(200, {"sync": True})
 
     client = TestAsyncClient(api)
@@ -36,7 +46,7 @@ async def test_asyncio_operations():
 
     # async successful
     res = await client.get("/async?payload=1&key=secret")
-    assert res.json() == {"async": True}
+    assert res.json() == {"is_async": True}
 
     # async innvalid input
     res = await client.get("/async?payload=str&key=secret")

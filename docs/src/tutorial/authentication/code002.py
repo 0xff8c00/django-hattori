@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import Response
 
@@ -9,5 +9,5 @@ def ip_whitelist(request):
 
 
 @api.get("/ipwhitelist", auth=ip_whitelist)
-def ipwhitelist(request) -> Annotated[Response[Any], 200]:
+def ipwhitelist(request) -> Annotated[Response[str], 200]:
     return Response(200, f"Authenticated client, IP = {request.auth}")

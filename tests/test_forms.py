@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -6,13 +6,19 @@ from hattori import Form, NinjaAPI, Response, Schema
 from hattori.errors import ConfigError
 from hattori.testing import TestClient
 
+
+class FormResponse(Schema):
+    s: str
+    i: int | None = None
+
+
 api = NinjaAPI()
 
 
 @api.post("/form")
 def form_operation(
     request, s: str = Form(...), i: int = Form(None)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[FormResponse], 200]:
     return Response(200, {"s": s, "i": i})
 
 
@@ -70,7 +76,7 @@ def test_duplicate_names():
         @api1.post("/broken1")
         def broken1(
             request, p1: int = Form(...), data: TestData = Form(...)
-        ) -> Annotated[Response[Any], 200]:
+        ) -> Annotated[Response[None], 200]:
             pass
 
     api2 = NinjaAPI(urls_namespace="test_dup2")
@@ -80,7 +86,7 @@ def test_duplicate_names():
         @api2.post("/broken2")
         def broken2(
             request, data: TestData = Form(...), p1: int = Form(...)
-        ) -> Annotated[Response[Any], 200]:
+        ) -> Annotated[Response[None], 200]:
             pass
 
 

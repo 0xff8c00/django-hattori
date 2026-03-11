@@ -1,9 +1,15 @@
 """Test that empty string POST values don't crash _MultiPartBody parsing."""
 
-from typing import Annotated, Any
+from typing import Annotated
 
-from hattori import Body, Form, Response, Router
+from hattori import Body, Form, Response, Router, Schema
 from hattori.testing import TestClient
+
+
+class EmptyBodyResponse(Schema):
+    name: str
+    tag: str
+
 
 router = Router()
 
@@ -11,7 +17,7 @@ router = Router()
 @router.post("/empty-body-str")
 def empty_body_str(
     request, name: str = Body(...), tag: str = Form("")
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[EmptyBodyResponse], 200]:
     return Response(200, {"name": name, "tag": tag})
 
 

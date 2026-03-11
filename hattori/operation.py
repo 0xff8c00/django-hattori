@@ -52,6 +52,40 @@ class _ParsedAnnotation:
         self.stream_alias: _StreamAlias | None = None
 
 
+def _resolve_type_alias(tp: Any) -> Any:
+    """Resolve Python 3.12+ type aliases (TypeAliasType) to their underlying types."""
+    origin = get_origin(tp)
+    if origin is None:
+        return tp
+    if type(origin).__name__ == "TypeAliasType":
+        args = get_args(tp)
+        type_params = origin.__type_params__
+        resolved = origin.__value__
+        if type_params and args:
+            mapping = dict(zip(type_params, args))
+            resolved = _substitute_typevars(resolved, mapping)
+        return resolved
+    return tp
+
+
+def _substitute_typevars(tp: Any, mapping: dict) -> Any:
+    """Recursively substitute TypeVars in a type according to the mapping."""
+    if tp in mapping:
+        return mapping[tp]
+    origin = get_origin(tp)
+    args = get_args(tp)
+    # Handle Pydantic models (get_args returns () but metadata has the args)
+    if not args and origin is None:
+        meta = getattr(tp, "__pydantic_generic_metadata__", None)
+        if meta and meta.get("args"):
+            origin = meta["origin"]
+            args = meta["args"]
+    if origin is None or not args:
+        return tp
+    new_args = tuple(_substitute_typevars(a, mapping) for a in args)
+    return origin[new_args] if len(new_args) > 1 else origin[new_args[0]]
+
+
 def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
     """Extract {status_code: schema_type} from the function's return type annotation.
 
@@ -100,6 +134,9 @@ def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
 
         response_type = arm_args[0]  # Response[Item]
         status_code = arm_args[1]
+
+        # Resolve type aliases (Python 3.12+ `type` statement)
+        response_type = _resolve_type_alias(response_type)
 
         # Extract T from Response[T]
         resp_origin = get_origin(response_type)

@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from django.http import HttpResponse
 
@@ -9,12 +9,12 @@ api = NinjaAPI()
 
 
 @api.get("/test-no-cookies")
-def op_no_cookies(request) -> Annotated[Response[Any], 200]:
-    return Response(200, {})
+def op_no_cookies(request) -> Annotated[Response[None], 200]:
+    return Response(200, None)
 
 
 @api.get("/test-set-cookie")
-def op_set_cookie(request) -> Annotated[Response[Any], 200]:
+def op_set_cookie(request) -> Annotated[Response[str], 200]:
     response = HttpResponse()
     response.set_cookie(key="sessionid", value="sessionvalue")
     return response  # HttpResponse pass-through

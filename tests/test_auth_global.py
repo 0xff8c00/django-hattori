@@ -1,6 +1,6 @@
-from typing import Annotated, Any
+from typing import Annotated
 
-from hattori import NinjaAPI, Response, Router
+from hattori import NinjaAPI, Response, Router, Schema
 from hattori.security import APIKeyQuery
 from hattori.testing import TestClient
 
@@ -17,21 +17,25 @@ class KeyQuery2(APIKeyQuery):
             return key
 
 
+class AuthResult(Schema):
+    auth: str
+
+
 api = NinjaAPI(auth=KeyQuery1())
 
 
 @api.get("/default")
-def default(request) -> Annotated[Response[Any], 200]:
+def default(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": request.auth})
 
 
 @api.api_operation(["POST", "PATCH"], "/multi-method-no-auth")
-def multi_no_auth(request) -> Annotated[Response[Any], 200]:
+def multi_no_auth(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": request.auth})
 
 
 @api.api_operation(["POST", "PATCH"], "/multi-method-auth", auth=KeyQuery2())
-def multi_auth(request) -> Annotated[Response[Any], 200]:
+def multi_auth(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": request.auth})
 
 
@@ -41,12 +45,12 @@ router = Router()
 
 
 @router.get("/router-operation")  # should come from global auth
-def router_operation(request) -> Annotated[Response[Any], 200]:
+def router_operation(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": str(request.auth)})
 
 
 @router.get("/router-operation-auth", auth=KeyQuery2())
-def router_operation_auth(request) -> Annotated[Response[Any], 200]:
+def router_operation_auth(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": str(request.auth)})
 
 
@@ -57,7 +61,7 @@ router_noauth = Router(auth=None)
 
 
 @router_noauth.get("/router-no-auth")
-def router_operation_no_auth(request) -> Annotated[Response[Any], 200]:
+def router_operation_no_auth(request) -> Annotated[Response[AuthResult], 200]:
     return Response(200, {"auth": str(request.auth)})
 
 

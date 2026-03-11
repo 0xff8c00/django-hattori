@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import NinjaAPI, Response
 from hattori.decorators import decorate_view
@@ -21,7 +21,7 @@ def test_decorator_before():
 
     @decorate_view(some_decorator)
     @api.get("/before")
-    def dec_before(request) -> Annotated[Response[Any], 200]:
+    def dec_before(request) -> Annotated[Response[int], 200]:
         return Response(200, 1)
 
     client = TestClient(api)
@@ -35,7 +35,7 @@ def test_decorator_after():
 
     @api.get("/after")
     @decorate_view(some_decorator)
-    def dec_after(request) -> Annotated[Response[Any], 200]:
+    def dec_after(request) -> Annotated[Response[int], 200]:
         return Response(200, 1)
 
     client = TestClient(api)

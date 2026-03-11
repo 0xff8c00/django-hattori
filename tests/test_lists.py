@@ -1,11 +1,39 @@
-from typing import Annotated, Any, List
+from typing import Annotated
 
 import pytest
 from django.http import QueryDict  # noqa
-from pydantic import BaseModel, Field, conlist
+from pydantic import BaseModel, ConfigDict, Field, conlist
 
 from hattori import Body, Form, Query, Response, Router, Schema
 from hattori.testing import TestClient
+
+
+class QueryFormResponse(Schema):
+    query: list[int]
+    form: list[int]
+
+
+class QueryBodyResponse(Schema):
+    query: list[int]
+    body: list[int]
+
+
+class BodyModel(BaseModel):
+    x: int
+    y: int
+
+
+class BodyModelListResponse(Schema):
+    body: list[BodyModel]
+
+
+class BodyIntListResponse(Schema):
+    body: list[int]
+
+
+class QueryObjectIdResponse(Schema):
+    query: list[int] | None = None
+
 
 router = Router()
 
@@ -13,9 +41,9 @@ router = Router()
 @router.post("/list1")
 def listview1(
     request,
-    query: List[int] = Query(...),
-    form: List[int] = Form(...),
-) -> Annotated[Response[Any], 200]:
+    query: list[int] = Query(...),
+    form: list[int] = Form(...),
+) -> Annotated[Response[QueryFormResponse], 200]:
     return Response(
         200,
         {
@@ -28,9 +56,9 @@ def listview1(
 @router.post("/list2")
 def listview2(
     request,
-    body: List[int],
-    query: List[int] = Query(...),
-) -> Annotated[Response[Any], 200]:
+    body: list[int],
+    query: list[int] = Query(...),
+) -> Annotated[Response[QueryBodyResponse], 200]:
     return Response(
         200,
         {
@@ -40,13 +68,8 @@ def listview2(
     )
 
 
-class BodyModel(BaseModel):
-    x: int
-    y: int
-
-
 @router.post("/list3")
-def listview3(request, body: List[BodyModel]) -> Annotated[Response[Any], 200]:
+def listview3(request, body: list[BodyModel]) -> Annotated[Response[BodyModelListResponse], 200]:
     return Response(
         200,
         {
@@ -56,7 +79,7 @@ def listview3(request, body: List[BodyModel]) -> Annotated[Response[Any], 200]:
 
 
 @router.post("/list-default")
-def listviewdefault(request, body: List[int] = [1]) -> Annotated[Response[Any], 200]:  # noqa: B006
+def listviewdefault(request, body: list[int] = [1]) -> Annotated[Response[BodyIntListResponse], 200]:  # noqa: B006
     # By default List[anything] is treated for body
     return Response(
         200,
@@ -67,15 +90,20 @@ def listviewdefault(request, body: List[int] = [1]) -> Annotated[Response[Any], 
 
 
 class Filters(Schema):
-    tags: List[str] = []
-    other_tags: List[str] = Field([], alias="other_tags_alias")
+    model_config = ConfigDict(populate_by_name=True)
+    tags: list[str] = []
+    other_tags: list[str] = Field([], alias="other_tags_alias")
+
+
+class FiltersResponse(Schema):
+    filters: Filters
 
 
 @router.post("/list4")
 def listview4(
     request,
     filters: Filters = Query(...),
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[FiltersResponse], 200]:
     return Response(
         200,
         {
@@ -97,7 +125,7 @@ def listview5(
     request,
     body: conlist(int, min_length=1) = Body(...),
     a_query: Data = Query(...),
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[QueryBodyResponse], 200]:
     return Response(
         200,
         {
@@ -110,8 +138,8 @@ def listview5(
 @router.post("/list6")
 def listview6(
     request,
-    object_id: List[int] = Query(None, alias="id"),
-) -> Annotated[Response[Any], 200]:
+    object_id: list[int] = Query(None, alias="id"),
+) -> Annotated[Response[QueryObjectIdResponse], 200]:
     return Response(200, {"query": object_id})
 
 

@@ -1,9 +1,9 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 from pydantic import BaseModel
 
-from hattori import Form, Query, Response, Router
+from hattori import Form, Query, Response, Router, Schema
 from hattori.testing import TestClient
 
 
@@ -26,48 +26,53 @@ class SelfReference(BaseModel):
 SelfReference.model_rebuild()
 
 
+class SomeOtherResponse(Schema):
+    some: SomeModel
+    other: OtherModel
+
+
 router = Router()
 
 
 @router.post("/test1")
-def view1(request, some: SomeModel) -> Annotated[Response[Any], 200]:
+def view1(request, some: SomeModel) -> Annotated[Response[SomeModel], 200]:
     assert isinstance(some, SomeModel)
     return Response(200, some)
 
 
 @router.post("/test2")
-def view2(request, some: SomeModel, other: OtherModel) -> Annotated[Response[Any], 200]:
+def view2(request, some: SomeModel, other: OtherModel) -> Annotated[Response[SomeOtherResponse], 200]:
     assert isinstance(some, SomeModel)
     assert isinstance(other, OtherModel)
     return Response(200, {"some": some, "other": other})
 
 
 @router.post("/test3")
-def view3(request, some: "SomeModel") -> Annotated[Response[Any], 200]:
+def view3(request, some: "SomeModel") -> Annotated[Response[SomeModel], 200]:
     assert isinstance(some, SomeModel)
     return Response(200, some)
 
 
 @router.post("/test_form")
-def view4(request, form: OtherModel = Form(...)) -> Annotated[Response[Any], 200]:
+def view4(request, form: OtherModel = Form(...)) -> Annotated[Response[OtherModel], 200]:
     assert isinstance(form, OtherModel)
     return Response(200, form)
 
 
 @router.post("/test_query")
-def view4query(request, q: OtherModel = Query(...)) -> Annotated[Response[Any], 200]:
+def view4query(request, q: OtherModel = Query(...)) -> Annotated[Response[OtherModel], 200]:
     assert isinstance(q, OtherModel)
     return Response(200, q)
 
 
 @router.post("/selfref")
-def view5(request, obj: SelfReference) -> Annotated[Response[Any], 200]:
+def view5(request, obj: SelfReference) -> Annotated[Response[SelfReference], 200]:
     assert isinstance(obj, SelfReference)
     return Response(200, obj)
 
 
 @router.post("/model-default")
-def view6(request, obj: OtherModel = None) -> Annotated[Response[Any], 200]:
+def view6(request, obj: OtherModel = None) -> Annotated[Response[OtherModel | None], 200]:
     assert isinstance(obj, (OtherModel, None.__class__))
     return Response(200, obj)
 
@@ -75,7 +80,7 @@ def view6(request, obj: OtherModel = None) -> Annotated[Response[Any], 200]:
 @router.post("/model-default2")
 def view7(
     request, obj: OtherModel = OtherModel(x=1, y=1)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[OtherModel], 200]:
     assert isinstance(obj, OtherModel)
     return Response(200, obj)
 

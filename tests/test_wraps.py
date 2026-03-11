@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Annotated, Any
+from typing import Annotated
 from unittest import mock
 
 import pytest
@@ -40,31 +40,31 @@ def a_bad_test_wrapper(f):
 @a_good_test_wrapper
 def get_text(
     request,
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, "Hello World")
 
 
 @router.get("/path/{item_id}")
 @a_good_test_wrapper
-def get_id(request, item_id) -> Annotated[Response[Any], 200]:
+def get_id(request, item_id) -> Annotated[Response[str], 200]:
     return Response(200, item_id)
 
 
 @router.get("/query")
 @a_good_test_wrapper
-def get_query_type(request, query: int) -> Annotated[Response[Any], 200]:
+def get_query_type(request, query: int) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
 @router.get("/path-query/{item_id}")
 @a_good_test_wrapper
-def get_query_id(request, item_id, query: int) -> Annotated[Response[Any], 200]:
+def get_query_id(request, item_id, query: int) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {item_id} {query}")
 
 
 @router.get("/text-bad")
 @a_bad_test_wrapper
-def get_text_bad(request) -> Annotated[Response[Any], 200]:
+def get_text_bad(request) -> Annotated[Response[str], 200]:
     return Response(200, "Hello World")
 
 
@@ -72,13 +72,13 @@ with mock.patch("hattori.signature.details.warnings.warn_explicit"):
 
     @router.get("/path-bad/{item_id}")
     @a_bad_test_wrapper
-    def get_id_bad(request, item_id) -> Annotated[Response[Any], 200]:
+    def get_id_bad(request, item_id) -> Annotated[Response[str], 200]:
         return Response(200, item_id)
 
 
 @router.get("/query-bad")
 @a_bad_test_wrapper
-def get_query_type_bad(request, query: int) -> Annotated[Response[Any], 200]:
+def get_query_type_bad(request, query: int) -> Annotated[Response[str], 200]:
     return Response(200, f"foo bar {query}")
 
 
@@ -86,7 +86,7 @@ with mock.patch("hattori.signature.details.warnings.warn_explicit"):
 
     @router.get("/path-query-bad/{item_id}")
     @a_bad_test_wrapper
-    def get_query_id_bad(request, item_id, query: int) -> Annotated[Response[Any], 200]:
+    def get_query_id_bad(request, item_id, query: int) -> Annotated[Response[str], 200]:
         return Response(200, f"foo bar {item_id} {query}")
 
 

@@ -1,13 +1,18 @@
 from io import StringIO
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 from django.utils.encoding import force_str
 from django.utils.xmlutils import SimplerXMLGenerator
 
-from hattori import NinjaAPI, Response
+from hattori import NinjaAPI, Response, Schema
 from hattori.renderers import BaseRenderer
 from hattori.testing import TestClient
+
+
+class PersonEntry(Schema):
+    name: str
+    lastname: str
 
 
 class XMLRenderer(BaseRenderer):
@@ -54,7 +59,7 @@ class CSVRenderer(BaseRenderer):
         return "\n".join(content)
 
 
-def operation(request) -> Annotated[Response[Any], 200]:
+def operation(request) -> Annotated[Response[list[PersonEntry]], 200]:
     return Response(
         200,
         [

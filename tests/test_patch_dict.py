@@ -1,10 +1,20 @@
-from typing import Annotated, Any, List, Optional
+from typing import Annotated
 
 import pytest
 
 from hattori import Field, NinjaAPI, Response, Schema
 from hattori.patch_dict import PatchDict
 from hattori.testing import TestClient
+
+
+class PatchPayloadResult(Schema):
+    payload: dict
+
+
+class PatchPayloadTypeResult(Schema):
+    payload: dict
+    type: str
+
 
 api = NinjaAPI()
 
@@ -17,7 +27,7 @@ client = TestClient(api)
 class ConstrainedSchema(Schema):
     name: str = Field(max_length=5)
     price: int = Field(ge=0)
-    tag: Optional[str] = None
+    tag: str | None = None
 
 
 constrained_api = NinjaAPI()
@@ -27,30 +37,30 @@ constrained_client = TestClient(constrained_api)
 @constrained_api.patch("/patch-constrained")
 def patch_constrained(
     request, payload: PatchDict[ConstrainedSchema]
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[PatchPayloadResult], 200]:
     return Response(200, {"payload": payload})
 
 
 class SomeSchema(Schema):
     name: str
     age: int
-    category: Optional[str] = None
+    category: str | None = None
 
 
 class OtherSchema(SomeSchema):
     other: str
-    category: Optional[List[str]] = None
+    category: list[str] | None = None
 
 
 @api.patch("/patch")
-def patch(request, payload: PatchDict[SomeSchema]) -> Annotated[Response[Any], 200]:
+def patch(request, payload: PatchDict[SomeSchema]) -> Annotated[Response[PatchPayloadTypeResult], 200]:
     return Response(200, {"payload": payload, "type": str(type(payload))})
 
 
 @api.patch("/patch-inherited")
 def patch_inherited(
     request, payload: PatchDict[OtherSchema]
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[PatchPayloadTypeResult], 200]:
     return Response(200, {"payload": payload, "type": str(type(payload))})
 
 

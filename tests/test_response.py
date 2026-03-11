@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated, Any, List, Union
+from typing import Annotated, Union
 
 import pytest
 from django.http import HttpResponse
@@ -60,7 +60,7 @@ def check_model(request) -> Annotated[Response[UserModel], 200]:
 
 
 @router.get("/check_list_model")
-def check_list_model(request) -> Annotated[Response[List[UserModel]], 200]:
+def check_list_model(request) -> Annotated[Response[list[UserModel]], 200]:
     return Response(200, [User(1, "John", "Password")])
 
 
@@ -79,7 +79,7 @@ def check_union(request, q: int) -> Annotated[Response[Union[int, UserModel]], 2
 
 
 @router.get("/check_set_header")
-def check_set_header(request, response: HttpResponse) -> Annotated[Response[Any], 200]:
+def check_set_header(request, response: HttpResponse) -> Annotated[Response[int], 200]:
     response["Cache-Control"] = "no-cache"
     return Response(200, 1)
 
@@ -87,14 +87,14 @@ def check_set_header(request, response: HttpResponse) -> Annotated[Response[Any]
 @router.get("/check_set_cookie")
 def check_set_cookie(
     request, set: bool, response: HttpResponse
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     if set:
         response.set_cookie("test", "me")
     return Response(200, 1)
 
 
 @router.get("/check_del_cookie")
-def check_del_cookie(request, response: HttpResponse) -> Annotated[Response[Any], 200]:
+def check_del_cookie(request, response: HttpResponse) -> Annotated[Response[int], 200]:
     response.delete_cookie("test")
     return Response(200, 1)
 

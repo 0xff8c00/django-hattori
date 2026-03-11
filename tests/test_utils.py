@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -22,7 +22,7 @@ def test_replace_path_param_notation(input, expected_output):
 
 
 def test_contribute_operation_args():
-    def some_func() -> Annotated[Response[Any], 200]:
+    def some_func() -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     contribute_operation_args(some_func, "arg1", str, Query(...))

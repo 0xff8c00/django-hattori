@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import Response
 from hattori.security import APIKeyQuery, APIKeyHeader
@@ -19,5 +19,5 @@ class HeaderKey(AuthCheck, APIKeyHeader):
 
 
 @api.get("/multiple", auth=[QueryKey(), HeaderKey()])
-def multiple(request) -> Annotated[Response[Any], 200]:
+def multiple(request) -> Annotated[Response[str], 200]:
     return Response(200, f"Token = {request.auth}")

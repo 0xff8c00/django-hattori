@@ -1,4 +1,4 @@
-from typing import Annotated, Any, TypeVar
+from typing import Annotated, TypeVar
 
 from hattori import Form, Response, Schema
 from pydantic import WrapValidator
@@ -17,12 +17,12 @@ EmptyStrToDefault = Annotated[T, WrapValidator(_empty_str_to_default)]
 
 class Item(Schema):
     name: str
-    description: str = None
+    description: str | None = None
     price: EmptyStrToDefault[float] = 0.0
     quantity: EmptyStrToDefault[int] = 0
     in_stock: EmptyStrToDefault[bool] = True
 
 
 @api.post("/items-blank-default")
-def update(request, item: Form[Item]) -> Annotated[Response[Any], 200]:
-    return Response(200, item.dict())
+def update(request, item: Form[Item]) -> Annotated[Response[Item], 200]:
+    return Response(200, item)

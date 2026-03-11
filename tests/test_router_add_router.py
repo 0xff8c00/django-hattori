@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import NinjaAPI, Response, Router
 from hattori.testing import TestClient
@@ -7,7 +7,7 @@ router = Router()
 
 
 @router.get("/")
-def op(request) -> Annotated[Response[Any], 200]:
+def op(request) -> Annotated[Response[bool], 200]:
     return Response(200, True)
 
 

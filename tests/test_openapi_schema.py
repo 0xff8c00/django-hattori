@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Union
 from unittest.mock import Mock
 from uuid import uuid4
 
@@ -73,6 +73,16 @@ class Response(Schema):
     f: float = Field(..., title="f title", description="f desc")
 
 
+class DeprecatedExampleResult(Schema):
+    i: str
+    f: str
+
+
+class PersonResult(Schema):
+    uuid: str
+    fullname: str
+
+
 @api.post("/test")
 def method(request, data: Payload) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, data.dict())
@@ -85,8 +95,8 @@ def method_alias(request, data: Payload) -> Annotated[ApiResponse[Response], 200
 
 @api.post("/test_list")
 def method_list_response(
-    request, data: List[Payload]
-) -> Annotated[ApiResponse[List[Response]], 200]:
+    request, data: list[Payload]
+) -> Annotated[ApiResponse[list[Response]], 200]:
     return ApiResponse(200, [])
 
 
@@ -145,7 +155,7 @@ def method_form_body(
 
 @api.post("/test-form-file")
 def method_form_file(
-    request, files: List[UploadedFile], data: Payload = Form(...)
+    request, files: list[UploadedFile], data: Payload = Form(...)
 ) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=data.i, f=data.f))
 
@@ -153,7 +163,7 @@ def method_form_file(
 @api.post("/test-body-file")
 def method_body_file(
     request,
-    files: List[UploadedFile],
+    files: list[UploadedFile],
     body: Payload = Body(...),
 ) -> Annotated[ApiResponse[Response], 200]:
     return ApiResponse(200, dict(i=body.i, f=body.f))
@@ -215,7 +225,7 @@ def method_test_deprecated_example_examples(
         },
     ),
     param4: int = Query(None, deprecated=True, include_in_schema=False),
-) -> Annotated[ApiResponse[Any], 200]:
+) -> Annotated[ApiResponse[DeprecatedExampleResult], 200]:
     return ApiResponse(200, dict(i=param2, f=param3))
 
 
@@ -271,6 +281,15 @@ def test_schema(schema):
             "properties": {
                 "i": {"title": "I", "type": "integer"},
                 "f": {"description": "f desc", "title": "f title", "type": "number"},
+            },
+            "required": ["i", "f"],
+        },
+        "DeprecatedExampleResult": {
+            "title": "DeprecatedExampleResult",
+            "type": "object",
+            "properties": {
+                "i": {"title": "I", "type": "string"},
+                "f": {"title": "F", "type": "string"},
             },
             "required": ["i", "f"],
         },
@@ -412,6 +431,15 @@ def test_schema_list(schema):
             },
             "required": ["i", "f"],
             "title": "Payload",
+            "type": "object",
+        },
+        "DeprecatedExampleResult": {
+            "properties": {
+                "f": {"title": "F", "type": "string"},
+                "i": {"title": "I", "type": "string"},
+            },
+            "required": ["i", "f"],
+            "title": "DeprecatedExampleResult",
             "type": "object",
         },
         "TypeA": {
@@ -878,7 +906,9 @@ def test_schema_deprecated_example_examples(schema):
             "description": "OK",
             "content": {
                 "application/json": {
-                    "schema": {"title": "Response"},
+                    "schema": {
+                        "$ref": "#/components/schemas/DeprecatedExampleResult"
+                    },
                 }
             },
         },
@@ -964,11 +994,11 @@ def test_unique_operation_ids(capsys):
     api = NinjaAPI()
 
     @api.get("/1")
-    def same_name(request) -> Annotated[ApiResponse[Any], 200]:
+    def same_name(request) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.get("/2")  # noqa: F811
-    def same_name(request) -> Annotated[ApiResponse[Any], 200]:  # noqa: F811
+    def same_name(request) -> Annotated[ApiResponse[None], 200]:  # noqa: F811
         pass
 
     api.get_openapi_schema()
@@ -1023,21 +1053,21 @@ def test_all_paths_rendered():
     @api.post("/1")
     def some_name_create(
         request,
-    ) -> Annotated[ApiResponse[Any], 200]:
+    ) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.get("/1")
     def some_name_list(
         request,
-    ) -> Annotated[ApiResponse[Any], 200]:
+    ) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.get("/1/{param}")
-    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[Any], 200]:
+    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.delete("/1/{param}")
-    def some_name_delete(request, param: int) -> Annotated[ApiResponse[Any], 200]:
+    def some_name_delete(request, param: int) -> Annotated[ApiResponse[None], 200]:
         pass
 
     schema = api.get_openapi_schema()
@@ -1053,21 +1083,21 @@ def test_all_paths_typed_params_rendered():
     @api.post("/1")
     def some_name_create(
         request,
-    ) -> Annotated[ApiResponse[Any], 200]:
+    ) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.get("/1")
     def some_name_list(
         request,
-    ) -> Annotated[ApiResponse[Any], 200]:
+    ) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.get("/1/{int:param}")
-    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[Any], 200]:
+    def some_name_get_one(request, param: int) -> Annotated[ApiResponse[None], 200]:
         pass
 
     @api.delete("/1/{str:param}")
-    def some_name_delete(request, param: str) -> Annotated[ApiResponse[Any], 200]:
+    def some_name_delete(request, param: str) -> Annotated[ApiResponse[None], 200]:
         pass
 
     schema = api.get_openapi_schema()
@@ -1111,7 +1141,7 @@ def test_by_alias_uses_validation_alias_simple():
         name: str = Field(..., validation_alias="fullName")
 
     @api.get("/person", by_alias=True)
-    def get_user(request, param: PersonIn) -> Annotated[ApiResponse[Any], 200]:
+    def get_user(request, param: PersonIn) -> Annotated[ApiResponse[PersonResult], 200]:
         return ApiResponse(200, {"uuid": uuid4(), "fullname": "John Snow"})
 
     schema = api.get_openapi_schema()

@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -38,38 +38,38 @@ client = TestClient(api)
 
 
 @r1.get("/")
-def op1(request) -> Annotated[Response[Any], 200]:
+def op1(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r2.get("/")
-def op2(request) -> Annotated[Response[Any], 200]:
+def op2(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r3.get("/")
-def op3(request) -> Annotated[Response[Any], 200]:
+def op3(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r4.get("/")
-def op4(request) -> Annotated[Response[Any], 200]:
+def op4(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @r3.get("/op5", auth=Auth("op5_auth"))
-def op5(request) -> Annotated[Response[Any], 200]:
+def op5(request) -> Annotated[Response[str], 200]:
     return Response(200, request.auth)
 
 
 @o3.get("/")
-def op_o3(request) -> Annotated[Response[Any], 200]:
+def op_o3(request) -> Annotated[Response[str], 200]:
     assert request.auth is None
     return Response(200, "ok")
 
 
 @o4.get("/")
-def op_o4(request) -> Annotated[Response[Any], 200]:
+def op_o4(request) -> Annotated[Response[str], 200]:
     assert request.auth is None
     return Response(200, "ok")
 

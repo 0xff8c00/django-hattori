@@ -1,12 +1,11 @@
 import sys
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional
 
 import pytest
 from pydantic import BaseModel, Field
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import NinjaAPI, Query, Response, Schema
 from hattori.testing.client import TestClient
@@ -31,13 +30,31 @@ class Data(Schema):
     a_float: float = Field(alias="float", default=1.5)
 
 
+class FilterResult(Schema):
+    to_datetime: datetime
+    from_datetime: datetime
+    range: int
+
+
+class DataResult(Schema):
+    an_int: int
+    a_float: float
+
+
+class MixedResult(Schema):
+    query1: int
+    query2: int
+    filters: FilterResult
+    data: DataResult
+
+
 api = NinjaAPI()
 
 
 @api.get("/test")
 def query_params_schema(
     request, filters: Filter = Query(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[FilterResult], 200]:
     return Response(200, filters.model_dump())
 
 
@@ -48,7 +65,7 @@ def query_params_mixed_schema(
     query2: int = 5,
     filters: Filter = Query(...),
     data: Data = Query(...),
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[MixedResult], 200]:
     return Response(
         200,
         dict(
@@ -118,7 +135,7 @@ def test_request_query_params_using_basemodel():
     temp_api = NinjaAPI()
 
     @temp_api.get("/foo")
-    def view(request, foo: Foo = Query(...)) -> Annotated[Response[Any], 200]:
+    def view(request, foo: Foo = Query(...)) -> Annotated[Response[Foo], 200]:
         return Response(200, foo.model_dump())
 
     client = TestClient(temp_api)
@@ -197,8 +214,8 @@ def test_optional_query_schema():
 
     @temp_api.get("/opt")
     def view(
-        request, f: Optional[MyFilter] = Query(None)
-    ) -> Annotated[Response[Any], 200]:
+        request, f: MyFilter | None = Query(None)
+    ) -> Annotated[Response[MyFilter], 200]:
         if f:
             return Response(200, f.model_dump())
         return Response(200, {})
@@ -225,7 +242,7 @@ def test_union_pipe_syntax_query_schema():
     @temp_api.get("/pipe")
     def view(
         request, f: MyFilter | None = Query(None)
-    ) -> Annotated[Response[Any], 200]:
+    ) -> Annotated[Response[MyFilter], 200]:
         if f:
             return Response(200, f.model_dump())
         return Response(200, {})
@@ -245,7 +262,7 @@ def test_nested_optional_query_schema():
     """Nested optional model fields should also work."""
 
     class Inner(Schema):
-        value: Optional[int] = 0
+        value: int | None = 0
         items: list[str] = []
 
     class Outer(Schema):
@@ -255,7 +272,7 @@ def test_nested_optional_query_schema():
     temp_api = NinjaAPI()
 
     @temp_api.get("/nested")
-    def view(request, f: Outer = Query(...)) -> Annotated[Response[Any], 200]:
+    def view(request, f: Outer = Query(...)) -> Annotated[Response[Outer], 200]:
         return Response(200, f.model_dump())
 
     client = TestClient(temp_api)

@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from hattori import NinjaAPI, Response, Router
 
@@ -71,7 +71,7 @@ def test_router_openapi_extra_extends():
     }
 
     @test_router.get("/path/{item_id}", openapi_extra={"parameters": [extra_param]})
-    def get_path_item_id(request, item_id: int) -> Annotated[Response[Any], 200]:
+    def get_path_item_id(request, item_id: int) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     schema = api.get_openapi_schema()

@@ -1,7 +1,7 @@
 import contextlib
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 from django.http import FileResponse, HttpResponse
@@ -22,47 +22,47 @@ client = TestClient(api)
 
 
 @api.get("")
-def emptypath(request) -> Annotated[Response[Any], 200]:
+def emptypath(request) -> Annotated[Response[str], 200]:
     return Response(200, "/")
 
 
 @api.get("/get")
-def get(request) -> Annotated[Response[Any], 200]:
+def get(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.post("/post")
-def post(request) -> Annotated[Response[Any], 200]:
+def post(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.put("/put")
-def put(request) -> Annotated[Response[Any], 200]:
+def put(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.patch("/patch")
-def patch(request) -> Annotated[Response[Any], 200]:
+def patch(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.delete("/delete")
-def delete(request) -> Annotated[Response[Any], 200]:
+def delete(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.api_operation(["GET", "POST"], "/multi")
-def multiple(request) -> Annotated[Response[Any], 200]:
+def multiple(request) -> Annotated[Response[str], 200]:
     return Response(200, f"this is {request.method}")
 
 
 @api.get("/html")
-def html(request) -> Annotated[Response[Any], 200]:
+def html(request) -> Annotated[Response[str], 200]:
     return HttpResponse("html")
 
 
 @api.get("/file")
-def file_response(request) -> Annotated[Response[Any], 200]:
+def file_response(request) -> Annotated[Response[str], 200]:
     tmp = NamedTemporaryFile(delete=False)
     try:
         p = Path(tmp.name)

@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 import pytest
 
@@ -12,11 +12,11 @@ def test_api_instance():
     router = Router()
 
     @api.get("/global")
-    def global_op(request) -> Annotated[Response[Any], 200]:
+    def global_op(request) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     @router.get("/router")
-    def router_op(request) -> Annotated[Response[Any], 200]:
+    def router_op(request) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     api.add_router("/", router)
@@ -40,7 +40,7 @@ def test_reuse_router_requires_url_name_prefix():
     test_router = Router()
 
     @test_router.get("/test")
-    def test_op(request) -> Annotated[Response[Any], 200]:
+    def test_op(request) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     test_api.add_router("/", test_router)
@@ -57,7 +57,7 @@ def test_reuse_router_with_url_name_prefix():
     test_router = Router()
 
     @test_router.get("/test")
-    def test_op(request) -> Annotated[Response[Any], 200]:
+    def test_op(request) -> Annotated[Response[None], 200]:
         return Response(200, None)
 
     test_api.add_router("/v1", test_router, url_name_prefix="v1")

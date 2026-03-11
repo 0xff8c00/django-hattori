@@ -1,10 +1,10 @@
 from datetime import date
 from enum import Enum
-from typing import Annotated, Any, List, Optional
+from typing import Annotated
 
 from pydantic import BaseModel
 
-from hattori import NinjaAPI, Query, Response
+from hattori import NinjaAPI, Query, Response, Schema
 from hattori.testing import TestClient
 
 
@@ -25,37 +25,49 @@ class Booking(BaseModel):
     room: RoomEnum = RoomEnum.double
 
 
+class RoomResponse(Schema):
+    room: RoomEnum | None = None
+
+
+class ExtraResponse(Schema):
+    extra: ExtraEnum | None = None
+
+
+class RoomsResponse(Schema):
+    rooms: list[RoomEnum] | None = None
+
+
 api = NinjaAPI()
 
 
 @api.post("/book")
-def create_booking(request, booking: Booking) -> Annotated[Response[Any], 200]:
+def create_booking(request, booking: Booking) -> Annotated[Response[Booking], 200]:
     return Response(200, booking)
 
 
 @api.get("/search")
-def booking_search(request, room: RoomEnum) -> Annotated[Response[Any], 200]:
+def booking_search(request, room: RoomEnum) -> Annotated[Response[RoomResponse], 200]:
     return Response(200, {"room": room})
 
 
 @api.get("/optional")
 def enum_optional(
-    request, room: Optional[RoomEnum] = Query(None, description="description")
-) -> Annotated[Response[Any], 200]:
+    request, room: RoomEnum | None = Query(None, description="description")
+) -> Annotated[Response[RoomResponse], 200]:
     return Response(200, {"room": room})
 
 
 @api.get("/optional2")
 def enum_optional2(
-    request, extra: Optional[ExtraEnum] = None
-) -> Annotated[Response[Any], 200]:
+    request, extra: ExtraEnum | None = None
+) -> Annotated[Response[ExtraResponse], 200]:
     return Response(200, {"extra": extra})
 
 
 @api.get("/list")
 def enum_list(
-    request, rooms: List[RoomEnum] = Query(None, description="description")
-) -> Annotated[Response[Any], 200]:
+    request, rooms: list[RoomEnum] = Query(None, description="description")
+) -> Annotated[Response[RoomsResponse], 200]:
     return Response(200, {"rooms": rooms})
 
 
@@ -64,10 +76,14 @@ class QueryOnlyEnum(str, Enum):
     two = "two"
 
 
+class QResponse(Schema):
+    q: list[QueryOnlyEnum] | None = None
+
+
 @api.get("/new-list")
 def new_enum_list(
-    request, q: List[QueryOnlyEnum] = Query(None, description="description")
-) -> Annotated[Response[Any], 200]:
+    request, q: list[QueryOnlyEnum] = Query(None, description="description")
+) -> Annotated[Response[QResponse], 200]:
     return Response(200, {"q": q})
 
 

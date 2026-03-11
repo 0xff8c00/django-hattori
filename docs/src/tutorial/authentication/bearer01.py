@@ -1,7 +1,11 @@
-from typing import Annotated, Any
+from typing import Annotated
 
-from hattori import Response
+from hattori import Response, Schema
 from hattori.security import HttpBearer
+
+
+class TokenResponse(Schema):
+    token: str
 
 
 class AuthBearer(HttpBearer):
@@ -11,5 +15,5 @@ class AuthBearer(HttpBearer):
 
 
 @api.get("/bearer", auth=AuthBearer())
-def bearer(request) -> Annotated[Response[Any], 200]:
+def bearer(request) -> Annotated[Response[TokenResponse], 200]:
     return Response(200, {"token": request.auth})

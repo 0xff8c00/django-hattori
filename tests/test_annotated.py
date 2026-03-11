@@ -1,9 +1,39 @@
-from typing import Annotated, Any, List
+from typing import Annotated
 
 from util import pydantic_ref_fix
 
 from hattori import Body, Cookie, Form, Header, NinjaAPI, Path, Query, Response, Schema
 from hattori.testing import TestClient
+
+
+class FormData(Schema):
+    x: int
+    y: float
+
+
+class Payload(Schema):
+    t: int
+    p: str
+
+
+class MultiOpResult(Schema):
+    q: str
+    p: int
+    f: FormData
+    c: str
+
+
+class QueryListResult(Schema):
+    q: list[str]
+
+
+class HeaderResult(Schema):
+    h: str
+
+
+class BodyOpResult(Schema):
+    payload: Payload
+
 
 api = NinjaAPI()
 
@@ -19,16 +49,6 @@ VALIDATION_ERROR_422 = {
 }
 
 
-class FormData(Schema):
-    x: int
-    y: float
-
-
-class Payload(Schema):
-    t: int
-    p: str
-
-
 @api.post("/multi/{p}")
 def multi_op(
     request,
@@ -36,29 +56,29 @@ def multi_op(
     p: Annotated[int, Path(description="Path param")],
     f: Annotated[FormData, Form(description="Form params")],
     c: Annotated[str, Cookie(description="Cookie params")],
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[MultiOpResult], 200]:
     return Response(200, {"q": q, "p": p, "f": f.dict(), "c": c})
 
 
 @api.post("/query_list")
 def query_list(
     request,
-    q: Annotated[List[str], Query(description="User ID")],
-) -> Annotated[Response[Any], 200]:
+    q: Annotated[list[str], Query(description="User ID")],
+) -> Annotated[Response[QueryListResult], 200]:
     return Response(200, {"q": q})
 
 
 @api.post("/headers")
 def headers(
     request, h: Annotated[str, Header()] = "some-default"
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[HeaderResult], 200]:
     return Response(200, {"h": h})
 
 
 @api.post("/body")
 def body_op(
     request, payload: Annotated[Payload, Body(examples=[{"t": 42, "p": "test"}])]
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[BodyOpResult], 200]:
     return Response(200, {"payload": payload})
 
 
@@ -141,7 +161,11 @@ def test_openapi_schema():
                     200: {
                         "description": "OK",
                         "content": {
-                            "application/json": {"schema": {"title": "Response"}}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MultiOpResult"
+                                }
+                            }
                         },
                     },
                     422: VALIDATION_ERROR_422,
@@ -186,7 +210,11 @@ def test_openapi_schema():
                     200: {
                         "description": "OK",
                         "content": {
-                            "application/json": {"schema": {"title": "Response"}}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QueryListResult"
+                                }
+                            }
                         },
                     },
                     422: VALIDATION_ERROR_422,
@@ -213,7 +241,11 @@ def test_openapi_schema():
                     200: {
                         "description": "OK",
                         "content": {
-                            "application/json": {"schema": {"title": "Response"}}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HeaderResult"
+                                }
+                            }
                         },
                     },
                     422: VALIDATION_ERROR_422,
@@ -229,7 +261,11 @@ def test_openapi_schema():
                     200: {
                         "description": "OK",
                         "content": {
-                            "application/json": {"schema": {"title": "Response"}}
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BodyOpResult"
+                                }
+                            }
                         },
                     },
                     422: VALIDATION_ERROR_422,

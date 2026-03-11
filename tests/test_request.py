@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Optional
+from typing import Annotated
 
 import pytest
 from pydantic import ConfigDict
@@ -9,65 +9,65 @@ from hattori.testing import TestClient
 
 class OptionalEmptySchema(Schema):
     model_config = ConfigDict(extra="forbid")
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class ExtraForbidSchema(Schema):
     model_config = ConfigDict(extra="forbid")
     name: str
-    metadata: Optional[OptionalEmptySchema] = None
+    metadata: OptionalEmptySchema | None = None
 
 
 router = Router()
 
 
 @router.get("/headers1")
-def headers1(request, user_agent: str = Header(...)) -> Annotated[Response[Any], 200]:
+def headers1(request, user_agent: str = Header(...)) -> Annotated[Response[str], 200]:
     return Response(200, user_agent)
 
 
 @router.get("/headers2")
 def headers2(
     request, ua: str = Header(..., alias="User-Agent")
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, ua)
 
 
 @router.get("/headers3")
 def headers3(
     request, content_length: int = Header(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, content_length)
 
 
 @router.get("/headers4")
 def headers4(
     request, c_len: int = Header(..., alias="Content-length")
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[int], 200]:
     return Response(200, c_len)
 
 
 @router.get("/headers5")
-def headers5(request, missing: int = Header(...)) -> Annotated[Response[Any], 200]:
+def headers5(request, missing: int = Header(...)) -> Annotated[Response[int], 200]:
     return Response(200, missing)
 
 
 @router.get("/cookies1")
-def cookies1(request, weapon: str = Cookie(...)) -> Annotated[Response[Any], 200]:
+def cookies1(request, weapon: str = Cookie(...)) -> Annotated[Response[str], 200]:
     return Response(200, weapon)
 
 
 @router.get("/cookies2")
 def cookies2(
     request, wpn: str = Cookie(..., alias="weapon")
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, wpn)
 
 
 @router.post("/test-schema")
 def schema(
     request, payload: ExtraForbidSchema = Body(...)
-) -> Annotated[Response[Any], 200]:
+) -> Annotated[Response[str], 200]:
     return Response(200, "ok")
 
 
