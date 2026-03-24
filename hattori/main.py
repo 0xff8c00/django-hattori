@@ -517,7 +517,25 @@ class NinjaAPI:
             result.extend(bound_router.urls_paths(bound_router.prefix))
 
         result.append(get_root_url(self))
+        self._validate_unique_url_names(result)
         return result
+
+    def _validate_unique_url_names(
+        self, patterns: list[URLResolver | URLPattern]
+    ) -> None:
+        seen_names: set[str] = set()
+        for pattern in patterns:
+            if not isinstance(pattern, URLPattern):
+                continue
+            if not pattern.name:
+                continue
+            if pattern.name in seen_names:
+                raise ConfigError(
+                    f"Duplicate URL name '{pattern.name}' detected in API "
+                    f"namespace '{self.urls_namespace}'. Use unique url_name or "
+                    f"url_name_prefix values."
+                )
+            seen_names.add(pattern.name)
 
     def get_root_path(self, path_params: dict[str, Any]) -> str:
         name = f"{self.urls_namespace}:api-root"

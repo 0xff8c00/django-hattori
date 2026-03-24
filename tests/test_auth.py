@@ -110,7 +110,7 @@ for path, auth in [
     ("async_bearer", AsyncBearerAuth()),
     ("customexception", KeyHeaderCustomException()),
 ]:
-    api.get(f"/{path}", auth=auth, operation_id=path)(demo_operation)
+    api.get(f"/{path}", auth=auth, operation_id=path, url_name=path)(demo_operation)
 
 
 client = TestClient(api)
@@ -311,6 +311,69 @@ def test_async_auth_no_unawaited_coroutine_on_sync_endpoint():
         assert not runtime_warnings, f"Unawaited coroutine warnings: {runtime_warnings}"
 
 
+@pytest.mark.parametrize(
+    "auth_value,response_type,expected_body",
+    [
+        (0, "int", 0),
+        (False, "bool", False),
+        ("", "str", ""),
+    ],
+)
+def test_sync_auth_accepts_falsy_principals(auth_value, response_type, expected_body):
+    class FalsyAuth(APIKeyQuery):
+        def authenticate(self, request, key):
+            if key == "ok":
+                return auth_value
+
+    api = NinjaAPI()
+
+    if response_type == "int":
+
+        @api.get("/falsy", auth=FalsyAuth())
+        def view(request) -> Annotated[Response[int], 200]:
+            return Response(200, request.auth)
+
+    elif response_type == "bool":
+
+        @api.get("/falsy", auth=FalsyAuth())
+        def view(request) -> Annotated[Response[bool], 200]:
+            return Response(200, request.auth)
+
+    else:
+
+        @api.get("/falsy", auth=FalsyAuth())
+        def view(request) -> Annotated[Response[str], 200]:
+            return Response(200, request.auth)
+
+    client = TestClient(api)
+
+    response = client.get("/falsy?key=ok")
+    assert response.status_code == 200
+    assert response.json() == expected_body
+
+
+def test_sync_multi_auth_accepts_later_falsy_principal():
+    api = NinjaAPI()
+
+    def auth_1(request):
+        return None
+
+    def auth_2(request):
+        if request.GET.get("key") == "ok":
+            return 0
+        return None
+
+    @api.get("/falsy", auth=[auth_1, auth_2])
+    def view(request) -> Annotated[Response[int], 200]:
+        return Response(200, request.auth)
+
+    client = TestClient(api)
+
+    response = client.get("/falsy?key=ok")
+    assert response.status_code == 200
+    assert response.json() == 0
+
+
 def test_schema():
     schema = api.get_openapi_schema()
     assert schema["components"]["securitySchemes"] == {
@@ -381,7 +444,7 @@ async def test_async_auth():
         async def authenticate(self, request, key):
             nonlocal _async_auth_called
             _async_auth_called = True
-            return False
+            return None
 
     class SyncAuth(APIKeyQuery):
         def authenticate(self, request, key):

@@ -206,13 +206,15 @@ class Router:
         self.exclude_none = exclude_none
 
         self.path_operations: dict[str, PathView] = {}
-        self._routers: list[tuple[str, Router, list[str] | None]] = []
+        self._routers: list[
+            tuple[str, Router, Any, Any, list[str] | None, str | None]
+        ] = []
         self._decorators: list[tuple[Callable, DecoratorMode]] = []
 
     def _freeze(self) -> None:
         """Mark router as frozen - no more modifications allowed."""
         self._frozen = True
-        for _, child_router, _ in self._routers:
+        for _, child_router, _, _, _, _ in self._routers:
             child_router._freeze()
 
     def _check_not_frozen(self) -> None:
@@ -562,6 +564,7 @@ class Router:
         auth: Any = NOT_SET,
         throttle: BaseThrottle | list[BaseThrottle] | NOT_SET_TYPE = NOT_SET,
         tags: list[str] | None = None,
+        url_name_prefix: str | None = None,
     ) -> None:
         self._check_not_frozen()
 
@@ -569,15 +572,17 @@ class Router:
             router = import_string(router)
             assert isinstance(router, Router)
 
-        # Store child router with its mount-time configuration
-        # Auth/throttle are stored on the child router template,
-        # but tags from add_router are stored separately to distinguish from Router(tags=...)
-        if auth != NOT_SET:
-            router.auth = auth
-        if throttle != NOT_SET:
-            router.throttle = throttle
-        # Store as (prefix, router, tags) - tags here are mount-level overrides
-        self._routers.append((prefix, router, tags))
+        existing_templates = {child_router for _, child_router, *_ in self._routers}
+        if router in existing_templates and url_name_prefix is None:
+            raise ConfigError(
+                "Router is already mounted to this parent router. When mounting "
+                "the same router multiple times, you must provide unique "
+                "url_name_prefix for each mount."
+            )
+
+        # Store child router with its mount-time configuration.
+        # These values belong to the mount, not the shared router template.
+        self._routers.append((prefix, router, auth, throttle, tags, url_name_prefix))
 
     def add_decorator(
         self,
@@ -647,18 +652,40 @@ class Router:
 
         # Build mounts for child routers
         child_mounts: list[RouterMount] = []
-        for child_prefix, child_router, child_mount_tags in self._routers:
+        for (
+            child_prefix,
+            child_router,
+            child_mount_auth,
+            child_mount_throttle,
+            child_mount_tags,
+            child_url_name_prefix,
+        ) in self._routers:
             child_path = normalize_path("/".join((prefix, child_prefix))).lstrip("/")
+            child_inherited_auth = (
+                child_mount_auth if child_mount_auth is not NOT_SET else child_auth
+            )
+            child_inherited_throttle = (
+                child_mount_throttle
+                if child_mount_throttle is not NOT_SET
+                else child_throttle
+            )
             mounts = child_router.build_routers(
                 child_path,
                 child_decorators,
-                child_auth,
-                child_throttle,
+                child_inherited_auth,
+                child_inherited_throttle,
                 child_tags,
             )
+            if mounts and child_mount_auth is not NOT_SET:
+                mounts[0].auth = child_mount_auth
+            if mounts and child_mount_throttle is not NOT_SET:
+                mounts[0].throttle = child_mount_throttle
             # Apply mount-level tags override to the first mount (the child router itself)
             if mounts and child_mount_tags is not None:
                 mounts[0].tags = child_mount_tags
+            if child_url_name_prefix is not None:
+                for child_mount in mounts:
+                    child_mount.url_name_prefix = child_url_name_prefix
             child_mounts.extend(mounts)
 
         return [mount, *child_mounts]

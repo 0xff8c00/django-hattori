@@ -13,6 +13,6 @@ class CookieKey(APIKeyCookie):
 cookie_key = CookieKey()
 
 
-@api.get("/cookiekey", auth=cookie_key)
+@api.get("/cookiekey", auth=cookie_key, url_name="apikey_cookie")
 def apikey(request) -> Annotated[Response[str], 200]:
     return Response(200, f"Token = {request.auth}")

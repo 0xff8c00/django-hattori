@@ -18,7 +18,7 @@ class ApiKey(APIKeyQuery):
 api_key = ApiKey()
 
 
-@api.get("/apikey", auth=api_key)
+@api.get("/apikey", auth=api_key, url_name="apikey_query")
 def apikey(request) -> Annotated[Response[str], 200]:
     assert isinstance(request.auth, Client)
     return Response(200, f"Hello {request.auth}")

@@ -218,6 +218,15 @@ Great! Now go have a look at the automatically generated docs:
 
 ![Swagger UI Nested Routers](../img/nested-routers-swagger.png)
 
+If you mount the same child router multiple times under the same parent router, provide a unique `url_name_prefix` for each mount so reverse URL names stay unique:
+
+```python
+parent_router.add_router("public", child_router, url_name_prefix="public")
+parent_router.add_router("admin", child_router, url_name_prefix="admin")
+```
+
+The same rule applies at the top API level with `api.add_router(...)`.
+
 ### Nested url parameters
 
 You can also use url parameters in nested routers by adding `= Path(...)` to the function parameters:

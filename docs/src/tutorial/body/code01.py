@@ -10,6 +10,6 @@ class Item(Schema):
     quantity: int
 
 
-@api.post("/items")
+@api.post("/items", url_name="create_item")
 def create(request, item: Item) -> Annotated[Response[Item], 200]:
     return Response(200, item)

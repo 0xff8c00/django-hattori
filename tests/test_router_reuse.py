@@ -14,9 +14,12 @@ from typing import Annotated
 import pytest
 
 from hattori import NinjaAPI, Response, Router, Schema
+from hattori.constants import NOT_SET
 from hattori.errors import ConfigError
 from hattori.operation import Operation, PathView
+from hattori.security import APIKeyQuery
 from hattori.testing import TestClient
+from hattori.throttling import BaseThrottle
 
 
 class IdResult(Schema):
@@ -37,6 +40,33 @@ class BoolTestResult(Schema):
 
 class MethodResult(Schema):
     method: str
+
+
+class AuthValueResult(Schema):
+    auth: str
+
+
+class ThrottleValueResult(Schema):
+    throttle: str
+
+
+class QueryAuth(APIKeyQuery):
+    def __init__(self, secret: str):
+        self.secret = secret
+        super().__init__()
+
+    def authenticate(self, request, key):
+        if key == self.secret:
+            return key
+
+
+class MarkerThrottle(BaseThrottle):
+    def __init__(self, name: str):
+        self.name = name
+
+    def allow_request(self, request):
+        request.throttle_name = self.name
+        return True
 
 
 class TestRouterReuse:
@@ -152,6 +182,112 @@ class TestDecoratorIsolation:
         assert calls["api1"] == 1
         assert calls["api2"] == 1
 
+
+class TestNestedRouterMountIsolation:
+    """Test that nested router mount overrides are isolated per mount."""
+
+    def test_nested_child_mount_auth_does_not_leak_between_parents(self):
+        child = Router()
+
+        @child.get("/items")
+        def list_items(request) -> Annotated[Response[AuthValueResult], 200]:
+            return Response(200, {"auth": request.auth})
+
+        parent_one = Router()
+        parent_one.add_router("/child", child, auth=QueryAuth("one"), url_name_prefix="one")
+
+        parent_two = Router()
+        parent_two.add_router("/child", child, auth=QueryAuth("two"), url_name_prefix="two")
+
+        api = NinjaAPI(urls_namespace="nested-auth-isolation")
+        api.add_router("/one", parent_one)
+        api.add_router("/two", parent_two)
+
+        client = TestClient(api)
+
+        assert client.get("/one/child/items?key=one").status_code == 200
+        assert client.get("/one/child/items?key=two").status_code == 401
+        assert client.get("/two/child/items?key=one").status_code == 401
+        assert client.get("/two/child/items?key=two").status_code == 200
+
+    def test_nested_child_mount_throttle_does_not_leak_between_parents(self):
+        child = Router()
+
+        @child.get("/items")
+        def list_items(request) -> Annotated[Response[ThrottleValueResult], 200]:
+            return Response(200, {"throttle": request.throttle_name})
+
+        parent_one = Router()
+        parent_one.add_router(
+            "/child", child, throttle=MarkerThrottle("one"), url_name_prefix="one"
+        )
+
+        parent_two = Router()
+        parent_two.add_router(
+            "/child", child, throttle=MarkerThrottle("two"), url_name_prefix="two"
+        )
+
+        api = NinjaAPI(urls_namespace="nested-throttle-isolation")
+        api.add_router("/one", parent_one)
+        api.add_router("/two", parent_two)
+
+        client = TestClient(api)
+
+        assert client.get("/one/child/items").json() == {"throttle": "one"}
+        assert client.get("/two/child/items").json() == {"throttle": "two"}
+
+    def test_nested_same_child_multiple_mounts_requires_url_name_prefix(self):
+        parent = Router()
+        child = Router()
+
+        @child.get("/items")
+        def list_items(request) -> Annotated[Response[OkResult], 200]:
+            return Response(200, {"ok": True})
+
+        parent.add_router("/one", child)
+
+        with pytest.raises(ConfigError, match="url_name_prefix"):
+            parent.add_router("/two", child)
+
+    def test_nested_same_child_multiple_mounts_with_url_name_prefix(self):
+        parent = Router()
+        child = Router()
+
+        @child.get("/items")
+        def list_items(request) -> Annotated[Response[OkResult], 200]:
+            return Response(200, {"ok": True})
+
+        parent.add_router("/one", child, url_name_prefix="one")
+        parent.add_router("/two", child, url_name_prefix="two")
+
+        api = NinjaAPI(urls_namespace="nested-name-prefix")
+        api.add_router("/parent", parent)
+
+        names = {
+            pattern.name for pattern in api.urls[0] if getattr(pattern, "name", None)
+        }
+
+        assert "one_list_items" in names
+        assert "two_list_items" in names
+
+    def test_duplicate_url_names_raise_during_url_generation(self):
+        api = NinjaAPI(urls_namespace="duplicate-names")
+        router_one = Router()
+        router_two = Router()
+
+        @router_one.get("/one", url_name="shared")
+        def op_one(request) -> Annotated[Response[OkResult], 200]:
+            return Response(200, {"ok": True})
+
+        @router_two.get("/two", url_name="shared")
+        def op_two(request) -> Annotated[Response[OkResult], 200]:
+            return Response(200, {"ok": True})
+
+        api.add_router("/a", router_one)
+        api.add_router("/b", router_two)
+
+        with pytest.raises(ConfigError, match="Duplicate URL name 'shared'"):
+            _ = api.urls
 
 class TestFreezeBehavior:
     """Test that routers are frozen after URLs are generated."""
@@ -697,10 +833,20 @@ class TestRouterAddRouterStringImport:
         parent.add_router("/test", child)
 
         assert len(parent._routers) == 1
-        _, added_child, mount_tags = parent._routers[0]
+        (
+            _,
+            added_child,
+            mount_auth,
+            mount_throttle,
+            mount_tags,
+            mount_url_name_prefix,
+        ) = parent._routers[0]
         assert isinstance(added_child, Router)
         assert added_child is child
+        assert mount_auth is NOT_SET
+        assert mount_throttle is NOT_SET
         assert mount_tags is None  # No tags specified in add_router
+        assert mount_url_name_prefix is None
 
 
 class TestBuildRoutersEdgeCases:

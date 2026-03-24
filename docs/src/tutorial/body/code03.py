@@ -16,6 +16,6 @@ class ItemUpdateResponse(Schema):
     q: str
 
 
-@api.post("/items/{item_id}")
+@api.post("/items/{item_id}", url_name="update_item_post")
 def update(request, item_id: int, item: Item, q: str) -> Annotated[Response[ItemUpdateResponse], 200]:
     return Response(200, {"item_id": item_id, "item": item, "q": q})

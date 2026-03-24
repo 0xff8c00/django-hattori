@@ -72,7 +72,9 @@ And, if you need to overrule some of those methods, you can do that on the opera
 ### Custom function
 
 
-The "`auth=`" argument accepts any Callable object. **NinjaAPI** passes authentication only if the callable object returns a value that can be **converted to boolean `True`**. This return value will be assigned to the `request.auth` attribute.
+The "`auth=`" argument accepts any Callable object. Authentication is treated as successful whenever the callable returns any value other than `None`. That return value will be assigned to `request.auth`.
+
+Use `None` to indicate that authentication failed or that the next authenticator in a list should be tried. Falsy values such as `0`, `False`, or `""` are still considered successful authentication results and will be stored on `request.auth`.
 
 ```python hl_lines="1 2 3 6"
 {!./src/tutorial/authentication/code002.py!}

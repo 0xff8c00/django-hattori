@@ -185,3 +185,70 @@ async def test_async_with_bearer():
 
     res = await client.get("/async", headers={"Authorization": "Bearer secret"})
     assert res.json() == {"auth": "secret"}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "auth_value,response_type,expected_body",
+    [
+        (0, "int", 0),
+        (False, "bool", False),
+        ("", "str", ""),
+    ],
+)
+async def test_async_auth_accepts_falsy_principals(
+    auth_value, response_type, expected_body
+):
+    api = NinjaAPI()
+
+    async def auth(request):
+        if request.GET.get("key") == "ok":
+            return auth_value
+        return None
+
+    if response_type == "int":
+
+        @api.get("/async", auth=auth)
+        async def view(request) -> Annotated[Response[int], 200]:
+            return Response(200, request.auth)
+
+    elif response_type == "bool":
+
+        @api.get("/async", auth=auth)
+        async def view(request) -> Annotated[Response[bool], 200]:
+            return Response(200, request.auth)
+
+    else:
+
+        @api.get("/async", auth=auth)
+        async def view(request) -> Annotated[Response[str], 200]:
+            return Response(200, request.auth)
+
+    client = TestAsyncClient(api)
+
+    response = await client.get("/async?key=ok")
+    assert response.status_code == 200
+    assert response.json() == expected_body
+
+
+@pytest.mark.asyncio
+async def test_async_multi_auth_accepts_later_falsy_principal():
+    api = NinjaAPI()
+
+    async def auth_1(request):
+        return None
+
+    async def auth_2(request):
+        if request.GET.get("key") == "ok":
+            return 0
+        return None
+
+    @api.get("/async", auth=[auth_1, auth_2])
+    async def view(request) -> Annotated[Response[int], 200]:
+        return Response(200, request.auth)
+
+    client = TestAsyncClient(api)
+
+    response = await client.get("/async?key=ok")
+    assert response.status_code == 200
+    assert response.json() == 0

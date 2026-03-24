@@ -15,6 +15,6 @@ class ItemUpdate(Schema):
     item: Item
 
 
-@api.put("/items/{item_id}")
+@api.put("/items/{item_id}", url_name="update_item_put")
 def update(request, item_id: int, item: Item) -> Annotated[Response[ItemUpdate], 200]:
     return Response(200, {"item_id": item_id, "item": item})

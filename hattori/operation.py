@@ -443,7 +443,7 @@ class Operation:
             except Exception as exc:
                 return self.api.on_exception(request, exc)
 
-            if result:
+            if result is not None:
                 request.auth = result  # type: ignore
                 return None
         return self.api.on_exception(request, AuthenticationError())
@@ -669,7 +669,7 @@ class AsyncOperation(Operation):
             except Exception as exc:
                 return self.api.on_exception(request, exc)
 
-            if result:
+            if result is not None:
                 request.auth = result  # type: ignore
                 return None
         return self.api.on_exception(request, AuthenticationError())

@@ -11,14 +11,8 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: ['3.11', '3.12', '3.13', '3.14']
-        django-version: ['<5.1', '<5.2', '<5.3', '<6.1']
-        exclude:
-          # as of oct 2025 looks like django < 5.2 does not support python 3.14
-          - python-version: '3.14'
-            django-version: '<5.1'
-          - python-version: '3.14'
-            django-version: '<5.2'
+        python-version: ['3.14']
+        django-version: ['<5.3', '<6.1']
     
     steps:
       - uses: actions/checkout@v6
@@ -41,7 +35,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: '3.14'
       - name: Install Flit
         run: pip install flit "django>=5.2"
       - name: Install Dependencies
@@ -56,7 +50,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: '3.14'
       - name: Install Flit
         run: pip install flit
       - name: Install Dependencies

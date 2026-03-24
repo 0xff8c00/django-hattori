@@ -248,6 +248,32 @@ def test_wait():
     assert th.wait() is None  # available becomes negative
 
 
+@pytest.mark.xfail(
+    reason="SimpleRateThrottle keeps per-request state on the shared instance",
+    strict=True,
+)
+def test_wait_state_isolation_between_requests():
+    th = AnonRateThrottle("1/s")
+
+    request_one = build_request(addr="1.1.1.1")
+    request_two = build_request(addr="2.2.2.2")
+    request_one.auth = None
+    request_two.auth = None
+
+    set_throttle_timer(th, 0)
+    assert th.allow_request(request_one) is True
+
+    set_throttle_timer(th, 0.75)
+    assert th.allow_request(request_one) is False
+    expected_wait = th.wait()
+    assert expected_wait == 0.25
+
+    # Another request on the same throttle instance overwrites key/history/now,
+    # so wait() no longer reports the original throttled request's retry time.
+    assert th.allow_request(request_two) is True
+    assert th.wait() == expected_wait
+
+
 def test_rate_parser():
     th = SimpleRateThrottle("1/s")
     assert th.parse_rate(None) == (None, None)
@@ -271,6 +297,21 @@ def test_rate_parser():
 
     with pytest.raises(ValueError):
         th.parse_rate("42")
+
+
+def test_allow_request_with_no_rate_short_circuits():
+    class NoRateThrottle(SimpleRateThrottle):
+        scope = "no-rate"
+
+        def get_rate(self):
+            return None
+
+        def get_cache_key(self, request):
+            raise AssertionError("get_cache_key should not be called when rate is None")
+
+    th = NoRateThrottle()
+    request = build_request()
+    assert th.allow_request(request) is True
 
 
 def test_proxy_throttle():

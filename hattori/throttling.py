@@ -141,6 +141,10 @@ class SimpleRateThrottle(BaseThrottle):
         if self.rate is None:
             return True
 
+        # TODO: This throttle stores per-request evaluation state on the shared
+        # instance (`key`, `history`, `now`), which means interleaved requests can
+        # overwrite each other. We have a regression test documenting the issue,
+        # but we are still deciding on the cleanest fix.
         self.key = self.get_cache_key(request)
         if self.key is None:
             return True

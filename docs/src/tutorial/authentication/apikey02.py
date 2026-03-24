@@ -15,6 +15,6 @@ class ApiKey(APIKeyHeader):
 header_key = ApiKey()
 
 
-@api.get("/headerkey", auth=header_key)
+@api.get("/headerkey", auth=header_key, url_name="apikey_header")
 def apikey(request) -> Annotated[Response[str], 200]:
     return Response(200, f"Token = {request.auth}")

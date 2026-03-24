@@ -20,6 +20,8 @@ index_url = reverse_lazy("api-1.0.0:index")
 
 This implicit URL name will only be set for the first operation for each API path.  If you *don't* want any implicit reverse URL name generated, just explicitly specify `url_name=""` (an empty string) on the method decorator.
 
+URL names must be unique within an API namespace. If two mounted routers or two operations produce the same name, Django Hattori will raise a `ConfigError` during URL generation. When reusing the same router multiple times, use `url_name_prefix` on `api.add_router(...)` or `Router.add_router(...)` to disambiguate the generated names.
+
 ### Changing the URL name
 
 Rather than using the default URL name, you can specify it explicitly as a property on the method decorator.

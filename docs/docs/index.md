@@ -73,7 +73,7 @@ You do that with standard modern Python types.
 
 You don't have to learn a new syntax, the methods or classes of a specific library, etc.
 
-Just standard **Python 3.11+**.
+Just standard **Python 3.14+**.
 
 For example, for an `int`:
 
@@ -111,4 +111,3 @@ def operation(a: Item):
 * Automatic, interactive API documentation
 
 This project was heavily inspired by [FastAPI](https://fastapi.tiangolo.com/) (developed by [Sebastián Ramírez](https://github.com/tiangolo))
-

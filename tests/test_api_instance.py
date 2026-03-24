@@ -1,6 +1,7 @@
 from typing import Annotated
 
 import pytest
+from django.urls import path
 
 from hattori import NinjaAPI, Response, Router
 from hattori.errors import ConfigError
@@ -70,3 +71,12 @@ def test_reuse_router_with_url_name_prefix():
     bound_routers = test_api._get_bound_routers()
     # default router + 2 mounts of test_router
     assert len(bound_routers) == 3
+
+
+def test_validate_unique_url_names_ignores_non_patterns_and_unnamed_patterns():
+    api = NinjaAPI(urls_namespace="unique-name-validation")
+
+    unnamed_pattern = path("unnamed/", lambda request: None)
+
+    # Should ignore non-URLPattern objects and unnamed URLPatterns without raising.
+    api._validate_unique_url_names([object(), unnamed_pattern])  # type: ignore[arg-type]
