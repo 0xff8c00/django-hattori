@@ -19,10 +19,14 @@ dotted attributes and resolver methods. For example::
 """
 
 import warnings
+from enum import Enum
 from typing import (
     Any,
     Callable,
+    Literal,
     TypeVar,
+    get_args,
+    get_origin,
     no_type_check,
 )
 
@@ -175,8 +179,54 @@ class NinjaGenerateJsonSchema(GenerateJsonSchema):
         return result
 
 
+def _update_core_schema_ref(schema: Any, name: str) -> None:
+    """Recursively update 'ref' keys in a Pydantic core schema dict tree."""
+    if isinstance(schema, dict):
+        if "ref" in schema:
+            schema["ref"] = name
+        for v in schema.values():
+            if isinstance(v, (dict, list)):
+                _update_core_schema_ref(v, name)
+    elif isinstance(schema, list):
+        for item in schema:
+            _update_core_schema_ref(item, name)
+
+
 class Schema(BaseModel, metaclass=ResolverMetaclass):
     model_config = ConfigDict(from_attributes=True)
+
+    def __class_getitem__(cls, params: Any) -> Any:
+        """Parameterize and produce clean schema names for OpenAPI.
+
+        Pydantic generates ugly $defs names for parameterized generics
+        (e.g. ``ErrorResponse_Literal_not_found__``). This override
+        renames parameterized models to use the Literal values directly
+        (e.g. ``ErrorResponse_not_found``).
+
+        Only renames when all type args are Literal values or enum members;
+        plain type args like ``str`` keep Pydantic's default naming.
+        """
+        model = super().__class_getitem__(params)
+        if not isinstance(model, type):
+            return model
+
+        # Collect Literal values from all type params
+        param_list = params if isinstance(params, tuple) else (params,)
+        values: list[str] = []
+        for p in param_list:
+            if get_origin(p) is Literal:
+                for a in get_args(p):
+                    values.append(a.value if isinstance(a, Enum) else str(a))
+            elif isinstance(p, Enum):
+                values.append(p.value)
+
+        if values:
+            name = cls.__name__ + "_" + "_".join(values)
+            model.__name__ = name
+            model.__qualname__ = name
+            _update_core_schema_ref(model.__pydantic_core_schema__, name)
+
+        return model
 
     @model_validator(mode="wrap")
     @classmethod

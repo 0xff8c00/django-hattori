@@ -161,6 +161,7 @@ class OpenAPISchema(dict):
 
     def _extract_parameters(self, model: TModel) -> list[dict[str, Any]]:
         result = []
+        csv_fields = set(getattr(model, "__ninja_csv_fields__", []))
 
         schema = model.model_json_schema(
             ref_template=REF_TEMPLATE,
@@ -190,6 +191,10 @@ class OpenAPISchema(dict):
                     "schema": p_schema,
                     "required": p_required,
                 }
+
+                if p_name in csv_fields:
+                    param["style"] = "form"
+                    param["explode"] = False
 
                 # copy description from schema description to param description
                 if "description" in p_schema:

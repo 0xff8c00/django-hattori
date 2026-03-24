@@ -507,13 +507,18 @@ class Operation:
 
         ctx = {"request": request, "response_status": status}
 
-        # Skip re-validation for pydantic model instances matching the response type
+        # Skip re-validation for pydantic model instances matching the response type.
+        # For parameterized generics (e.g. ErrorResponse[Literal["not_found"]]),
+        # check against the origin type since isinstance() doesn't work with
+        # parameterized generics directly.
         resp_annotation = self._resp_annotations[id(response_model)]
+        meta = getattr(resp_annotation, "__pydantic_generic_metadata__", None)
+        resp_type = meta["origin"] if meta and meta.get("origin") else resp_annotation
         if (
             resp_annotation is not Any
-            and isinstance(resp_annotation, type)
+            and isinstance(resp_type, type)
             and isinstance(result, BaseModel)
-            and isinstance(result, resp_annotation)
+            and isinstance(result, resp_type)
         ):
             result = cast(BaseModel, result).model_dump(
                 by_alias=self.by_alias,

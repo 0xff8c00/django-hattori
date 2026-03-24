@@ -178,6 +178,13 @@ class ViewSignature:
                 args, attrs.get("__ninja_flatten_map__", {})
             )
 
+            # csv fields (explode=False):
+            attrs["__ninja_csv_fields__"] = [
+                i.alias or i.name
+                for i in args
+                if i.is_collection and getattr(i.source, "explode", True) is False
+            ]
+
             base_cls = param_cls._model
             model_cls = type(cls_name, (base_cls,), attrs)
             # TODO: https://pydantic-docs.helpmanual.io/usage/models/#dynamic-model-creation - check if anything special in create_model method that I did not use

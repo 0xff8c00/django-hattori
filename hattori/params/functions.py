@@ -65,6 +65,7 @@ def Query(  # noqa: N802
     examples: dict[str, Any] | None = None,
     deprecated: bool | None = None,
     include_in_schema: bool = True,
+    explode: bool = True,
     **extra: Any,
 ) -> Any:
     return models.Query(
@@ -83,6 +84,7 @@ def Query(  # noqa: N802
         examples=examples,
         deprecated=deprecated,
         include_in_schema=include_in_schema,
+        explode=explode,
         **extra,
     )
 

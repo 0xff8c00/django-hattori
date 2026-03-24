@@ -78,11 +78,18 @@ class ParamModel(BaseModel, ABC):
             current[path[-1]] = value
 
 
-def _parse_querydict(data: Any, list_fields: list[str]) -> dict[str, Any]:
+def _parse_querydict(
+    data: Any,
+    list_fields: list[str],
+    csv_fields: list[str] | None = None,
+) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key in data.keys():
         if key in list_fields:
-            result[key] = data.getlist(key)
+            values = data.getlist(key)
+            if csv_fields and key in csv_fields:
+                values = [item for v in values for item in v.split(",") if item]
+            result[key] = values
         else:
             result[key] = data[key]
     return result
@@ -94,7 +101,8 @@ class QueryModel(ParamModel):
         cls, request: HttpRequest, api: "NinjaAPI", path_params: dict[str, Any]
     ) -> dict[str, Any] | None:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
-        return _parse_querydict(request.GET, list_fields)
+        csv_fields = getattr(cls, "__ninja_csv_fields__", None)
+        return _parse_querydict(request.GET, list_fields, csv_fields)
 
 
 class PathModel(ParamModel):
@@ -215,11 +223,13 @@ class Param(FieldInfo):  # type: ignore[misc]
         deprecated: bool | None = None,
         include_in_schema: bool | None = True,
         pattern: str | re.Pattern[str] | None = None,
+        explode: bool = True,
         # param_name: str = None,
         # param_type: Any = None,
         **extra: Any,
     ):
         self.deprecated = deprecated
+        self.explode = explode
         # self.param_name: str = None
         # self.param_type: Any = None
         self.model_field: FieldInfo | None = None

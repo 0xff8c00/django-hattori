@@ -35,6 +35,14 @@ class QueryObjectIdResponse(Schema):
     query: list[int] | None = None
 
 
+class CsvListResponse(Schema):
+    ids: list[str]
+
+
+class CsvListOptionalResponse(Schema):
+    ids: list[str] | None = None
+
+
 router = Router()
 
 
@@ -143,6 +151,22 @@ def listview6(
     return Response(200, {"query": object_id})
 
 
+@router.get("/list-csv")
+def list_csv(
+    request,
+    ids: list[str] = Query(..., explode=False),
+) -> Annotated[Response[CsvListResponse], 200]:
+    return Response(200, {"ids": ids})
+
+
+@router.get("/list-csv-optional")
+def list_csv_optional(
+    request,
+    ids: Annotated[list[str] | None, Query(explode=False)] = None,  # pyright: ignore[reportCallIssue]
+) -> Annotated[Response[CsvListOptionalResponse], 200]:
+    return Response(200, {"ids": ids})
+
+
 client = TestClient(router)
 
 
@@ -207,3 +231,50 @@ def test_list(path, kwargs, expected_response):
     response = client.post(path, **kwargs)
     assert response.status_code == 200, response.content
     assert response.json() == expected_response
+
+
+@pytest.mark.parametrize(
+    "path,expected_response",
+    [
+        # single csv value
+        ("/list-csv?ids=a,b,c", {"ids": ["a", "b", "c"]}),
+        # mixed: csv + repeated
+        ("/list-csv?ids=a,b&ids=c", {"ids": ["a", "b", "c"]}),
+        # single value, no commas
+        ("/list-csv?ids=a", {"ids": ["a"]}),
+        # empty segments filtered out
+        ("/list-csv?ids=a,,b", {"ids": ["a", "b"]}),
+        # optional with csv
+        ("/list-csv-optional?ids=a,b", {"ids": ["a", "b"]}),
+        # optional with no param
+        ("/list-csv-optional", {"ids": None}),
+    ],
+)
+def test_csv_query(path, expected_response):
+    response = client.get(path)
+    assert response.status_code == 200, response.content
+    assert response.json() == expected_response
+
+
+def _get_schema():
+    from hattori import NinjaAPI
+
+    api = NinjaAPI()
+    api.add_router("", router)
+    return api.get_openapi_schema()
+
+
+def test_csv_query_openapi_schema():
+    schema = _get_schema()
+    params = schema["paths"]["/api/list-csv"]["get"]["parameters"]
+    ids_param = next(p for p in params if p["name"] == "ids")
+    assert ids_param["style"] == "form"
+    assert ids_param["explode"] is False
+
+
+def test_non_csv_query_has_no_explode():
+    schema = _get_schema()
+    params = schema["paths"]["/api/list6"]["post"]["parameters"]
+    id_param = next(p for p in params if p["name"] == "id")
+    assert "style" not in id_param
+    assert "explode" not in id_param
