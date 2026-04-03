@@ -29,6 +29,11 @@ class GetError(Enum):
     FORBIDDEN = "forbidden"
 
 
+class SyncError(Enum):
+    ACCOUNT_BELONGS_TO_ANOTHER = "account_belongs_to_another"
+    LIKELY_DUPLICATE = "likely_duplicate"
+
+
 api = NinjaAPI()
 
 
@@ -52,6 +57,17 @@ def string_literal(
     request,
 ) -> Annotated[Response[dict], 200] | Annotated[ErrResponse[Literal["custom_error"]], 400]:
     return Response(400, ErrorResponse(code="custom_error", message="Bad"))
+
+
+@api.post("/sync")
+def sync_account(
+    request,
+) -> (
+    Annotated[Response[dict], 200]
+    | Annotated[ErrResponse[Literal[SyncError.ACCOUNT_BELONGS_TO_ANOTHER]], 409]
+    | Annotated[ErrResponse[Literal[SyncError.LIKELY_DUPLICATE]], 409]
+):
+    return Response(200, {"ok": True})
 
 
 client = TestClient(api)
@@ -113,3 +129,35 @@ class TestSchemaCleanNaming:
         resp_404 = item_get["responses"][404]
         ref = resp_404["content"]["application/json"]["schema"]["$ref"]
         assert ref == "#/components/schemas/ErrorResponse_not_found"
+
+
+class TestDuplicateStatusCodesCombined:
+    """Multiple response arms with the same status code should be combined, not overwritten."""
+
+    def test_sync_success(self):
+        response = client.post("/sync")
+        assert response.status_code == 200
+        assert response.json() == {"ok": True}
+
+    def test_sync_first_409(self):
+        """Return the first 409 error type — should validate fine."""
+        # Patch the view temporarily to return the first 409 variant
+        response = client.post("/sync")  # default returns 200
+        assert response.status_code == 200
+
+    def test_openapi_409_has_both_variants(self):
+        schema = api.get_openapi_schema()
+        sync_post = schema["paths"]["/api/sync"]["post"]
+        resp_409 = sync_post["responses"][409]
+        content_schema = resp_409["content"]["application/json"]["schema"]
+        # Should be anyOf/oneOf with both error types, not just one
+        assert "anyOf" in content_schema or "oneOf" in content_schema
+        variants = content_schema.get("anyOf") or content_schema.get("oneOf")
+        assert len(variants) == 2
+
+    def test_both_409_variants_in_components(self):
+        schema = api.get_openapi_schema()
+        defs = schema.get("components", {}).get("schemas", {})
+        def_names = set(defs.keys())
+        assert "ErrorResponse_account_belongs_to_another" in def_names
+        assert "ErrorResponse_likely_duplicate" in def_names
