@@ -4,6 +4,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Union,
     cast,
     get_args,
     get_origin,
@@ -117,6 +118,9 @@ def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
         arms = (annotation,)
 
     parsed = _ParsedAnnotation()
+    # Accumulate schema types per status code so multiple arms with the same
+    # code (e.g. two different 409 error types) are combined into a Union.
+    collected: dict[int, list[Any]] = {}
     for arm in arms:
         arm_origin = get_origin(arm)
         if arm_origin is not Annotated:
@@ -156,7 +160,13 @@ def _parse_return_annotation(view_func: Callable) -> _ParsedAnnotation:
         if isinstance(schema_type, _StreamAlias):
             parsed.stream_alias = schema_type
             schema_type = schema_type.item_type
-        parsed.response_models[status_code] = schema_type
+        collected.setdefault(status_code, []).append(schema_type)
+
+    for status_code, types in collected.items():
+        if len(types) == 1:
+            parsed.response_models[status_code] = types[0]
+        else:
+            parsed.response_models[status_code] = Union[tuple(types)]
 
     return parsed
 
